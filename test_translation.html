@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翻译测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-text {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .test-title {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>日文翻译测试页面</h1>
+    <p>请使用翻译扩展测试以下文本的翻译效果：</p>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 1 - 原始问题文本：</div>
+        <span class="highlight">キーワード入力補助を早く 安心店舗「政府備蓄米」の販売情報「若PayPay券」厳選ブランドの商品もネトクに</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 2 - AIモデル：</div>
+        <span class="highlight">AIモデル</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 3 - 技术词汇：</div>
+        <span class="highlight">モデル、コード、テスト、デザイン、フォーム</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 4 - 电商词汇：</div>
+        <span class="highlight">ショッピング、サービス、ポイント、キャンペーン、セール</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 5 - 复合词汇：</div>
+        <span class="highlight">キーワード入力補助、安心店舗、政府備蓄米、厳選ブランド</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 6 - 混合文本：</div>
+        <span class="highlight">AI技術を使った新しいサービスです</span>
+    </div>
+
+    <div class="test-text">
+        <div class="test-title">测试文本 7 - 长句子：</div>
+        <span class="highlight">この商品は政府が備蓄している安心できる米の販売情報を提供しています</span>
+    </div>
+
+    <h2>预期翻译结果：</h2>
+    <ul>
+        <li><strong>AIモデル</strong> → AI模型</li>
+        <li><strong>キーワード入力補助</strong> → 關鍵詞輸入輔助</li>
+        <li><strong>安心店舗</strong> → 安心店鋪</li>
+        <li><strong>政府備蓄米</strong> → 政府儲備米</li>
+        <li><strong>厳選ブランド</strong> → 精選品牌</li>
+        <li><strong>ネトク</strong> → 網絡</li>
+    </ul>
+
+    <h2>测试说明：</h2>
+    <ol>
+        <li>重新加载翻译扩展</li>
+        <li>选择上述高亮文本</li>
+        <li>查看翻译结果是否正确</li>
+        <li>检查是否还有未翻译的日文字符</li>
+    </ol>
+</body>
+</html>

@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "截圖翻譯器",
-  "version": "1.1.0",
-  "description": "智能截圖翻譯工具 - 選擇任意區域，即時識別並翻譯文字",
+  "version": "1.2.0",
+  "description": "智能截圖翻譯工具 - 自動語言檢測，精確翻譯日韓英文等多語言",
   "author": "Screenshot Translator Team",
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
-    "tabs"
+    "tabs",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>",

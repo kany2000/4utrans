@@ -32,7 +32,7 @@ class ScreenshotTranslator {
     try {
       console.log('Shortcut capture triggered');
 
-      // 獲取當前活動標籤
+      // 获取当前活动标签
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tabs[0]) {
         console.error('No active tab found');
@@ -42,9 +42,16 @@ class ScreenshotTranslator {
       const tab = tabs[0];
       console.log('Active tab for shortcut:', tab.url);
 
-      // 檢查是否是受限制的頁面
+      // 检查是否是受限制的页面
       if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://')) {
         console.error('Cannot use shortcut on restricted pages');
+        // 显示通知提醒用户
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon16.png',
+          title: '截图翻译器',
+          message: '无法在此页面使用快捷键，请切换到普通网页'
+        });
         return;
       }
 
@@ -59,15 +66,22 @@ class ScreenshotTranslator {
         console.log('Content script may already be injected:', injectError.message);
       }
 
-      // 等待一下再發送消息
-      setTimeout(async () => {
-        try {
-          await chrome.tabs.sendMessage(tab.id, { action: 'initCapture' });
-          console.log('Shortcut capture message sent');
-        } catch (msgError) {
-          console.error('Failed to send shortcut message:', msgError);
-        }
-      }, 100);
+      // 直接发送截图初始化消息，无需延迟
+      try {
+        await chrome.tabs.sendMessage(tab.id, { action: 'initCapture' });
+        console.log('Shortcut capture initiated successfully');
+      } catch (msgError) {
+        console.error('Failed to send shortcut message:', msgError);
+        // 如果失败，稍等片刻重试一次
+        setTimeout(async () => {
+          try {
+            await chrome.tabs.sendMessage(tab.id, { action: 'initCapture' });
+            console.log('Shortcut capture retry successful');
+          } catch (retryError) {
+            console.error('Shortcut capture retry failed:', retryError);
+          }
+        }, 200);
+      }
 
     } catch (error) {
       console.error('Shortcut capture failed:', error);
