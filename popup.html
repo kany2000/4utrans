@@ -45,6 +45,7 @@
       <div class="setting-group">
         <label for="ocr-language">識別語言:</label>
         <select id="ocr-language" class="setting-select">
+          <option value="auto">自動檢測 (推薦)</option>
           <option value="eng">English</option>
           <option value="chi_tra">繁體中文</option>
           <option value="chi_sim">簡體中文</option>
@@ -54,6 +55,14 @@
           <option value="deu">Deutsch</option>
           <option value="spa">Español</option>
         </select>
+      </div>
+
+      <!-- 快速保存按鈕 -->
+      <div class="quick-save-section">
+        <button id="quick-save" class="save-btn">
+          <span class="btn-icon">💾</span>
+          <span class="btn-text">保存設置</span>
+        </button>
       </div>
     </div>
 

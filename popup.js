@@ -17,6 +17,7 @@ class PopupController {
       startCapture: document.getElementById('start-capture'),
       targetLanguage: document.getElementById('target-language'),
       ocrLanguage: document.getElementById('ocr-language'),
+      quickSave: document.getElementById('quick-save'),
       settingsBtn: document.getElementById('settings-btn'),
       settingsModal: document.getElementById('settings-modal'),
       closeSettings: document.getElementById('close-settings'),
@@ -37,6 +38,11 @@ class PopupController {
     // 開始截圖
     this.elements.startCapture.addEventListener('click', () => {
       this.startCapture();
+    });
+
+    // 快速保存基本設置
+    this.elements.quickSave.addEventListener('click', () => {
+      this.quickSaveBasicSettings();
     });
 
     // 設置按鈕
@@ -71,13 +77,13 @@ class PopupController {
       this.resetSettings();
     });
 
-    // 語言設置變更時自動保存
+    // 語言設置變更時顯示提示
     this.elements.targetLanguage.addEventListener('change', () => {
-      this.autoSaveBasicSettings();
+      this.showUnsavedChanges();
     });
 
     this.elements.ocrLanguage.addEventListener('change', () => {
-      this.autoSaveBasicSettings();
+      this.showUnsavedChanges();
     });
 
     // ESC 鍵關閉模態框
@@ -281,20 +287,64 @@ class PopupController {
     }
   }
 
-  async autoSaveBasicSettings() {
-    const basicSettings = {
-      targetLanguage: this.elements.targetLanguage.value,
-      ocrLanguage: this.elements.ocrLanguage.value
-    };
-
+  async quickSaveBasicSettings() {
     try {
+      const basicSettings = {
+        targetLanguage: this.elements.targetLanguage.value,
+        ocrLanguage: this.elements.ocrLanguage.value
+      };
+
+      // 顯示保存中狀態
+      const saveBtn = this.elements.quickSave;
+      const originalText = saveBtn.querySelector('.btn-text').textContent;
+      saveBtn.querySelector('.btn-text').textContent = '保存中...';
+      saveBtn.disabled = true;
+
       chrome.runtime.sendMessage({
         action: 'saveSettings',
         settings: basicSettings
+      }, (response) => {
+        if (response && response.success) {
+          // 更新本地設置
+          this.settings = { ...this.settings, ...basicSettings };
+
+          // 顯示成功狀態
+          saveBtn.classList.add('saved');
+          saveBtn.querySelector('.btn-text').textContent = '已保存';
+          this.showStatus('基本設置已保存', 'success');
+
+          // 恢復按鈕狀態
+          setTimeout(() => {
+            saveBtn.classList.remove('saved');
+            saveBtn.querySelector('.btn-text').textContent = originalText;
+            saveBtn.disabled = false;
+            this.hideUnsavedChanges();
+          }, 1500);
+        } else {
+          this.showStatus('保存失敗', 'error');
+          saveBtn.querySelector('.btn-text').textContent = originalText;
+          saveBtn.disabled = false;
+        }
       });
     } catch (error) {
-      console.error('Failed to auto-save settings:', error);
+      console.error('Failed to save basic settings:', error);
+      this.showStatus('保存失敗: ' + error.message, 'error');
     }
+  }
+
+  showUnsavedChanges() {
+    const saveBtn = this.elements.quickSave;
+    if (!saveBtn.classList.contains('saved')) {
+      saveBtn.style.animation = 'pulse 1s ease-in-out';
+      setTimeout(() => {
+        saveBtn.style.animation = '';
+      }, 1000);
+    }
+  }
+
+  hideUnsavedChanges() {
+    const saveBtn = this.elements.quickSave;
+    saveBtn.style.animation = '';
   }
 
   async saveSettings() {
@@ -307,6 +357,12 @@ class PopupController {
         this.showStatus('請輸入 API Key', 'error');
         return;
       }
+
+      // 顯示保存中狀態
+      const saveBtn = this.elements.saveSettings;
+      const originalText = saveBtn.textContent;
+      saveBtn.textContent = '保存中...';
+      saveBtn.disabled = true;
 
       const settings = {
         targetLanguage: this.elements.targetLanguage.value,
@@ -326,17 +382,36 @@ class PopupController {
       }, (response) => {
         if (response && response.success) {
           this.settings = { ...this.settings, ...settings };
-          this.showStatus('設置已保存', 'success');
+
+          // 顯示成功狀態
+          saveBtn.textContent = '已保存';
+          saveBtn.style.background = 'linear-gradient(135deg, #34a853, #34a853)';
+          this.showStatus('高級設置已保存', 'success');
+
+          // 更新主界面的設置顯示
+          this.updateUI();
+
           setTimeout(() => {
             this.hideSettingsModal();
+            // 恢復按鈕狀態
+            saveBtn.textContent = originalText;
+            saveBtn.style.background = '';
+            saveBtn.disabled = false;
           }, 1000);
         } else {
           this.showStatus('保存失敗', 'error');
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
         }
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
-      this.showStatus('保存失敗', 'error');
+      this.showStatus('保存失敗: ' + error.message, 'error');
+
+      // 恢復按鈕狀態
+      const saveBtn = this.elements.saveSettings;
+      saveBtn.textContent = '保存設置';
+      saveBtn.disabled = false;
     }
   }
 
