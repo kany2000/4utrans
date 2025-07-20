@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "截圖翻譯器",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "智能截圖翻譯工具 - 自動語言檢測，精確翻譯日韓英文等多語言",
   "author": "Screenshot Translator Team",
   "permissions": [
@@ -46,14 +46,14 @@
     }
   ],
   "commands": {
-    "start-capture": {
+    "smart-translate": {
       "suggested_key": {
-        "default": "Alt+2",
-        "mac": "Alt+2",
-        "windows": "Alt+2",
-        "linux": "Alt+2"
+        "default": "Alt+1",
+        "mac": "Alt+1",
+        "windows": "Alt+1",
+        "linux": "Alt+1"
       },
-      "description": "開始截圖翻譯"
+      "description": "智能翻譯（自動檢測語言翻譯成目標語言）"
     }
   }
 }

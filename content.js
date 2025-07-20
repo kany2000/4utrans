@@ -31,7 +31,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         switch (request.action) {
           case 'initCapture':
             console.log('Content: Initializing capture...');
-            this.initCapture();
+            this.initCapture(request.smartMode, request.userSettings);
             sendResponse({ success: true });
             break;
           case 'showResult':
@@ -54,8 +54,12 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       }
     }
 
-    initCapture() {
-      console.log('Content: initCapture called');
+    initCapture(smartMode = false, userSettings = null) {
+      console.log('Content: initCapture called with smartMode:', smartMode);
+
+      // 保存智能模式设置
+      this.isSmartMode = smartMode;
+      this.smartUserSettings = userSettings;
 
       // 清理現有覆蓋層
       this.cleanupOverlay();
@@ -100,7 +104,17 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
       // 創建指導文字
       this.instructionText = document.createElement('div');
-      this.instructionText.textContent = '拖拽選擇要翻譯的區域，或點擊使用默認區域，按 ESC 取消';
+
+      // 根据智能模式设置不同的提示文字
+      let instructionText = '拖拽選擇要翻譯的區域，或點擊使用默認區域，按 ESC 取消';
+      let backgroundColor = 'rgba(0, 0, 0, 0.8)';
+
+      if (this.isSmartMode && this.smartUserSettings) {
+        instructionText = `智能翻譯模式\n自動檢測語言 → 中文\n拖拽選擇要翻譯的區域，按 ESC 取消`;
+        backgroundColor = 'rgba(52, 168, 83, 0.9)';
+      }
+
+      this.instructionText.textContent = instructionText;
       this.instructionText.style.cssText = `
         position: absolute !important;
         top: 50% !important;
@@ -110,13 +124,14 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         font-size: 18px !important;
         font-weight: 500 !important;
         text-align: center !important;
-        background-color: rgba(0, 0, 0, 0.8) !important;
+        background-color: ${backgroundColor} !important;
         padding: 16px 24px !important;
         border-radius: 8px !important;
         pointer-events: none !important;
         max-width: 400px !important;
         line-height: 1.4 !important;
         z-index: 2147483648 !important;
+        white-space: pre-line !important;
       `;
 
       // 組裝元素
@@ -155,6 +170,21 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       document.body.style.overflow = 'hidden';
 
       console.log('Content: Overlay created successfully');
+    }
+
+    getLanguageName(langCode) {
+      const languageNames = {
+        'zh-CN': '简体中文',
+        'zh-TW': '繁体中文',
+        'zh': '中文',
+        'en': '英文',
+        'ja': '日文',
+        'ko': '韩文',
+        'fr': '法文',
+        'de': '德文',
+        'es': '西班牙文'
+      };
+      return languageNames[langCode] || langCode;
     }
 
     handleKeyDown(e) {
@@ -411,7 +441,8 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         if (parent === this.overlay ||
             parent === this.selectionBox ||
             parent === this.instructionText ||
-            (parent.className && parent.className.includes('screenshot')) ||
+            (parent.className && typeof parent.className === 'string' && parent.className.includes('screenshot')) ||
+            (parent.className && parent.className.toString && parent.className.toString().includes('screenshot')) ||
             (parent.id && parent.id.includes('screenshot'))) {
           return true;
         }
@@ -1108,11 +1139,15 @@ if (typeof window.ScreenshotCapture === 'undefined') {
     }
 
     isOurElement(element) {
-      return element === this.overlay ||
-             element === this.selectionBox ||
-             element === this.instructionText ||
-             element.closest('#screenshot-overlay') ||
-             element.classList.contains('translation-result-modal');
+      try {
+        return element === this.overlay ||
+               element === this.selectionBox ||
+               element === this.instructionText ||
+               element.closest('#screenshot-overlay') ||
+               (element.classList && element.classList.contains('translation-result-modal'));
+      } catch (error) {
+        return false;
+      }
     }
 
     isElementInArea(elementRect, selectionRect) {
@@ -1460,50 +1495,86 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       console.log('Content: Translating text:', text);
 
       try {
-        // 獲取用戶設置的語言
-        const settings = await this.getUserSettings();
-        let targetLang = this.convertLanguageCode(settings.targetLanguage || 'zh-TW');
-        const ocrLang = settings.ocrLanguage || 'auto';
+        let sourceLang, targetLang;
 
-        console.log('Content: User settings - target:', targetLang, 'ocr:', ocrLang);
-        console.log('Content: Raw settings:', settings);
+        // 如果是智能模式，使用用户设置的目标语言
+        if (this.isSmartMode && this.smartUserSettings) {
+          console.log('Content: Smart mode user settings:', this.smartUserSettings);
 
-        // 確保目標語言是中文
-        if (!targetLang.startsWith('zh')) {
-          console.log('Content: Setting target language to Chinese');
-          targetLang = 'zh-cn';
+          // 智能模式下，强制目标语言为中文
+          targetLang = 'zh';
+          sourceLang = this.detectLanguage(text);
+
+          console.log(`Content: Smart mode - auto detect -> ${targetLang} (forced Chinese)`);
+          console.log(`Content: Detected source language: ${sourceLang}`);
+
+          // 如果檢測失敗，使用auto
+          if (!sourceLang || sourceLang === 'auto') {
+            sourceLang = 'auto';
+          }
+        } else {
+          // 使用原有的用户设置逻辑
+          const settings = await this.getUserSettings();
+          targetLang = this.convertLanguageCode(settings.targetLanguage || 'zh-TW');
+          const ocrLang = settings.ocrLanguage || 'auto';
+
+          console.log('Content: User settings - target:', targetLang, 'ocr:', ocrLang);
+          console.log('Content: Raw settings:', settings);
+
+          // 確保目標語言是中文
+          if (!targetLang.startsWith('zh')) {
+            console.log('Content: Setting target language to Chinese');
+            targetLang = 'zh-cn';
+          }
+
+          // 根據文本內容自動檢測源語言（忽略OCR設置）
+          sourceLang = this.detectLanguage(text);
+          console.log('Content: Auto-detected source language:', sourceLang);
+
+          // 如果檢測失敗，使用auto
+          if (!sourceLang || sourceLang === 'auto') {
+            sourceLang = 'auto';
+          }
+
+          console.log(`Content: Auto-detected translation - source: ${sourceLang}, target: ${targetLang}`);
         }
-
-        // 根據文本內容自動檢測源語言（忽略OCR設置）
-        let sourceLang = this.detectLanguage(text);
-        console.log('Content: Auto-detected source language:', sourceLang);
-
-        // 如果檢測失敗，使用auto
-        if (!sourceLang || sourceLang === 'auto') {
-          sourceLang = 'auto';
-        }
-
-        console.log(`Content: Translation - source: ${sourceLang}, target: ${targetLang}`);
 
         // 如果源語言和目標語言相同，則不需要翻譯
         if (sourceLang === targetLang) {
           console.log('Content: Source and target languages are the same, no translation needed');
-          return text;
+          console.log(`Content: sourceLang="${sourceLang}", targetLang="${targetLang}"`);
+
+          // 但是如果是智能模式，我们仍然尝试翻译，因为可能是检测错误
+          if (this.isSmartMode) {
+            console.log('Content: Smart mode - forcing translation despite same language detection');
+            // 继续执行翻译
+          } else {
+            return text;
+          }
         }
 
         // 對於所有語言，統一使用Google翻譯API
         console.log('Content: Using Google Translate for all languages');
         console.log(`Content: Final translation parameters - source: ${sourceLang}, target: ${targetLang}`);
 
+        // 如果检测到英文但目标语言不是中文，强制设置为中文
+        if (sourceLang === 'en' && !targetLang.startsWith('zh')) {
+          console.log('Content: English detected but target is not Chinese, forcing Chinese target');
+          targetLang = 'zh';
+        }
+
         // 直接測試Google翻譯
+        console.log(`Content: About to call Google Translate with: "${text}" (${sourceLang} -> ${targetLang})`);
         const translatedText = await this.callGoogleTranslate(text, sourceLang, targetLang);
+        console.log(`Content: Google Translate returned: "${translatedText}"`);
 
         // 檢查翻譯質量（簡化檢查）
-        if (translatedText && translatedText !== text) {
+        if (translatedText && translatedText !== text && translatedText.trim() !== '') {
           console.log('Content: Translation successful, returning result');
           return translatedText;
         } else {
           console.log('Content: Translation failed or empty, using fallback');
+          console.log(`Content: Failed because - translatedText: "${translatedText}", same as original: ${translatedText === text}`);
           return this.fallbackTranslate(text, sourceLang, targetLang);
         }
       } catch (error) {
@@ -1525,7 +1596,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
       // 如果獲取失敗，返回默認設置
       return {
-        targetLanguage: 'zh-CN',
+        targetLanguage: 'zh-TW',
         ocrLanguage: 'auto',
         apiProvider: 'google'
       };
@@ -1534,9 +1605,9 @@ if (typeof window.ScreenshotCapture === 'undefined') {
     convertLanguageCode(uiLangCode) {
       // 將UI語言代碼轉換為Google翻譯API語言代碼
       const langMap = {
-        'zh-TW': 'zh-tw',
+        'zh-TW': 'zh',
         'zh-CN': 'zh-cn',
-        'zh': 'zh-tw',
+        'zh': 'zh',
         'en': 'en',
         'ja': 'ja',
         'ko': 'ko',
@@ -1544,7 +1615,8 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         'de': 'de',
         'es': 'es'
       };
-      return langMap[uiLangCode] || 'zh-tw';
+      console.log(`Content: Converting language code: ${uiLangCode} -> ${langMap[uiLangCode] || 'zh'}`);
+      return langMap[uiLangCode] || 'zh';
     }
 
     convertOcrToTranslateCode(ocrCode) {
@@ -1789,64 +1861,49 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         console.log(`Content: Calling Google Translate API - ${sourceLang} -> ${targetLang}`);
         console.log('Content: Text to translate:', text);
 
-        // 使用Google翻譯的免費API端點
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&ie=UTF-8&oe=UTF-8&q=${encodeURIComponent(text)}`;
-        console.log('Content: Google Translate URL:', url);
+        // 由于CORS限制，content script无法直接调用Google API
+        // 改为通过background script调用
+        console.log('Content: Sending translation request to background script');
 
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
+        const response = await chrome.runtime.sendMessage({
+          action: 'translateText',
+          text: text,
+          sourceLang: sourceLang,
+          targetLang: targetLang
         });
 
-        console.log('Content: Google Translate response status:', response.status);
-        console.log('Content: Google Translate response headers:', response.headers);
+        console.log('Content: Background translation response:', response);
 
-        if (!response.ok) {
-          console.error(`Content: Google Translate HTTP error! status: ${response.status}`);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (response && response.success && response.translatedText) {
+          const result = response.translatedText.trim();
+          console.log('Content: Translation successful:', result);
 
-        const data = await response.json();
-        console.log('Content: Google Translate response data:', data);
-
-        // 解析Google翻譯的響應格式
-        if (data && data[0] && Array.isArray(data[0])) {
-          let translatedText = '';
-          for (const segment of data[0]) {
-            if (segment && segment[0]) {
-              translatedText += segment[0];
-            }
-          }
-          const result = translatedText.trim();
-          console.log('Content: Google Translate result:', result);
-
-          // 验证翻译结果是否真的是目标语言
+          // 验证翻译结果
           if (result && result !== text) {
-            // 检查是否真的翻译成了中文
             if (targetLang.startsWith('zh')) {
               const chineseChars = (result.match(/[\u4e00-\u9fff]/g) || []).length;
-              console.log(`Content: Google result has ${chineseChars} Chinese characters`);
+              console.log(`Content: Result has ${chineseChars} Chinese characters`);
 
               if (chineseChars > 0) {
-                console.log('Content: Google Translate SUCCESS - has Chinese characters');
+                console.log('Content: Translation SUCCESS - has Chinese characters');
                 return result;
               } else {
-                console.log('Content: Google Translate FAILED - no Chinese characters in result');
+                console.log('Content: Translation FAILED - no Chinese characters in result');
                 throw new Error('Translation result has no Chinese characters');
               }
             } else {
               return result;
             }
           } else {
-            console.log('Content: Google Translate FAILED - result is empty or same as original');
+            console.log('Content: Translation FAILED - result is empty or same as original');
             throw new Error('Translation result is empty or same as original');
           }
+        } else {
+          console.log('Content: Background translation failed:', response);
+          throw new Error(response?.error || 'Background translation failed');
         }
 
-        console.log('Content: Google Translate FAILED - invalid response format');
-        throw new Error('Invalid response format');
+
       } catch (error) {
         console.error('Content: Google Translate API error:', error);
 

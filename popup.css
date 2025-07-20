@@ -85,6 +85,21 @@ body {
   margin-top: 12px;
   color: #666;
   font-size: 12px;
+  text-align: center;
+}
+
+.shortcut-hints {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.shortcut-hints small {
+  color: #495057;
+  font-weight: 500;
+  font-size: 11px;
 }
 
 /* 設置區域 */
@@ -131,6 +146,7 @@ body {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid #eee;
+  margin-bottom: 8px;
 }
 
 .save-btn {
@@ -180,15 +196,16 @@ body {
 /* 狀態區域 */
 .status-section {
   padding: 0 20px;
-  min-height: 20px;
+  min-height: 0;
 }
 
 .status-message {
   font-size: 12px;
   text-align: center;
-  padding: 8px;
+  padding: 6px 8px;
   border-radius: 4px;
   display: none;
+  margin: 4px 0;
 }
 
 .status-message.success {
@@ -211,7 +228,7 @@ body {
 
 /* 底部操作 */
 .footer {
-  padding: 16px 20px;
+  padding: 12px 20px 16px;
   border-top: 1px solid #e0e0e0;
   background-color: #f8f9fa;
 }

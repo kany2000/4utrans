@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-text {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+        .english {
+            background: #e8f4fd;
+            border-color: #4285f4;
+        }
+        .chinese {
+            background: #f0f8e8;
+            border-color: #34a853;
+        }
+        .japanese {
+            background: #fef7e0;
+            border-color: #fbbc04;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Translation Test Page</h1>
+    <p>Use Alt+1 to test smart translation on the text blocks below:</p>
+
+    <h2>English Text Samples</h2>
+    
+    <div class="test-text english">
+        <h3>News Headline</h3>
+        <p>Vehicle strikes crowd in LA</p>
+    </div>
+
+    <div class="test-text english">
+        <h3>Longer News Text</h3>
+        <p>At least 30 hurt after vehicle strikes crowd outside Los Angeles nightclub. The driver was then shot by bystander, police say</p>
+    </div>
+
+    <div class="test-text english">
+        <h3>Simple Phrases</h3>
+        <p>Hello World</p>
+        <p>Click to start</p>
+        <p>Save settings</p>
+    </div>
+
+    <h2>Chinese Text Samples</h2>
+    
+    <div class="test-text chinese">
+        <h3>繁體中文</h3>
+        <p>截圖翻譯器</p>
+        <p>開始截圖翻譯</p>
+    </div>
+
+    <div class="test-text chinese">
+        <h3>簡體中文</h3>
+        <p>屏幕截图翻译器</p>
+        <p>开始屏幕截图翻译</p>
+    </div>
+
+    <h2>Japanese Text Samples</h2>
+    
+    <div class="test-text japanese">
+        <h3>日本語</h3>
+        <p>もっと見る</p>
+        <p>プロ野球オールスター</p>
+        <p>メニュー</p>
+    </div>
+
+    <h2>Instructions</h2>
+    <ol>
+        <li>Press <strong>Alt+1</strong> to activate smart translation mode</li>
+        <li>Drag to select any text above</li>
+        <li>Check if the translation works correctly</li>
+        <li>Open browser console (F12) to see debug information</li>
+    </ol>
+
+    <div class="test-text">
+        <h3>Expected Behavior</h3>
+        <ul>
+            <li>English text should be translated to Chinese</li>
+            <li>Chinese text should be translated to English (or stay as Chinese)</li>
+            <li>Japanese text should be translated to Chinese</li>
+            <li>Console should show detailed translation process</li>
+        </ul>
+    </div>
+</body>
+</html>

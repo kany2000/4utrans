@@ -538,11 +538,11 @@ class PopupController {
   async loadShortcutSetting() {
     try {
       const result = await chrome.storage.local.get(['shortcutKey']);
-      const shortcut = result.shortcutKey || 'Alt+2';
+      const shortcut = result.shortcutKey || 'Alt+1';
       this.elements.shortcutKey.value = shortcut;
     } catch (error) {
       console.error('Failed to load shortcut setting:', error);
-      this.elements.shortcutKey.value = 'Alt+2';
+      this.elements.shortcutKey.value = 'Alt+1';
     }
   }
 
