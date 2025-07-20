@@ -126,7 +126,7 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### 📱 主界面设计
 
-<img src="images/main-interface.png" alt="主界面截图" width="400"/>
+<img src="images/main-interface.png" alt="主界面截图" width="240"/>
 
 *简洁直观的主界面，一键开始翻译*
 
@@ -159,7 +159,7 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### ⚙️ 高级设置面板
 
-<img src="images/advanced-settings.png" alt="高级设置截图" width="450"/>
+<img src="images/advanced-settings.png" alt="高级设置截图" width="270"/>
 
 *功能丰富的高级配置选项*
 
@@ -275,6 +275,7 @@ cd 4utrans
 - **快捷键优化** - 默认快捷键更改为Alt+1，更符合用户习惯
 - **界面间距优化** - 精细调整布局，消除多余空白，视觉更紧凑美观
 - **GitHub集成** - 完善项目仓库信息，支持一键安装脚本
+- **项目结构优化** - 清理临时文件，保留核心功能，项目结构更加清晰专业
 
 #### ✨ 新增功能
 - **一键安装脚本** - 支持Windows、macOS、Linux一键安装
@@ -331,7 +332,7 @@ A: 部分网站可能有特殊的安全策略，请尝试刷新页面或联系�
 
 **🚀 按 Alt+1 开始您的智能翻译之旅！**
 
-**🔧 查看 [项目优化文档](PROJECT_OPTIMIZATION.md) 了解技术细节！**
+**🔧 查看 [用户指南](USER_GUIDE.md) 了解详细使用方法！**
 
 ---
 
@@ -348,7 +349,7 @@ A: 部分网站可能有特殊的安全策略，请尝试刷新页面或联系�
 
 #### 📱 **主界面截图**
 **文件**: `images/main-interface.png`
-**尺寸**: 建议宽度400px
+**尺寸**: 显示宽度240px (60%缩放)
 **格式**: PNG (高分辨率)
 
 **应包含元素**:
@@ -364,7 +365,7 @@ A: 部分网站可能有特殊的安全策略，请尝试刷新页面或联系�
 
 #### ⚙️ **高级设置截图**
 **文件**: `images/advanced-settings.png`
-**尺寸**: 建议宽度450px
+**尺寸**: 显示宽度270px (60%缩放)
 **格式**: PNG (高分辨率)
 
 **应包含元素**:
