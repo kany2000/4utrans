@@ -1501,11 +1501,11 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         if (this.isSmartMode && this.smartUserSettings) {
           console.log('Content: Smart mode user settings:', this.smartUserSettings);
 
-          // 智能模式下，强制目标语言为中文
-          targetLang = 'zh';
+          // 智能模式下，使用用户设置的目标语言
+          targetLang = this.convertLanguageCode(this.smartUserSettings.targetLanguage || 'zh-TW');
           sourceLang = this.detectLanguage(text);
 
-          console.log(`Content: Smart mode - auto detect -> ${targetLang} (forced Chinese)`);
+          console.log(`Content: Smart mode - auto detect -> ${targetLang} (user target language)`);
           console.log(`Content: Detected source language: ${sourceLang}`);
 
           // 如果檢測失敗，使用auto

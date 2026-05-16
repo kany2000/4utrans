@@ -9,13 +9,13 @@
     "scripting",
     "storage",
     "tabs",
-    "notifications"
+    "notifications",
+    "captureVisibleTab"
   ],
   "host_permissions": [
     "<all_urls>",
     "https://translate.googleapis.com/*",
-    "https://api.mymemory.translated.net/*",
-    "https://unpkg.com/*"
+    "https://api.mymemory.translated.net/*"
   ],
   "action": {
     "default_popup": "popup.html",
