@@ -27,6 +27,9 @@ class PopupController {
       llmCustomConfig: document.getElementById('llm-custom-config'),
       llmBaseUrl: document.getElementById('llm-base-url'),
       llmModel: document.getElementById('llm-model'),
+      llmModelCustom: document.getElementById('llm-model-custom'),
+      llmModelHelp: document.getElementById('llm-model-help'),
+      fetchModels: document.getElementById('fetch-models'),
       autoCopy: document.getElementById('auto-copy'),
       showConfidence: document.getElementById('show-confidence'),
       saveSettings: document.getElementById('save-settings'),
@@ -104,6 +107,107 @@ class PopupController {
     this.elements.shortcutKey.addEventListener('click', () => {
       this.openShortcutSettings();
     });
+
+    // 獲取模型列表
+    this.elements.fetchModels.addEventListener('click', () => {
+      this.fetchAvailableModels();
+    });
+
+    // 模型選擇變更時切換自定義輸入
+    this.elements.llmModel.addEventListener('change', () => {
+      const selectedValue = this.elements.llmModel.value;
+      if (selectedValue === '__custom__') {
+        this.elements.llmModel.classList.add('hidden');
+        this.elements.llmModelCustom.classList.remove('hidden');
+        this.elements.llmModelCustom.focus();
+      } else if (selectedValue) {
+        this.elements.llmModelHelp.textContent = `已選擇: ${selectedValue}`;
+      }
+    });
+
+    // LLM 配置變更時標記未保存
+    this.elements.apiKey.addEventListener('input', () => this.showUnsavedChanges());
+    this.elements.llmBaseUrl.addEventListener('input', () => this.showUnsavedChanges());
+  }
+
+  async fetchAvailableModels() {
+    const apiKey = this.elements.apiKey.value.trim();
+    const baseUrl = this.elements.llmBaseUrl.value.trim();
+
+    if (!apiKey || !baseUrl) {
+      this.showStatus('請先填寫 API Key 和 Base URL', 'error');
+      return;
+    }
+
+    this.showStatus('正在獲取模型列表...', 'info');
+    this.elements.fetchModels.disabled = true;
+    this.elements.fetchModels.textContent = '載入中...';
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'getModels',
+        apiKey: apiKey,
+        baseUrl: baseUrl
+      });
+
+      if (response && response.success && response.models) {
+        const models = response.models;
+        this.elements.llmModel.innerHTML = '';
+
+        if (models.length === 0) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = '-- 未找到模型 --';
+          this.elements.llmModel.appendChild(option);
+          this.showStatus('未找到可用模型', 'error');
+        } else {
+          // 添加常用模型選項
+          const popularModels = ['gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'];
+          const sortedModels = models.sort((a, b) => {
+            const aPopular = popularModels.indexOf(a);
+            const bPopular = popularModels.indexOf(b);
+            if (aPopular !== -1 && bPopular !== -1) return aPopular - bPopular;
+            if (aPopular !== -1) return -1;
+            if (bPopular !== -1) return 1;
+            return a.localeCompare(b);
+          });
+
+          sortedModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model;
+            option.textContent = model;
+            this.elements.llmModel.appendChild(option);
+          });
+
+          // 添加自定義選項
+          const customOption = document.createElement('option');
+          customOption.value = '__custom__';
+          customOption.textContent = '-- 或輸入自定義模型 --';
+          this.elements.llmModel.appendChild(customOption);
+
+          this.showStatus(`已載入 ${models.length} 個模型`, 'success');
+        }
+      } else {
+        this.showStatus(response?.error || '獲取模型列表失敗', 'error');
+        // 添加錯誤提示選項
+        this.elements.llmModel.innerHTML = '';
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '-- 獲取失敗，請手動輸入 --';
+        this.elements.llmModel.appendChild(option);
+
+        const customOption = document.createElement('option');
+        customOption.value = '__custom__';
+        customOption.textContent = '-- 或輸入自定義模型 --';
+        this.elements.llmModel.appendChild(customOption);
+      }
+    } catch (error) {
+      console.error('Popup: Error fetching models:', error);
+      this.showStatus('獲取模型列表失敗: ' + error.message, 'error');
+    } finally {
+      this.elements.fetchModels.disabled = false;
+      this.elements.fetchModels.textContent = '🔄 獲取可用模型';
+    }
   }
 
   async startCapture() {
@@ -278,7 +382,25 @@ class PopupController {
     // 更新 LLM 自定義配置
     if (this.settings.llmConfig) {
       this.elements.llmBaseUrl.value = this.settings.llmConfig.baseUrl || '';
-      this.elements.llmModel.value = this.settings.llmConfig.model || '';
+      const savedModel = this.settings.llmConfig.model || '';
+      if (savedModel) {
+        // 檢查模型是否已在列表中
+        const options = this.elements.llmModel.options;
+        let found = false;
+        for (let i = 0; i < options.length; i++) {
+          if (options[i].value === savedModel) {
+            this.elements.llmModel.value = savedModel;
+            found = true;
+            break;
+          }
+        }
+        if (!found && savedModel) {
+          // 模型不在列表中，顯示自定義輸入框
+          this.elements.llmModel.classList.add('hidden');
+          this.elements.llmModelCustom.classList.remove('hidden');
+          this.elements.llmModelCustom.value = savedModel;
+        }
+      }
     }
 
     // 載入快捷鍵設置
@@ -414,7 +536,9 @@ class PopupController {
         },
         llmConfig: provider === 'custom' ? {
           baseUrl: this.elements.llmBaseUrl.value.trim(),
-          model: this.elements.llmModel.value.trim()
+          model: this.elements.llmModelCustom.classList.contains('hidden')
+            ? this.elements.llmModel.value
+            : this.elements.llmModelCustom.value.trim()
         } : this.settings.llmConfig
       };
 

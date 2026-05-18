@@ -116,8 +116,14 @@
           </div>
           <div class="setting-group">
             <label for="llm-model">模型名稱:</label>
-            <input type="text" id="llm-model" class="setting-input" placeholder="gpt-3.5-turbo">
-            <small class="help-text">模型名稱，如 gpt-3.5-turbo、claude-3 等</small>
+            <select id="llm-model" class="setting-select">
+              <option value="">-- 請先填寫 API Key 和 Base URL --</option>
+            </select>
+            <input type="text" id="llm-model-custom" class="setting-input hidden" placeholder="或直接輸入模型名稱">
+            <small class="help-text" id="llm-model-help">選擇可用模型，或直接輸入模型名稱</small>
+          </div>
+          <div class="setting-group">
+            <button type="button" id="fetch-models" class="secondary-btn">🔄 獲取可用模型</button>
           </div>
         </div>
 

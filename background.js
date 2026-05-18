@@ -168,6 +168,10 @@ class ScreenshotTranslator {
           console.log('Translating text...');
           this.translateText(request.text, request.sourceLang, request.targetLang, sendResponse);
           break;
+        case 'getModels':
+          console.log('Getting available models...');
+          this.getAvailableModels(request.apiKey, request.baseUrl, sendResponse);
+          break;
         default:
           console.warn('Unknown action:', request.action);
           sendResponse({ error: 'Unknown action' });
@@ -260,6 +264,49 @@ class ScreenshotTranslator {
     } catch (error) {
       console.error('Failed to save settings:', error);
       sendResponse({ error: error.message });
+    }
+  }
+
+  async getAvailableModels(apiKey, baseUrl, sendResponse) {
+    try {
+      // 构建 API URL
+      let url = baseUrl.trim();
+      if (url.endsWith('/')) {
+        url = url.slice(0, -1);
+      }
+      // 尝试 OpenAI 兼容的 models 端点
+      const modelsUrl = `${url}/models`;
+
+      console.log('Background: Fetching models from:', modelsUrl);
+
+      const response = await fetch(modelsUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Background: Failed to fetch models:', errorText);
+        throw new Error(`Failed to fetch models: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 解析 OpenAI 格式的响应
+      let models = [];
+      if (data.data && Array.isArray(data.data)) {
+        models = data.data.map(model => model.id);
+      } else if (Array.isArray(data)) {
+        models = data.map(model => typeof model === 'string' ? model : model.id);
+      }
+
+      console.log('Background: Found models:', models);
+      sendResponse({ success: true, models: models });
+    } catch (error) {
+      console.error('Background: Error fetching models:', error);
+      sendResponse({ success: false, error: error.message });
     }
   }
 
