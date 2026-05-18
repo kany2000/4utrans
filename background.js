@@ -299,54 +299,53 @@ class ScreenshotTranslator {
     try {
       console.log(`Background: Translating "${text}" from ${sourceLang} to ${targetLang}`);
 
-      // 使用Google翻譯的免費API端點
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&ie=UTF-8&oe=UTF-8&q=${encodeURIComponent(text)}`;
-      console.log('Background: Google Translate URL:', url);
+      // 获取用户设置的 API Provider
+      const settings = await this.getUserSettings();
+      const apiProvider = settings.apiProvider || 'google';
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
+      console.log('Background: Using API provider:', apiProvider);
 
-      console.log('Background: Google Translate response status:', response.status);
+      let result;
 
-      if (!response.ok) {
-        console.error(`Background: Google Translate HTTP error! status: ${response.status}`);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Background: Google Translate response data:', data);
-
-      // 解析Google翻譯的響應格式
-      if (data && data[0] && Array.isArray(data[0])) {
-        let translatedText = '';
-        for (const segment of data[0]) {
-          if (segment && segment[0]) {
-            translatedText += segment[0];
+      // 根据 API Provider 选择翻译方法
+      switch (apiProvider) {
+        case 'glm':
+          // 使用 GLM 大模型翻译
+          const glmApiKey = settings.apiKeys?.glm;
+          if (!glmApiKey) {
+            throw new Error('GLM API Key 未设置，请在设置中配置');
           }
-        }
-        const result = translatedText.trim();
-        console.log('Background: Google Translate result:', result);
+          result = await this.callGLMTranslate(text, sourceLang, targetLang, glmApiKey);
+          break;
 
-        if (result && result !== text) {
-          console.log('Background: Translation successful');
-          sendResponse({
-            success: true,
-            translatedText: result,
-            sourceLang: sourceLang,
-            targetLang: targetLang
-          });
-        } else {
-          console.log('Background: Translation failed - result is empty or same as original');
-          throw new Error('Translation result is empty or same as original');
-        }
-      } else {
-        console.log('Background: Translation failed - invalid response format');
-        throw new Error('Invalid response format');
+        case 'microsoft':
+          // 使用 Microsoft Translator（免费）
+          result = await this.callMicrosoftTranslate(text, sourceLang, targetLang);
+          break;
+
+        case 'custom':
+          // 使用通用 LLM（OpenAI 兼容格式）
+          const customApiKey = settings.apiKeys?.custom;
+          const llmConfig = settings.llmConfig || {};
+          if (!customApiKey || !llmConfig.baseUrl || !llmConfig.model) {
+            throw new Error('LLM 自定义配置不完整，请检查 API Key、Base URL 和模型名称');
+          }
+          result = await this.callCustomLLMTranslate(text, sourceLang, targetLang, customApiKey, llmConfig);
+          break;
+
+        case 'google':
+        default:
+          // 默认使用 Google 翻译（免费）
+          result = await this.callGoogleTranslate(text, sourceLang, targetLang);
+          break;
       }
+
+      sendResponse({
+        success: true,
+        translatedText: result,
+        sourceLang: sourceLang,
+        targetLang: targetLang
+      });
     } catch (error) {
       console.error('Background: Translation error:', error);
 
@@ -373,6 +372,254 @@ class ScreenshotTranslator {
           error: `Translation failed: ${error.message}. Backup also failed: ${backupError.message}`
         });
       }
+    }
+  }
+
+  // Google 翻译（免费）
+  async callGoogleTranslate(text, sourceLang, targetLang) {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&ie=UTF-8&oe=UTF-8&q=${encodeURIComponent(text)}`;
+    console.log('Background: Google Translate URL:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+
+    console.log('Background: Google Translate response status:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`Google Translate HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Background: Google Translate response data:', data);
+
+    // 解析Google翻譯的響應格式
+    if (data && data[0] && Array.isArray(data[0])) {
+      let translatedText = '';
+      for (const segment of data[0]) {
+        if (segment && segment[0]) {
+          translatedText += segment[0];
+        }
+      }
+      const result = translatedText.trim();
+      console.log('Background: Google Translate result:', result);
+
+      if (result && result !== text) {
+        console.log('Background: Google translation successful');
+        return result;
+      }
+    }
+
+    throw new Error('Google translation failed - invalid response format');
+  }
+
+  // Microsoft Translator（免费）
+  async callMicrosoftTranslate(text, sourceLang, targetLang) {
+    try {
+      console.log(`Background: Calling Microsoft Translator - ${sourceLang} -> ${targetLang}`);
+
+      // Microsoft Translator API 端点（免费版本）
+      const endpoint = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+
+      // 语言代码映射
+      const langMap = {
+        'zh': 'zh-Hans',
+        'zh-cn': 'zh-Hans',
+        'zh-CN': 'zh-Hans',
+        'zh-TW': 'zh-Hant',
+        'en': 'en',
+        'ja': 'ja',
+        'ko': 'ko',
+        'fr': 'fr',
+        'de': 'de',
+        'es': 'es'
+      };
+
+      const fromLang = langMap[sourceLang] || sourceLang;
+      const toLang = langMap[targetLang] || targetLang;
+
+      const url = `${endpoint}&from=${fromLang}&to=${toLang}`;
+      console.log('Background: Microsoft Translator URL:', url);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([{ text: text }])
+      });
+
+      console.log('Background: Microsoft Translator response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Background: Microsoft Translator error:', errorText);
+        throw new Error(`Microsoft Translator error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Background: Microsoft Translator response:', data);
+
+      if (data && data[0] && data[0].translations && data[0].translations[0]) {
+        const result = data[0].translations[0].text;
+        console.log('Background: Microsoft translation result:', result);
+        return result;
+      }
+
+      throw new Error('Microsoft translation failed - invalid response format');
+    } catch (error) {
+      console.error('Background: Microsoft translation error:', error);
+      throw error;
+    }
+  }
+
+  // GLM 大模型翻译
+  async callGLMTranslate(text, sourceLang, targetLang, apiKey) {
+    try {
+      console.log(`Background: Calling GLM API - ${sourceLang} -> ${targetLang}`);
+
+      // 语言代码映射到 GLM 友好的语言描述
+      const langMap = {
+        'zh': '中文',
+        'zh-cn': '简体中文',
+        'zh-TW': '繁体中文',
+        'en': '英文',
+        'ja': '日文',
+        'ko': '韩文',
+        'fr': '法文',
+        'de': '德文',
+        'es': '西班牙文',
+        'auto': '自动检测'
+      };
+
+      const sourceLangName = langMap[sourceLang] || '源语言';
+      const targetLangName = langMap[targetLang] || '目标语言';
+
+      const prompt = `你是一个专业的翻译引擎。请将以下${sourceLangName}文本翻译成${targetLangName}，只返回翻译结果，不要添加任何解释、备注或格式：
+
+${text}`;
+
+      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'glm-4-flash',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.1
+        })
+      });
+
+      console.log('Background: GLM API response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Background: GLM API error:', errorData);
+        throw new Error(`GLM API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Background: GLM API response:', data);
+
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        const result = data.choices[0].message.content.trim();
+        console.log('Background: GLM translation result:', result);
+        return result;
+      }
+
+      throw new Error('Invalid GLM API response format');
+    } catch (error) {
+      console.error('Background: GLM translation error:', error);
+      throw error;
+    }
+  }
+
+  // 通用 LLM 翻译（OpenAI 兼容格式）
+  async callCustomLLMTranslate(text, sourceLang, targetLang, apiKey, llmConfig) {
+    try {
+      console.log(`Background: Calling Custom LLM API - ${sourceLang} -> ${targetLang}`);
+      console.log('Background: LLM Config:', llmConfig);
+
+      // 语言代码映射到友好的语言描述
+      const langMap = {
+        'zh': '中文',
+        'zh-cn': '简体中文',
+        'zh-CN': '简体中文',
+        'zh-TW': '繁体中文',
+        'en': '英文',
+        'ja': '日文',
+        'ko': '韩文',
+        'fr': '法文',
+        'de': '德文',
+        'es': '西班牙文',
+        'auto': '源语言'
+      };
+
+      const sourceLangName = langMap[sourceLang] || sourceLang;
+      const targetLangName = langMap[targetLang] || targetLang;
+
+      const prompt = `你是一个专业的翻译引擎。请将以下${sourceLangName}文本翻译成${targetLangName}，只返回翻译结果，不要添加任何解释、备注或格式：
+
+${text}`;
+
+      // 构建 API URL（处理 baseUrl 末尾的斜杠）
+      let baseUrl = llmConfig.baseUrl.trim();
+      if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.slice(0, -1);
+      }
+      const chatEndpoint = `${baseUrl}/chat/completions`;
+
+      console.log('Background: Custom LLM endpoint:', chatEndpoint);
+
+      const response = await fetch(chatEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: llmConfig.model,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.1
+        })
+      });
+
+      console.log('Background: Custom LLM response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Background: Custom LLM API error:', errorData);
+        throw new Error(`Custom LLM API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Background: Custom LLM response:', data);
+
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        const result = data.choices[0].message.content.trim();
+        console.log('Background: Custom LLM translation result:', result);
+        return result;
+      }
+
+      throw new Error('Invalid Custom LLM API response format');
+    } catch (error) {
+      console.error('Background: Custom LLM translation error:', error);
+      throw error;
     }
   }
 
