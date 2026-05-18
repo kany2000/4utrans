@@ -671,63 +671,81 @@ ${text}`;
 
       console.log('Background: Custom LLM endpoint:', chatEndpoint);
 
-      // 设置 60 秒超时
+      // 设置 120 秒超时
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-      let response;
-      try {
-        response = await fetch(chatEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: llmConfig.model,
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            temperature: 0.1,
-            stream: false
-          }),
-          signal: controller.signal
-        });
+      const response = await fetch(chatEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: llmConfig.model,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.1,
+          stream: true
+        }),
+        signal: controller.signal
+      });
 
-        clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-        console.log('Background: Custom LLM response status:', response.status);
+      console.log('Background: Custom LLM response status:', response.status);
 
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('Background: Custom LLM API error:', errorData);
-          throw new Error(`Custom LLM API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Background: Custom LLM response:', data);
-
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          let result = data.choices[0].message.content.trim();
-          // 格式化中文结果，添加词间空格
-          result = this.formatChineseResult(text, result, sourceLang);
-          console.log('Background: Custom LLM translation result:', result);
-          return result;
-        }
-
-        throw new Error('Invalid Custom LLM API response format');
-      } catch (error) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-          console.error('Background: Custom LLM request timeout');
-          throw new Error('LLM 请求超时，请检查网络连接或 API 服务状态');
-        }
-        console.error('Background: Custom LLM translation error:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Background: Custom LLM API error:', errorData);
+        throw new Error(`Custom LLM API error: ${response.status}`);
       }
+
+      // 处理流式响应
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                result += content;
+              }
+            } catch (e) {
+              // 忽略解析错误
+            }
+          }
+        }
+      }
+
+      console.log('Background: Custom LLM translation result:', result);
+
+      if (result) {
+        // 格式化中文结果，添加词间空格
+        result = this.formatChineseResult(text, result, sourceLang);
+        return result;
+      }
+
+      throw new Error('翻译结果为空');
     } catch (error) {
       console.error('Background: Custom LLM translation error:', error);
       throw error;
