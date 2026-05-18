@@ -611,49 +611,63 @@ ${text}`;
 
       console.log('Background: Custom LLM endpoint:', chatEndpoint);
 
-      const response = await fetch(chatEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: llmConfig.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.1
-        })
-      });
+      // 设置 60 秒超时
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-      console.log('Background: Custom LLM response status:', response.status);
+      let response;
+      try {
+        response = await fetch(chatEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: llmConfig.model,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.1
+          }),
+          signal: controller.signal
+        });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Background: Custom LLM API error:', errorData);
-        throw new Error(`Custom LLM API error: ${response.status}`);
+        clearTimeout(timeoutId);
+
+        console.log('Background: Custom LLM response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Background: Custom LLM API error:', errorData);
+          throw new Error(`Custom LLM API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Background: Custom LLM response:', data);
+
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          let result = data.choices[0].message.content.trim();
+          // 格式化中文结果，添加词间空格
+          result = this.formatChineseResult(text, result, sourceLang);
+          console.log('Background: Custom LLM translation result:', result);
+          return result;
+        }
+
+        throw new Error('Invalid Custom LLM API response format');
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          console.error('Background: Custom LLM request timeout');
+          throw new Error('LLM 请求超时，请检查网络连接或 API 服务状态');
+        }
+        console.error('Background: Custom LLM translation error:', error);
+        throw error;
       }
-
-      const data = await response.json();
-      console.log('Background: Custom LLM response:', data);
-
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        let result = data.choices[0].message.content.trim();
-        // 格式化中文结果，添加词间空格
-        result = this.formatChineseResult(text, result, sourceLang);
-        console.log('Background: Custom LLM translation result:', result);
-        return result;
-      }
-
-      throw new Error('Invalid Custom LLM API response format');
-    } catch (error) {
-      console.error('Background: Custom LLM translation error:', error);
-      throw error;
     }
-  }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {
     try {
