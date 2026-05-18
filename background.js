@@ -667,7 +667,11 @@ ${text}`;
         console.error('Background: Custom LLM translation error:', error);
         throw error;
       }
+    } catch (error) {
+      console.error('Background: Custom LLM translation error:', error);
+      throw error;
     }
+  }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {
     try {
