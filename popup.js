@@ -536,9 +536,19 @@ class PopupController {
         },
         llmConfig: provider === 'custom' ? {
           baseUrl: this.elements.llmBaseUrl.value.trim(),
-          model: this.elements.llmModelCustom.classList.contains('hidden')
-            ? this.elements.llmModel.value
-            : this.elements.llmModelCustom.value.trim()
+          model: (() => {
+            const isCustomHidden = this.elements.llmModelCustom.classList.contains('hidden');
+            const dropdownValue = this.elements.llmModel.value;
+            const customValue = this.elements.llmModelCustom.value.trim();
+            console.log('Popup: Saving LLM model config:', {
+              isCustomHidden,
+              dropdownValue,
+              customValue,
+              llmModelSelectedIndex: this.elements.llmModel.selectedIndex,
+              llmModelSelectedText: this.elements.llmModel.options[this.elements.llmModel.selectedIndex]?.text
+            });
+            return isCustomHidden ? (dropdownValue || customValue) : customValue;
+          })()
         } : this.settings.llmConfig
       };
 
