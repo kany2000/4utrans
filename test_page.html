@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4utrans 测试页面</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.8;
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+    .version {
+      color: #667eea;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #444;
+      margin: 30px 0 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+    p {
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .test-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .test-text {
+      font-size: 1.2em;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      margin: 10px 0;
+      border-left: 4px solid #667eea;
+    }
+    .japanese { border-left-color: #ff6b6b; }
+    .korean { border-left-color: #4ecdc4; }
+    .english { border-left-color: #45b7d1; }
+    .chinese { border-left-color: #96ceb4; }
+    .french { border-left-color: #dda0dd; }
+    .german { border-left-color: #f7dc6f; }
+    .instructions {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 30px 0;
+    }
+    .instructions h3 {
+      margin-bottom: 15px;
+    }
+    .instructions ol {
+      margin-left: 20px;
+    }
+    .instructions li {
+      margin: 8px 0;
+    }
+    code {
+      background: rgba(0,0,0,0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+    }
+    .shortcut {
+      display: inline-block;
+      background: #333;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 5px;
+      font-family: monospace;
+      margin: 0 4px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #999;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📷 4utrans 测试页面</h1>
+    <p class="version">版本 v1.4.0</p>
+
+    <div class="instructions">
+      <h3>🧪 测试说明</h3>
+      <ol>
+        <li>安装 4utrans 扩展后，访问此页面</li>
+        <li>按 <span class="shortcut">Alt+1</span> 启动智能翻译</li>
+        <li>拖拽选择下方任意一段文字</li>
+        <li>扩展会自动检测语言并翻译成中文</li>
+      </ol>
+    </div>
+
+    <h2>🌐 多语言测试文本</h2>
+    <p>以下是多语言测试内容，请用扩展选择翻译：</p>
+
+    <div class="test-section">
+      <h3>🇯🇵 日文</h3>
+      <div class="test-text japanese">
+        こんにちは、世界！これは日本のテキストです。この拡張機能は、ウェブページ上のテキストを自動的に検出され翻訳できます。
+      </div>
+      <p><strong>翻译：</strong>你好，世界！这是日语文字。这个扩展可以自动检测和翻译网页上的文字。</p>
+    </div>
+
+    <div class="test-section">
+      <h3>🇰🇷 韩文</h3>
+      <div class="test-text korean">
+        안녕하세요, 세계! 이것은 한국어 텍스트입니다. 이 확장 프로그램은 웹 페이지의 텍스트를 자동으로 감지하고 번역할 수 있습니다.
+      </div>
+      <p><strong>翻译：</strong>你好，世界！这是韩语文字。这个扩展程序可以自动检测和翻译网页上的文字。</p>
+    </div>
+
+    <div class="test-section">
+      <h3>🇺🇸 英文</h3>
+      <div class="test-text english">
+        Hello, World! This is English text. This extension can automatically detect and translate text on web pages with high accuracy.
+      </div>
+      <p><strong>翻译：</strong>你好，世界！这是英语文字。这个扩展程序可以高精度地自动检测和翻译网页上的文字。</p>
+    </div>
+
+    <div class="test-section">
+      <h3>🇫🇷 法文</h3>
+      <div class="test-text french">
+        Bonjour, le monde! Ceci est un texte en français. Cette extension peut détecter et traduire automatiquement le texte des pages web.
+      </div>
+      <p><strong>翻译：</strong>你好，世界！这是法语文字。这个扩展程序可以自动检测和翻译网页上的文字。</p>
+    </div>
+
+    <div class="test-section">
+      <h3>🇩🇪 德文</h3>
+      <div class="test-text german">
+        Hallo, Welt! Dies ist ein deutscher Text. Diese Erweiterung kann Text auf Webseiten automatisch erkennen und übersetzen.
+      </div>
+      <p><strong>翻译：</strong>你好，世界！这是德语文字。这个扩展程序可以自动检测和翻译网页上的文字。</p>
+    </div>
+
+    <div class="test-section">
+      <h3>🇨🇳 中文</h3>
+      <div class="test-text chinese">
+        你好，世界！这是一段中文文字。4utrans 扩展程序采用创新的 DOM 文字提取技术，可以从网页结构中直接提取文字，无需 OCR 识别。
+      </div>
+      <p><strong>说明：</strong>翻译成英文或其他语言试试看！</p>
+    </div>
+
+    <h2>📋 快捷键</h2>
+    <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+      <tr style="background: #f8f9fa;">
+        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">快捷键</th>
+        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">功能</th>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><span class="shortcut">Alt+1</span></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">智能翻译（自动检测语言 → 目标语言）</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><span class="shortcut">ESC</span></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">退出截图翻译模式</td>
+      </tr>
+    </table>
+
+    <h2>✅ 功能验证清单</h2>
+    <ul style="margin: 20px; color: #666;">
+      <li>☐ 扩展图标显示正常</li>
+      <li>☐ 点击扩展图标弹出设置界面</li>
+      <li>☐ Alt+1 快捷键启动翻译模式</li>
+      <li>☐ 拖拽选择区域高亮显示</li>
+      <li>☐ 翻译结果正确弹出</li>
+      <li>☐ ESC 键退出翻译模式</li>
+    </ul>
+
+    <footer>
+      <p>4utrans - 智能网页翻译助手 | <a href="https://github.com/kany2000/4utrans" style="color: #667eea;">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
