@@ -111,7 +111,9 @@ class ScreenshotTranslator {
         'ocrLanguage',
         'apiProvider',
         'autoCopy',
-        'showConfidence'
+        'showConfidence',
+        'apiKeys',
+        'llmConfig'
       ]);
 
       return {
@@ -119,7 +121,9 @@ class ScreenshotTranslator {
         ocrLanguage: result.ocrLanguage || 'auto',
         apiProvider: result.apiProvider || 'google',
         autoCopy: result.autoCopy || false,
-        showConfidence: result.showConfidence || false
+        showConfidence: result.showConfidence || false,
+        apiKeys: result.apiKeys || {},
+        llmConfig: result.llmConfig || { baseUrl: '', model: '' }
       };
     } catch (error) {
       console.error('Failed to get user settings:', error);
@@ -128,7 +132,9 @@ class ScreenshotTranslator {
         ocrLanguage: 'auto',
         apiProvider: 'google',
         autoCopy: false,
-        showConfidence: false
+        showConfidence: false,
+        apiKeys: {},
+        llmConfig: { baseUrl: '', model: '' }
       };
     }
   }
