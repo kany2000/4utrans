@@ -577,6 +577,10 @@ class ScreenshotTranslator {
 
 ${text}`;
 
+      // 设置 60 秒超时
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
       const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
         method: 'POST',
         headers: {
@@ -591,9 +595,13 @@ ${text}`;
               content: prompt
             }
           ],
-          temperature: 0.1
-        })
+          temperature: 0.1,
+          stream: false
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       console.log('Background: GLM API response status:', response.status);
 
@@ -616,6 +624,11 @@ ${text}`;
 
       throw new Error('Invalid GLM API response format');
     } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        console.error('Background: GLM request timeout');
+        throw new Error('GLM 请求超时，请检查网络连接或 API 服务状态');
+      }
       console.error('Background: GLM translation error:', error);
       throw error;
     }
@@ -678,7 +691,8 @@ ${text}`;
                 content: prompt
               }
             ],
-            temperature: 0.1
+            temperature: 0.1,
+            stream: false
           }),
           signal: controller.signal
         });
