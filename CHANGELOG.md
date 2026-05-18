@@ -5,7 +5,7 @@
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 並且本項目遵循 [語義化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.3.1] - 2025-05-18
+## [1.4.0] - 2025-05-18
 
 ### ✨ 新增功能
 - **Microsoft Translator 翻譯服務** - 新增微軟翻譯作為免費翻譯選項
@@ -23,7 +23,7 @@
 - 高級設置界面新增 LLM 自定義配置區塊
 
 ### 📝 文件變更
-- `manifest.json` - 版本更新至 1.3.1
+- `manifest.json` - 版本更新至 1.4.0
 - `background.js` - 新增翻譯服務路由、Microsoft/GLM/自定義LLM翻譯方法
 - `popup.html` - 新增翻譯服務選項和LLM配置輸入框
 - `popup.js` - 新增LLM配置保存/加載邏輯
