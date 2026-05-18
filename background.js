@@ -232,7 +232,8 @@ class ScreenshotTranslator {
         'apiProvider',
         'autoCopy',
         'showConfidence',
-        'apiKeys'
+        'apiKeys',
+        'llmConfig'
       ]);
 
       const settings = {
@@ -241,7 +242,8 @@ class ScreenshotTranslator {
         apiProvider: result.apiProvider || 'google',
         autoCopy: result.autoCopy || false,
         showConfidence: result.showConfidence !== false,
-        apiKeys: result.apiKeys || {}
+        apiKeys: result.apiKeys || {},
+        llmConfig: result.llmConfig || { baseUrl: '', model: '' }
       };
 
       sendResponse({ success: true, settings });
