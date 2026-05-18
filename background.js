@@ -726,7 +726,17 @@ ${text}`;
         if (!response.ok) {
           const errorData = await response.text();
           console.error('Background: LLM API error:', errorData);
-          reject(new Error(`LLM API error: ${response.status}`));
+          // 尝试解析错误消息
+          let errorMessage = `LLM API error: ${response.status}`;
+          try {
+            const errorJson = JSON.parse(errorData);
+            if (errorJson.error && errorJson.error.message) {
+              errorMessage = errorJson.error.message;
+            }
+          } catch (e) {
+            // 解析失败，使用默认消息
+          }
+          reject(new Error(errorMessage));
           return;
         }
 
