@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "截圖翻譯器",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "智能截圖翻譯工具 - 自動語言檢測，精確翻譯日韓英文等多語言",
   "author": "Screenshot Translator Team",
   "permissions": [

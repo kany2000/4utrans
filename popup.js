@@ -24,6 +24,9 @@ class PopupController {
       apiProvider: document.getElementById('api-provider'),
       apiKey: document.getElementById('api-key'),
       apiKeyGroup: document.querySelector('.api-key-group'),
+      llmCustomConfig: document.getElementById('llm-custom-config'),
+      llmBaseUrl: document.getElementById('llm-base-url'),
+      llmModel: document.getElementById('llm-model'),
       autoCopy: document.getElementById('auto-copy'),
       showConfidence: document.getElementById('show-confidence'),
       saveSettings: document.getElementById('save-settings'),
@@ -240,7 +243,11 @@ class PopupController {
       apiProvider: 'google',
       autoCopy: false,
       showConfidence: true,
-      apiKeys: {}
+      apiKeys: {},
+      llmConfig: {
+        baseUrl: '',
+        model: ''
+      }
     };
     this.updateUI();
   }
@@ -258,14 +265,20 @@ class PopupController {
     this.elements.ocrLanguage.value = this.settings.ocrLanguage || 'eng';
 
     // 更新高級設置
-    this.elements.apiProvider.value = this.settings.apiProvider || 'offline';
+    this.elements.apiProvider.value = this.settings.apiProvider || 'google';
     this.elements.autoCopy.checked = this.settings.autoCopy || false;
     this.elements.showConfidence.checked = this.settings.showConfidence !== false;
 
     // 更新 API Key
-    const provider = this.settings.apiProvider || 'offline';
+    const provider = this.settings.apiProvider || 'google';
     if (this.settings.apiKeys && this.settings.apiKeys[provider]) {
       this.elements.apiKey.value = this.settings.apiKeys[provider];
+    }
+
+    // 更新 LLM 自定義配置
+    if (this.settings.llmConfig) {
+      this.elements.llmBaseUrl.value = this.settings.llmConfig.baseUrl || '';
+      this.elements.llmModel.value = this.settings.llmConfig.model || '';
     }
 
     // 載入快捷鍵設置
@@ -277,13 +290,28 @@ class PopupController {
 
   toggleApiKeyInput() {
     const provider = this.elements.apiProvider.value;
-    // Google翻譯使用免費API，不需要API Key
-    const needsApiKey = provider !== 'offline' && provider !== 'google';
+    // Google翻譯、Microsoft翻譯和離線翻譯使用免費API，不需要API Key
+    const needsApiKey = provider !== 'offline' && provider !== 'google' && provider !== 'microsoft';
 
     if (needsApiKey) {
       this.elements.apiKeyGroup.classList.remove('hidden');
+      // 更新 API Key 输入框的提示文本
+      if (provider === 'glm') {
+        this.elements.apiKey.nextElementSibling.textContent = '輸入您的智譜 API Key（GLM-4-Flash 模型）';
+      } else if (provider === 'custom') {
+        this.elements.apiKey.nextElementSibling.textContent = 'OpenAI 兼容格式的 API Key';
+      } else {
+        this.elements.apiKey.nextElementSibling.textContent = 'API密鑰將安全存儲在本地';
+      }
     } else {
       this.elements.apiKeyGroup.classList.add('hidden');
+    }
+
+    // LLM 自定義配置顯示/隱藏
+    if (provider === 'custom') {
+      this.elements.llmCustomConfig.classList.remove('hidden');
+    } else {
+      this.elements.llmCustomConfig.classList.add('hidden');
     }
   }
 
@@ -353,9 +381,19 @@ class PopupController {
       const apiKey = this.elements.apiKey.value.trim();
 
       // 驗證 API Key（如果需要）
-      if (provider !== 'offline' && provider !== 'google' && !apiKey) {
-        this.showStatus('請輸入 API Key', 'error');
+      if (provider !== 'offline' && provider !== 'google' && provider !== 'microsoft' && !apiKey) {
+        this.showStatus(`請輸入 ${provider === 'glm' ? '智譜' : 'API'} Key`, 'error');
         return;
+      }
+
+      // 驗證 LLM 自定義配置（如果選擇了 custom）
+      if (provider === 'custom') {
+        const baseUrl = this.elements.llmBaseUrl.value.trim();
+        const model = this.elements.llmModel.value.trim();
+        if (!baseUrl || !model) {
+          this.showStatus('請填寫完整的 LLM 自定義配置（Base URL 和 模型名稱）', 'error');
+          return;
+        }
       }
 
       // 顯示保存中狀態
@@ -373,7 +411,11 @@ class PopupController {
         apiKeys: {
           ...this.settings.apiKeys,
           [provider]: apiKey
-        }
+        },
+        llmConfig: provider === 'custom' ? {
+          baseUrl: this.elements.llmBaseUrl.value.trim(),
+          model: this.elements.llmModel.value.trim()
+        } : this.settings.llmConfig
       };
 
       chrome.runtime.sendMessage({
@@ -423,7 +465,11 @@ class PopupController {
         apiProvider: 'google',
         autoCopy: false,
         showConfidence: true,
-        apiKeys: {}
+        apiKeys: {},
+        llmConfig: {
+          baseUrl: '',
+          model: ''
+        }
       };
 
       chrome.runtime.sendMessage({

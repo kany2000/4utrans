@@ -5,6 +5,29 @@
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 並且本項目遵循 [語義化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.4.0] - 2025-05-18
+
+### ✨ 新增功能
+- **Microsoft Translator 翻譯服務** - 新增微軟翻譯作為免費翻譯選項
+- **GLM 大模型翻譯支持** - 支持智譜 GLM-4-Flash 模型進行翻譯
+- **LLM 自定義翻譯** - 支持 OpenAI 兼容格式的自定義 LLM API
+  - 用戶可配置 Base URL
+  - 用戶可配置模型名稱
+  - 支持任何兼容 OpenAI 格式的 API（如 GPT-4、Claude 等）
+
+### 🔧 配置優化
+- 翻譯服務設置分為三類：
+  - **免費翻譯**：Google Translate、Microsoft Translator
+  - **大模型翻譯**：GLM（需 API Key）
+  - **自定義 LLM**：OpenAI 兼容格式（需 API Key、Base URL、模型名稱）
+- 高級設置界面新增 LLM 自定義配置區塊
+
+### 📝 文件變更
+- `manifest.json` - 版本更新至 1.4.0
+- `background.js` - 新增翻譯服務路由、Microsoft/GLM/自定義LLM翻譯方法
+- `popup.html` - 新增翻譯服務選項和LLM配置輸入框
+- `popup.js` - 新增LLM配置保存/加載邏輯
+
 ## [1.3.0] - 2025-01-20
 
 ### 🚀 重大更新

@@ -95,9 +95,10 @@
           <label for="api-provider">翻譯服務:</label>
           <select id="api-provider" class="setting-select">
             <option value="google">Google Translate (推薦)</option>
+            <option value="microsoft">Microsoft Translator</option>
             <option value="offline">離線翻譯</option>
-            <option value="deepl">DeepL</option>
-            <option value="baidu">百度翻譯</option>
+            <option value="glm">GLM 大模型 (智譜)</option>
+            <option value="custom">LLM 自定義 (OpenAI 兼容)</option>
           </select>
         </div>
 
@@ -105,6 +106,19 @@
           <label for="api-key">API Key:</label>
           <input type="password" id="api-key" class="setting-input" placeholder="輸入您的API密鑰">
           <small class="help-text">API密鑰將安全存儲在本地</small>
+        </div>
+
+        <div id="llm-custom-config" class="hidden">
+          <div class="setting-group">
+            <label for="llm-base-url">Base URL:</label>
+            <input type="text" id="llm-base-url" class="setting-input" placeholder="https://api.openai.com/v1">
+            <small class="help-text">OpenAI 兼容的 API 地址</small>
+          </div>
+          <div class="setting-group">
+            <label for="llm-model">模型名稱:</label>
+            <input type="text" id="llm-model" class="setting-input" placeholder="gpt-3.5-turbo">
+            <small class="help-text">模型名稱，如 gpt-3.5-turbo、claude-3 等</small>
+          </div>
         </div>
 
         <div class="setting-group">
