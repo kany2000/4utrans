@@ -671,85 +671,128 @@ ${text}`;
 
       console.log('Background: Custom LLM endpoint:', chatEndpoint);
 
-      // 设置 120 秒超时
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-      const response = await fetch(chatEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: llmConfig.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.1,
-          stream: true
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log('Background: Custom LLM response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Background: Custom LLM API error:', errorData);
-        throw new Error(`Custom LLM API error: ${response.status}`);
-      }
-
-      // 处理流式响应
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let result = '';
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                result += content;
-              }
-            } catch (e) {
-              // 忽略解析错误
-            }
-          }
-        }
-      }
-
-      console.log('Background: Custom LLM translation result:', result);
-
-      if (result) {
-        // 格式化中文结果，添加词间空格
-        result = this.formatChineseResult(text, result, sourceLang);
+      // 首先尝试非流式响应
+      try {
+        const result = await this.callLLMWithResponse(chatEndpoint, apiKey, llmConfig.model, prompt, false);
         return result;
+      } catch (nonStreamError) {
+        console.log('Background: Non-streaming failed, trying streaming:', nonStreamError.message);
+        // 如果非流式失败（如 "Invalid SSE response"），尝试流式
+        if (nonStreamError.message.includes('SSE') ||
+            nonStreamError.message.includes('stream') ||
+            nonStreamError.message.includes('streaming')) {
+          const result = await this.callLLMWithResponse(chatEndpoint, apiKey, llmConfig.model, prompt, true);
+          return result;
+        }
+        throw nonStreamError;
       }
-
-      throw new Error('翻译结果为空');
     } catch (error) {
       console.error('Background: Custom LLM translation error:', error);
       throw error;
     }
+  }
+
+  // LLM 请求辅助方法，支持流式/非流式
+  async callLLMWithResponse(endpoint, apiKey, model, prompt, isStream) {
+    return new Promise(async (resolve, reject) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.1,
+            stream: isStream
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        console.log('Background: LLM response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Background: LLM API error:', errorData);
+          reject(new Error(`LLM API error: ${response.status}`));
+          return;
+        }
+
+        if (isStream) {
+          // 处理流式响应
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let result = '';
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    result += content;
+                  }
+                } catch (e) {
+                  // 忽略解析错误
+                }
+              }
+            }
+          }
+
+          if (result) {
+            result = this.formatChineseResult(prompt, result, 'auto');
+            resolve(result);
+          } else {
+            reject(new Error('翻译结果为空'));
+          }
+        } else {
+          // 处理非流式响应
+          const data = await response.json();
+          console.log('Background: LLM response:', data);
+
+          if (data.choices && data.choices[0] && data.choices[0].message) {
+            let result = data.choices[0].message.content.trim();
+            if (result) {
+              result = this.formatChineseResult(prompt, result, 'auto');
+              resolve(result);
+              return;
+            }
+          }
+          reject(new Error('Invalid LLM API response format'));
+        }
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          reject(new Error('LLM 请求超时'));
+        } else {
+          reject(error);
+        }
+      }
+    });
   }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {
