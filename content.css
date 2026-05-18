@@ -132,7 +132,7 @@
   max-width: 600px !important;
   width: 90% !important;
   max-height: 80vh !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
   transform: scale(0.9) !important;
   transition: transform 0.3s ease !important;
 }

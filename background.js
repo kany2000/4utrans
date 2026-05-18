@@ -386,7 +386,7 @@ class ScreenshotTranslator {
     // 检查是否应该添加词间空格
     // 如果原文是英文单词列表（由多个空格分隔的短词组成）且翻译目标是中文
     const isChineseTarget = translatedText.match(/[\u4e00-\u9fff]/) !== null;
-    const isEnglishSource = sourceLang === 'en' || sourceLang === 'auto';
+    const isEnglishSource = sourceLang === 'en';
     const isWordList = text && text.split(/\s+/).length > 1 && text.split(/\s+/).every(word => word.length <= 15);
 
     if (isChineseTarget && isEnglishSource && isWordList) {
