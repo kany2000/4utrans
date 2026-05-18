@@ -9,8 +9,7 @@
     "scripting",
     "storage",
     "tabs",
-    "notifications",
-    "captureVisibleTab"
+    "notifications"
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
