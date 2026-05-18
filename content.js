@@ -1211,7 +1211,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       }
 
       // 如果文字太長，智能截取但保留更多內容
-      if (text.length > 1000) {
+      if (text.length > 3000) {
         console.log('Content: Text is very long, attempting smart truncation...');
 
         // 嘗試找到自然的斷點
@@ -1227,9 +1227,9 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         for (const breakPattern of naturalBreaks) {
           const matches = text.match(breakPattern);
           if (matches && matches.length > 0) {
-            // 找到第一個斷點位置，但保留至少300字符
+            // 找到第一個斷點位置，但保留至少500字符
             const firstBreakIndex = text.search(breakPattern);
-            if (firstBreakIndex > 300 && firstBreakIndex < 800) {
+            if (firstBreakIndex > 500 && firstBreakIndex < 2500) {
               truncatedText = text.substring(0, firstBreakIndex + matches[0].length).trim();
               break;
             }
@@ -1238,9 +1238,9 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
         // 如果沒有找到合適的斷點，在單詞邊界截取
         if (truncatedText === text) {
-          truncatedText = text.substring(0, 500);
+          truncatedText = text.substring(0, 2000);
           const lastSpace = truncatedText.lastIndexOf(' ');
-          if (lastSpace > 300) {
+          if (lastSpace > 500) {
             truncatedText = truncatedText.substring(0, lastSpace);
           }
           truncatedText += '...';
