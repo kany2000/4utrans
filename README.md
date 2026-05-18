@@ -135,6 +135,7 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 ### 📱 主界面设计
 
 <img src="images/main-interface.png" alt="主界面截图" width="240"/>
+<img src="images/main-interface.png" alt="主界面截图" width="240"/>
 
 *简洁直观的主界面，一键开始翻译*
 
