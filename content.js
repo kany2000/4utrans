@@ -5759,8 +5759,11 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       });
 
       const body = document.createElement('div');
+      body.className = 'modal-body';
       body.style.cssText = `
         padding: 24px !important;
+        max-height: 70vh !important;
+        overflow-y: auto !important;
       `;
 
       // 原文部分
@@ -5788,10 +5791,13 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         border-radius: 6px !important;
         padding: 12px !important;
         font-size: 14px !important;
-        line-height: 1.5 !important;
+        line-height: 1.6 !important;
         color: #333 !important;
         word-wrap: break-word !important;
-        min-height: 40px !important;
+        overflow-wrap: break-word !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        white-space: pre-wrap !important;
       `;
 
       // 翻譯部分
@@ -5819,10 +5825,13 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         border-radius: 6px !important;
         padding: 12px !important;
         font-size: 14px !important;
-        line-height: 1.5 !important;
+        line-height: 1.6 !important;
         color: #333 !important;
         word-wrap: break-word !important;
-        min-height: 40px !important;
+        overflow-wrap: break-word !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        white-space: pre-wrap !important;
       `;
 
       // 信心度

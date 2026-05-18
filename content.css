@@ -131,7 +131,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
   max-width: 600px !important;
   width: 90% !important;
-  max-height: 80vh !important;
+  max-height: 90vh !important;
   overflow-y: auto !important;
   transform: scale(0.9) !important;
   transition: transform 0.3s ease !important;
