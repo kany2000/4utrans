@@ -134,8 +134,8 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### 📱 主界面设计
 
-<img src="images/main-interface.png" alt="主界面截图" width="240"/>
-<img src="images/main-interface.png" alt="主界面截图" width="240"/>
+<img src="images/main-interface.png" alt="主界面截图" width="240"/> 
+<img src="images/main-interface_new.png" alt="主界面截图" width="240"/>
 
 *简洁直观的主界面，一键开始翻译*
 
@@ -168,7 +168,8 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### ⚙️ 高级设置面板
 
-<img src="images/advanced-settings.png" alt="高级设置截图" width="270"/>
+<img src="images/advanced-settings.png" alt="高级设置截图" width="240"/>
+<img src="images/advanced-settings_new.png" alt="高级设置截图" width="240"/>
 
 *功能丰富的高级配置选项*
 
