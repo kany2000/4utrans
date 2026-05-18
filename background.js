@@ -375,6 +375,22 @@ class ScreenshotTranslator {
     }
   }
 
+  // 格式化中文翻译结果，在词之间添加空格
+  formatChineseResult(text, translatedText, sourceLang) {
+    // 检查是否应该添加词间空格
+    // 如果原文是英文单词列表（由多个空格分隔的短词组成）且翻译目标是中文
+    const isChineseTarget = translatedText.match(/[\u4e00-\u9fff]/) !== null;
+    const isEnglishSource = sourceLang === 'en' || sourceLang === 'auto';
+    const isWordList = text && text.split(/\s+/).length > 1 && text.split(/\s+/).every(word => word.length <= 15);
+
+    if (isChineseTarget && isEnglishSource && isWordList) {
+      // 在每个中文字符之间添加空格（保留标点符号）
+      return translatedText.replace(/([\u4e00-\u9fff])([\u4e00-\u9fff])/g, '$1 $2');
+    }
+
+    return translatedText;
+  }
+
   // Google 翻译（免费）
   async callGoogleTranslate(text, sourceLang, targetLang) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&ie=UTF-8&oe=UTF-8&q=${encodeURIComponent(text)}`;
@@ -404,7 +420,9 @@ class ScreenshotTranslator {
           translatedText += segment[0];
         }
       }
-      const result = translatedText.trim();
+      let result = translatedText.trim();
+      // 格式化中文结果，添加词间空格
+      result = this.formatChineseResult(text, result, sourceLang);
       console.log('Background: Google Translate result:', result);
 
       if (result && result !== text) {
@@ -464,7 +482,9 @@ class ScreenshotTranslator {
       console.log('Background: Microsoft Translator response:', data);
 
       if (data && data[0] && data[0].translations && data[0].translations[0]) {
-        const result = data[0].translations[0].text;
+        let result = data[0].translations[0].text;
+        // 格式化中文结果，添加词间空格
+        result = this.formatChineseResult(text, result, sourceLang);
         console.log('Background: Microsoft translation result:', result);
         return result;
       }
@@ -532,7 +552,9 @@ ${text}`;
       console.log('Background: GLM API response:', data);
 
       if (data.choices && data.choices[0] && data.choices[0].message) {
-        const result = data.choices[0].message.content.trim();
+        let result = data.choices[0].message.content.trim();
+        // 格式化中文结果，添加词间空格
+        result = this.formatChineseResult(text, result, sourceLang);
         console.log('Background: GLM translation result:', result);
         return result;
       }
@@ -611,7 +633,9 @@ ${text}`;
       console.log('Background: Custom LLM response:', data);
 
       if (data.choices && data.choices[0] && data.choices[0].message) {
-        const result = data.choices[0].message.content.trim();
+        let result = data.choices[0].message.content.trim();
+        // 格式化中文结果，添加词间空格
+        result = this.formatChineseResult(text, result, sourceLang);
         console.log('Background: Custom LLM translation result:', result);
         return result;
       }
