@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "截圖翻譯器",
+  "name": "智能網頁翻譯助手",
   "version": "1.4.0",
-  "description": "智能截圖翻譯工具 - 自動語言檢測，精確翻譯日韓英文等多語言",
+  "description": "智能網頁翻譯助手 - 自動語言檢測，精確翻譯日韓英文等多語言",
   "author": "Screenshot Translator Team",
   "permissions": [
     "activeTab",
@@ -19,7 +19,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "截圖翻譯器 - 點擊開始",
+    "default_title": "智能網頁翻譯助手 - 點擊開始",
     "default_icon": {
       "16": "icons/icon16.png"
     }
