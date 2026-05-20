@@ -60,3 +60,10 @@ coverage/
 *.crx
 *.pem
 key.pem
+
+# 構建和發布腳本
+build-release.sh
+build-release.ps1
+
+# Issues 目錄
+issues/
