@@ -231,7 +231,9 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 ## 🎨 界面展示
 
 <details>
+<summary>📋 <strong>主副界面更替</strong></summary>
 
+<br>
 ---
 <div align="center">
 
@@ -315,7 +317,6 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 </details>
 ---
-
 <details>
 <summary>📋 <strong>界面布局详解</strong></summary>
 
