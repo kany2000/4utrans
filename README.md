@@ -1,12 +1,12 @@
-# 📷 4utrans - 智能网页翻译助手 (v2.0.0)
+# 🚀 QuickTranslate - 快译 (v2.0.0)
 
 > 🎉 **革命性更新** - 全新快捷翻译面板，选中文字即可翻译！操作步骤减少60%，翻译速度提升75%！
 
 一个功能强大且经过全面优化的 Chrome 浏览器扩展，采用创新的DOM文字提取技术和模块化架构，实现精确的网页文字识别和即时翻译。**v2.0.0 新增快捷翻译面板**，让网页翻译变得前所未有的简单！支持 **Google、Microsoft 免费翻译** 以及 **GLM、OpenAI 兼容格式大模型翻译**，为您提供快速、准确、稳定的翻译服务。
 
-[![GitHub stars](https://img.shields.io/github/stars/kany2000/4utrans?style=social)](https://github.com/kany2000/4utrans)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/4utrans)
-[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/kany2000/4utrans)
+[![GitHub stars](https://img.shields.io/github/stars/kany2000/QuickTranslate?style=social)](https://github.com/kany2000/QuickTranslate)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/QuickTranslate)
+[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/kany2000/QuickTranslate)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ 核心特色
@@ -154,8 +154,8 @@
 ### 🛠️ 开发者安装 (推荐)
 ```bash
 # 1. 克隆项目
-git clone https://github.com/kany2000/4utrans.git
-cd 4utrans
+git clone https://github.com/kany2000/QuickTranslate.git
+cd QuickTranslate
 
 # 2. Chrome 扩展安装
 # 打开 Chrome 浏览器 → chrome://extensions/
@@ -166,10 +166,10 @@ cd 4utrans
 ### ⚡ 一键安装脚本
 ```bash
 # Windows PowerShell
-git clone https://github.com/kany2000/4utrans.git && start chrome://extensions/
+git clone https://github.com/kany2000/QuickTranslate.git && start chrome://extensions/
 
 # macOS/Linux
-git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chrome://extensions/
+git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chrome" chrome://extensions/
 ```
 
 ### 📋 安装检查清单
@@ -367,8 +367,8 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 ### 本地开发
 ```bash
 # 克隆项目
-git clone https://github.com/kany2000/4utrans.git
-cd 4utrans
+git clone https://github.com/kany2000/QuickTranslate.git
+cd QuickTranslate
 
 # 在Chrome中载入扩展
 # 1. 打开 chrome://extensions/
