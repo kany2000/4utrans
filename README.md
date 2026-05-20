@@ -167,9 +167,18 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### 📱 主界面设计（版本更替）
 
-<img src="images/main-interface.png" alt="主界面截图" width="220"/> 
-<img src="images/main-interface_new.png" alt="主界面截图" width="220"/>
-<img src="images/main-interface_1.5.0.png" alt="主界面截图" width="220"/>
+<table>
+  <tr>
+    <td><img src="images/main-interface.png" height="200" alt="主界面截图1.3.0"></td>
+    <td><img src="images/main-interface_new.png" height="200" alt="主界面截图1.4.0"></td>
+    <td><img src="images/main-interface_1.5.0.png" height="200" alt="主界面截图1.5.0"></td>
+  </tr>
+  <tr>
+    <td align="center">主界面截图1.3.0</td>
+    <td align="center">主界面截图1.4.0</td>
+    <td align="center">主界面截图1.5.0</td>
+  </tr>
+</table>
 
 *简洁直观的主界面，一键开始翻译*
 
