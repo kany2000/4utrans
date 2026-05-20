@@ -837,32 +837,62 @@ ${text}`;
   }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {
+    const errors = [];
+
+    // 备用服务1: MyMemory
     try {
-      console.log(`Background: Trying backup translation service - ${sourceLang} -> ${targetLang}`);
+      console.log(`Background: Trying MyMemory - ${sourceLang} -> ${targetLang}`);
+      // MyMemory 不支持 'auto'，默认使用英文
+      const src = sourceLang === 'auto' ? 'en' : sourceLang;
+      const tgt = targetLang === 'zh-TW' ? 'zh-TW' : (targetLang === 'zh-CN' ? 'zh-CN' : targetLang);
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${tgt}`;
+      console.log('Background: MyMemory URL:', url);
 
-      // 使用MyMemory翻譯API作為備用
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
-      console.log('Background: Backup service URL:', url);
-
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
       const data = await response.json();
-
-      console.log('Background: Backup service response:', data);
+      console.log('Background: MyMemory response:', data);
 
       if (data && data.responseData && data.responseData.translatedText) {
         const result = data.responseData.translatedText;
-        console.log('Background: Backup service result:', result);
-
         if (result && result !== text && !result.includes('MYMEMORY WARNING')) {
+          console.log('Background: MyMemory success:', result);
           return result;
         }
       }
-
-      throw new Error('Backup service failed or returned invalid result');
-    } catch (error) {
-      console.error('Background: Backup translation service error:', error);
-      throw error;
+      errors.push('MyMemory: invalid result');
+    } catch (e) {
+      console.error('Background: MyMemory failed:', e.message);
+      errors.push(`MyMemory: ${e.message}`);
     }
+
+    // 备用服务2: Lingva Translate (Google Translate 代理，非 Google 域名)
+    try {
+      console.log(`Background: Trying Lingva Translate - ${sourceLang} -> ${targetLang}`);
+      const src = sourceLang === 'auto' ? 'auto' : sourceLang;
+      // Lingva 使用 zh 而不是 zh-CN/zh-TW
+      const tgt = (targetLang === 'zh-CN' || targetLang === 'zh-TW' || targetLang === 'zh') ? 'zh' : targetLang;
+      const lingvaUrl = `https://lingva.ml/api/v1/${src}/${tgt}/${encodeURIComponent(text)}`;
+      console.log('Background: Lingva URL:', lingvaUrl);
+
+      const response = await fetch(lingvaUrl, { signal: AbortSignal.timeout(8000) });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      console.log('Background: Lingva response:', data);
+
+      if (data && data.translation) {
+        const result = data.translation.trim();
+        if (result && result !== text) {
+          console.log('Background: Lingva success:', result);
+          return result;
+        }
+      }
+      errors.push('Lingva: invalid result');
+    } catch (e) {
+      console.error('Background: Lingva failed:', e.message);
+      errors.push(`Lingva: ${e.message}`);
+    }
+
+    throw new Error(`所有备用翻译服务均失败: ${errors.join('; ')}`);
   }
 }
 

@@ -15,7 +15,9 @@
     "https://translate.googleapis.com/*",
     "https://api.mymemory.translated.net/*",
     "https://api.cognitive.microsofttranslator.com/*",
-    "https://open.bigmodel.cn/*"
+    "https://open.bigmodel.cn/*",
+    "https://lingva.ml/*",
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
