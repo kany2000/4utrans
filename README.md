@@ -316,7 +316,6 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 </div>
 
 </details>
----
 
 <details>
 <summary>📋 <strong>界面布局详解</strong></summary>
