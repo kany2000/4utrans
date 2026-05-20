@@ -795,8 +795,7 @@ body {
 .shortcut-input:focus {
   background: white !important;
   border-color: #667eea !important;
-  box-shadow: 0 0 0 4px rgba(102,126,234,0.15) !important,
-              0 0 20px rgba(102,126,234,0.3) !important;
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.15), 0 0 20px rgba(102,126,234,0.3) !important;
 }
 
 .shortcut-btn {
