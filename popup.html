@@ -11,7 +11,7 @@
     <!-- 標題區域 -->
     <div class="header">
       <h1 class="title">智能網頁翻譯助手</h1>
-      <div class="version">v1.5.0</div>
+      <div class="version">v2.0.0</div>
     </div>
 
     <!-- 主要操作區域 -->
@@ -125,6 +125,22 @@
           <div class="setting-group">
             <button type="button" id="fetch-models" class="secondary-btn">🔄 獲取可用模型</button>
           </div>
+        </div>
+
+        <div class="setting-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="quick-panel-enabled" class="setting-checkbox">
+            <span class="checkmark"></span>
+            啟用快捷翻譯面板 (選中文字即可翻譯)
+          </label>
+          <small class="help-text">選中網頁文字後自動顯示翻譯按鈕</small>
+        </div>
+
+        <div class="setting-group" id="min-selection-group">
+          <label for="min-selection-length">最小選擇字數:</label>
+          <input type="number" id="min-selection-length" class="setting-input" 
+                 min="1" max="20" value="2" placeholder="2">
+          <small class="help-text">選擇少於此字數不會觸發翻譯按鈕</small>
         </div>
 
         <div class="setting-group">

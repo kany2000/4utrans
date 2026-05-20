@@ -30,6 +30,8 @@ class PopupController {
       llmModelCustom: document.getElementById('llm-model-custom'),
       llmModelHelp: document.getElementById('llm-model-help'),
       fetchModels: document.getElementById('fetch-models'),
+      quickPanelEnabled: document.getElementById('quick-panel-enabled'),
+      minSelectionLength: document.getElementById('min-selection-length'),
       autoCopy: document.getElementById('auto-copy'),
       showConfidence: document.getElementById('show-confidence'),
       saveSettings: document.getElementById('save-settings'),
@@ -351,6 +353,8 @@ class PopupController {
       apiProvider: 'google',
       autoCopy: false,
       showConfidence: true,
+      quickPanelEnabled: true,
+      minSelectionLength: 2,
       apiKeys: {},
       llmConfig: {
         baseUrl: '',
@@ -376,6 +380,10 @@ class PopupController {
     this.elements.apiProvider.value = this.settings.apiProvider || 'google';
     this.elements.autoCopy.checked = this.settings.autoCopy || false;
     this.elements.showConfidence.checked = this.settings.showConfidence !== false;
+    
+    // 更新快捷面板設置
+    this.elements.quickPanelEnabled.checked = this.settings.quickPanelEnabled !== false;
+    this.elements.minSelectionLength.value = this.settings.minSelectionLength || 2;
 
     // 更新 API Key
     const provider = this.settings.apiProvider || 'google';
@@ -542,6 +550,8 @@ class PopupController {
         apiProvider: provider,
         autoCopy: this.elements.autoCopy.checked,
         showConfidence: this.elements.showConfidence.checked,
+        quickPanelEnabled: this.elements.quickPanelEnabled.checked,
+        minSelectionLength: parseInt(this.elements.minSelectionLength.value) || 2,
         apiKeys: {
           ...this.settings.apiKeys,
           [provider]: apiKey
@@ -621,6 +631,8 @@ class PopupController {
         apiProvider: 'google',
         autoCopy: false,
         showConfidence: true,
+        quickPanelEnabled: true,
+        minSelectionLength: 2,
         apiKeys: {},
         llmConfig: {
           baseUrl: '',

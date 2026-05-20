@@ -168,6 +168,10 @@ class ScreenshotTranslator {
           console.log('Translating text...');
           this.translateText(request.text, request.sourceLang, request.targetLang, sendResponse);
           break;
+        case 'translate':
+          console.log('Quick panel translate request...');
+          this.handleQuickPanelTranslate(request, sendResponse);
+          break;
         case 'getModels':
           console.log('Getting available models...');
           this.getAvailableModels(request.apiKey, request.baseUrl, sendResponse);
@@ -809,6 +813,27 @@ ${text}`;
         }
       }
     });
+  }
+
+  async handleQuickPanelTranslate(request, sendResponse) {
+    try {
+      const { text, sourceLang, targetLang } = request;
+      
+      console.log('Quick panel translate:', {
+        textLength: text?.length,
+        sourceLang,
+        targetLang
+      });
+
+      // 直接调用 translateText 方法
+      await this.translateText(text, sourceLang, targetLang, sendResponse);
+    } catch (error) {
+      console.error('Quick panel translate error:', error);
+      sendResponse({
+        success: false,
+        error: error.message || '翻译失败'
+      });
+    }
   }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {

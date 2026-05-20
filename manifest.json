@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "智能網頁翻譯助手",
-  "version": "1.5.0",
-  "description": "智能網頁翻譯助手 - 自動語言檢測，精確翻譯日韓英文等多語言",
+  "version": "2.0.0",
+  "description": "智能網頁翻譯助手 - 選中文字即可快速翻譯，支持多種翻譯引擎",
   "author": "Screenshot Translator Team",
   "permissions": [
     "activeTab",
@@ -33,8 +33,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "js": ["content.js", "quick-panel.js"],
+      "css": ["content.css", "quick-panel.css"],
       "run_at": "document_idle",
       "all_frames": false
     }
