@@ -161,7 +161,7 @@ const settings = await chrome.storage.local.get([
       
     } catch (error) {
       console.error('Translation error:', error);
-      this.showError('翻译失败，请稍后重试');
+      this.showError(error.message || '翻译失败，请稍后重试');
     } finally {
       this.translating = false;
     }
@@ -185,22 +185,37 @@ const settings = await chrome.storage.local.get([
   async callTranslationAPI(text, sourceLang, targetLang, settings) {
     // 发送消息给background script处理翻译
     return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        action: 'translate',
-        text: text,
-        sourceLang: sourceLang,
-        targetLang: targetLang,
-        apiProvider: settings.apiProvider,
-        apiKey: settings.apiKey,
-        llmBaseUrl: settings.llmBaseUrl,
-        llmModel: settings.llmModel
-      }, (response) => {
-        if (response && response.success) {
-          resolve(response);
-        } else {
-          reject(new Error(response?.error || 'Translation failed'));
-        }
-      });
+      try {
+        chrome.runtime.sendMessage({
+          action: 'translate',
+          text: text,
+          sourceLang: sourceLang,
+          targetLang: targetLang,
+          apiProvider: settings.apiProvider,
+          apiKey: settings.apiKey,
+          llmBaseUrl: settings.llmBaseUrl,
+          llmModel: settings.llmModel
+        }, (response) => {
+          // 检查 chrome.runtime.lastError（Content Script 与 Service Worker 连接断开时会产生）
+          if (chrome.runtime.lastError) {
+            const errMsg = chrome.runtime.lastError.message || '';
+            if (errMsg.includes('invalidated') || errMsg.includes('closed') || errMsg.includes('context')) {
+              reject(new Error('⚠️ 扩展已更新，请刷新此网页后重试'));
+            } else {
+              reject(new Error(`连接错误: ${errMsg}`));
+            }
+            return;
+          }
+          if (response && response.success) {
+            resolve(response);
+          } else {
+            reject(new Error(response?.error || '翻译服务暂时不可用'));
+          }
+        });
+      } catch (e) {
+        // chrome.runtime.sendMessage 本身抛出（扩展上下文已销毁）
+        reject(new Error('⚠️ 扩展已更新，请刷新此网页后重试'));
+      }
     });
   }
 
