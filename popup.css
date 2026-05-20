@@ -1,4 +1,4 @@
-/* Popup 界面樣式 - v1.5.0 美化版 */
+/* Popup 界面樣式 - v1.5.0 極致科技美化版 */
 * {
   margin: 0;
   padding: 0;
@@ -7,73 +7,183 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  width: 340px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 360px;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   color: #333;
   line-height: 1.5;
-  padding: 8px;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 科技感背景动画 */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(72, 118, 255, 0.2) 0%, transparent 50%);
+  animation: backgroundShift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(5%, 5%) rotate(120deg); }
+  66% { transform: translate(-5%, 5%) rotate(240deg); }
 }
 
 .popup-container {
-  background: white;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: popupEnter 0.3s ease;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  animation: popupEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.popup-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent,
+    #667eea,
+    #764ba2,
+    #667eea,
+    transparent
+  );
+  animation: scanLine 3s linear infinite;
+}
+
+@keyframes scanLine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes popupEnter {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-/* 標題區域 */
+/* 標題區域 - 科技感漸變 */
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
   position: relative;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
 }
 
 .header::before {
   content: '';
   position: absolute;
   top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    );
   pointer-events: none;
 }
 
 .title {
-  font-size: 19px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  letter-spacing: 0.3px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.2);
   position: relative;
+  text-transform: uppercase;
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.2); }
+  50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.2); }
 }
 
 .version {
   font-size: 11px;
   opacity: 0.95;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 3px 10px;
-  border-radius: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 4px 12px;
+  border-radius: 14px;
   display: inline-block;
   backdrop-filter: blur(10px);
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
 }
 
-/* 主要操作區域 */
+/* 主要操作區域 - 科技感設計 */
 .main-section {
-  padding: 24px 20px 20px;
+  padding: 28px 22px 24px;
   text-align: center;
   background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+  position: relative;
+}
+
+.main-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
 }
 
 .primary-btn {
@@ -81,19 +191,22 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 16px 24px;
+  border-radius: 14px;
+  padding: 18px 28px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  gap: 12px;
+  box-shadow: 
+    0 8px 24px rgba(102, 126, 234, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   position: relative;
   overflow: hidden;
+  letter-spacing: 0.5px;
 }
 
 .primary-btn::before {
@@ -103,59 +216,133 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.6s;
+}
+
+.primary-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
 }
 
 .primary-btn:hover::before {
   left: 100%;
 }
 
+.primary-btn:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
 .primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 12px 32px rgba(102, 126, 234, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 20px rgba(102, 126, 234, 0.4);
 }
 
 .primary-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
 }
 
 .btn-icon {
-  font-size: 18px;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .btn-text {
-  font-size: 14px;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
 }
 
 .quick-info {
-  margin-top: 12px;
-  color: #666;
+  margin-top: 16px;
+  color: #6c757d;
   font-size: 12px;
   text-align: center;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 .shortcut-hints {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.shortcut-hints::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: hintShine 4s ease-in-out infinite;
+}
+
+@keyframes hintShine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
 }
 
 .shortcut-hints small {
   color: #495057;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 11px;
+  line-height: 1.6;
+  position: relative;
 }
 
-/* 設置區域 */
+/* 設置區域 - 科技卡片設計 */
 .settings-section {
-  padding: 0 20px 20px;
+  padding: 24px 22px;
+  background: white;
+  position: relative;
 }
 
 .setting-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.4s ease backwards;
+}
+
+.setting-group:nth-child(1) { animation-delay: 0.05s; }
+.setting-group:nth-child(2) { animation-delay: 0.1s; }
+.setting-group:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .setting-group:last-child {
@@ -165,156 +352,273 @@ body {
 .setting-group label {
   display: block;
   font-size: 13px;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 6px;
+  font-weight: 700;
+  color: #495057;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-size: 11px;
 }
 
 .setting-select,
 .setting-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
   font-size: 13px;
-  background-color: white;
-  transition: border-color 0.2s ease;
+  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.setting-select:hover,
+.setting-input:hover {
+  border-color: #dee2e6;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
 .setting-select:focus,
 .setting-input:focus {
   outline: none;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+  border-color: #667eea;
+  background: white;
+  box-shadow: 
+    0 0 0 4px rgba(102, 126, 234, 0.12),
+    0 4px 12px rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
 }
 
-/* 快速保存區域 */
+/* 快速保存區域 - 科技感按鈕 */
 .quick-save-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-  margin-bottom: 8px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #f1f3f5;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.quick-save-section::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
 }
 
 .save-btn {
   width: 100%;
-  background: linear-gradient(135deg, #34a853, #4285f4);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
+  border-radius: 12px;
+  padding: 14px 24px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  box-shadow: 0 2px 6px rgba(52, 168, 83, 0.3);
+  gap: 10px;
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+}
+
+.save-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
+}
+
+.save-btn:hover::before {
+  left: 100%;
 }
 
 .save-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(52, 168, 83, 0.4);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 8px 28px rgba(16, 185, 129, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 .save-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .save-btn.saved {
-  background: linear-gradient(135deg, #34a853, #34a853);
-  animation: saveSuccess 0.3s ease;
+  background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+  animation: saveSuccess 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes saveSuccess {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+  50% { 
+    transform: scale(1.08); 
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.6);
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 2px 6px rgba(52, 168, 83, 0.3); }
-  50% { box-shadow: 0 2px 12px rgba(52, 168, 83, 0.6); }
-  100% { box-shadow: 0 2px 6px rgba(52, 168, 83, 0.3); }
-}
-
-/* 狀態區域 */
+/* 狀態區域 - 科技感提示 */
 .status-section {
-  padding: 0 20px;
+  padding: 0 22px;
   min-height: 0;
 }
 
 .status-message {
   font-size: 12px;
   text-align: center;
-  padding: 6px 8px;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 10px;
   display: none;
-  margin: 4px 0;
+  margin: 10px 0;
+  font-weight: 600;
+  animation: statusSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.3px;
+}
+
+@keyframes statusSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .status-message.success {
-  background-color: #e8f5e8;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 2px solid #6ee7b7;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .status-message.error {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 2px solid #fca5a5;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .status-message.info {
-  background-color: #e3f2fd;
-  color: #1565c0;
-  border: 1px solid #bbdefb;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 2px solid #93c5fd;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-/* 底部操作 */
+/* 底部操作 - 科技感設計 */
 .footer {
-  padding: 12px 20px 16px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
+  padding: 20px 22px 22px;
+  border-top: 2px solid #f1f3f5;
+  background: linear-gradient(180deg, #fafbfc 0%, #f8f9fa 100%);
+  position: relative;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
 }
 
 .secondary-btn {
   width: 100%;
   background: white;
-  color: #666;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px 16px;
+  color: #6c757d;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 13px 20px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.secondary-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.secondary-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .secondary-btn:hover {
-  background-color: #f5f5f5;
-  border-color: #ccc;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-color: #dee2e6;
+  color: #495057;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-/* 模態框樣式 */
+.secondary-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 模態框樣式 - 科技感設計 */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px) saturate(150%);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal.hidden {
@@ -323,63 +627,121 @@ body {
 }
 
 .modal-content {
-  background: white;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
   width: 90%;
-  max-width: 400px;
-  max-height: 80vh;
+  max-width: 440px;
+  max-height: 85vh;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   transform: scale(1);
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal.hidden .modal-content {
-  transform: scale(0.9);
+  transform: scale(0.9) translateY(20px);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
+  padding: 20px 24px;
+  border-bottom: 2px solid rgba(241, 243, 245, 0.8);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    );
+  pointer-events: none;
 }
 
 .modal-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: relative;
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #666;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 24px;
+  color: white;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .close-btn:hover {
-  background-color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .modal-body {
-  padding: 20px;
-  max-height: 50vh;
+  padding: 24px;
+  max-height: 55vh;
   overflow-y: auto;
+  background: white;
+}
+
+/* 科技感滾動條 */
+.modal-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f1f3f5 0%, #e9ecef 100%);
+  border-radius: 5px;
+  margin: 4px 0;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 5px;
+  border: 2px solid #f1f3f5;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 0 6px rgba(102, 126, 234, 0.5);
 }
 
 .modal-footer {
-  padding: 16px 20px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
+  padding: 20px 24px;
+  border-top: 2px solid #f1f3f5;
+  background: linear-gradient(180deg, #fafbfc 0%, #f8f9fa 100%);
   display: flex;
-  gap: 10px;
+  gap: 14px;
 }
 
 .modal-footer .primary-btn,
@@ -388,105 +750,172 @@ body {
   margin: 0;
 }
 
-/* 複選框樣式 */
+/* 複選框樣式 - 科技感設計 */
 .checkbox-label {
   display: flex !important;
   align-items: center;
   cursor: pointer;
   font-size: 13px !important;
   margin-bottom: 0 !important;
+  padding: 10px 14px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.checkbox-label:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  transform: translateX(2px);
 }
 
 .setting-checkbox {
-  margin-right: 8px;
-  width: 16px;
-  height: 16px;
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
 }
 
 .help-text {
   display: block;
-  margin-top: 4px;
-  color: #888;
+  margin-top: 8px;
+  color: #6c757d;
   font-size: 11px;
+  line-height: 1.6;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .api-key-group {
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
 }
 
 .api-key-group.hidden {
   display: none;
 }
 
-/* 快捷鍵設置樣式 */
+/* 快捷鍵設置樣式 - 科技感設計 */
 .shortcut-setting {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 }
 
 .shortcut-input {
   flex: 1;
-  background-color: #f5f5f5 !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
   cursor: pointer;
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  font-weight: 800;
   text-align: center;
-  color: #4285f4;
+  color: #667eea;
+  letter-spacing: 2px;
+  border: 2px solid #e9ecef !important;
+  text-transform: uppercase;
+  font-size: 13px;
 }
 
 .shortcut-input:focus {
-  background-color: #fff !important;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+  background: white !important;
+  border-color: #667eea !important;
+  box-shadow: 
+    0 0 0 4px rgba(102, 126, 234, 0.15) !important,
+    0 0 20px rgba(102, 126, 234, 0.3) !important;
 }
 
 .shortcut-btn {
-  background-color: #4285f4;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+  border-radius: 10px;
+  padding: 10px 18px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  letter-spacing: 0.5px;
 }
 
 .shortcut-btn:hover {
-  background-color: #3367d6;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .shortcut-btn:active {
-  background-color: #2851a3;
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
 .shortcut-recording {
-  background-color: #ea4335 !important;
-  animation: pulse 1s ease-in-out infinite;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  animation: recordingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recordingPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); 
+  }
+  50% { 
+    box-shadow: 0 6px 24px rgba(239, 68, 68, 0.7); 
+  }
 }
 
 .shortcut-recording::after {
   content: " (按鍵中...)";
   font-size: 10px;
+  font-weight: 600;
 }
 
-/* 響應式設計 */
-@media (max-width: 360px) {
+/* LLM 自定義配置區域 - 科技感設計 */
+#llm-custom-config {
+  margin-top: 14px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  animation: fadeInUp 0.4s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+#llm-custom-config .setting-group {
+  margin-bottom: 16px;
+}
+
+#llm-custom-config .setting-group:last-child {
+  margin-bottom: 0;
+}
+
+/* 響應式設計 - 優化小屏幕體驗 */
+@media (max-width: 380px) {
   body {
-    width: 280px;
+    width: 320px;
+    padding: 8px;
   }
 
   .popup-container {
-    margin: 0;
+    border-radius: 16px;
+  }
+
+  .header {
+    padding: 18px 16px;
+  }
+
+  .title {
+    font-size: 18px;
   }
 
   .main-section,
   .settings-section,
   .footer {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .primary-btn {
+    padding: 16px 22px;
+    font-size: 15px;
   }
 
   .shortcut-setting {
@@ -495,6 +924,6 @@ body {
   }
 
   .shortcut-btn {
-    margin-top: 4px;
+    margin-top: 8px;
   }
 }
