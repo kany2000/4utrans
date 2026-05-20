@@ -122,14 +122,28 @@ class PopupController {
         this.elements.llmModel.classList.add('hidden');
         this.elements.llmModelCustom.classList.remove('hidden');
         this.elements.llmModelCustom.focus();
-        this.elements.llmModelHelp.textContent = '請輸入模型名稱';
+        this.elements.llmModelHelp.textContent = '請輸入模型名稱，或清空後點擊下方重新選擇';
       } else if (selectedValue) {
+        this.elements.llmModel.classList.remove('hidden');
+        this.elements.llmModelCustom.classList.add('hidden');
         this.elements.llmModelHelp.textContent = `已選擇: ${selectedValue}`;
       }
+      this.showUnsavedChanges();
     });
 
     // 自定義模型輸入框變更時標記未保存
     this.elements.llmModelCustom.addEventListener('input', () => this.showUnsavedChanges());
+    
+    // 自定義模型輸入框失去焦點時，如果為空則顯示下拉框
+    this.elements.llmModelCustom.addEventListener('blur', () => {
+      const customValue = this.elements.llmModelCustom.value.trim();
+      if (!customValue) {
+        this.elements.llmModel.classList.remove('hidden');
+        this.elements.llmModelCustom.classList.add('hidden');
+        this.elements.llmModel.value = '';
+        this.elements.llmModelHelp.textContent = '選擇可用模型，或直接輸入模型名稱';
+      }
+    });
 
     // LLM 配置變更時標記未保存
     this.elements.apiKey.addEventListener('input', () => this.showUnsavedChanges());
@@ -395,23 +409,35 @@ class PopupController {
     if (this.settings.llmConfig) {
       this.elements.llmBaseUrl.value = this.settings.llmConfig.baseUrl || '';
       const savedModel = this.settings.llmConfig.model || '';
+      
       if (savedModel) {
-        // 檢查模型是否已在列表中
+        // 檢查模型是否已在下拉列表中
         const options = this.elements.llmModel.options;
         let found = false;
+        
         for (let i = 0; i < options.length; i++) {
           if (options[i].value === savedModel) {
             this.elements.llmModel.value = savedModel;
+            this.elements.llmModel.classList.remove('hidden');
+            this.elements.llmModelCustom.classList.add('hidden');
+            this.elements.llmModelHelp.textContent = `已選擇: ${savedModel}`;
             found = true;
             break;
           }
         }
-        if (!found && savedModel) {
-          // 模型不在列表中，顯示自定義輸入框
+        
+        if (!found) {
+          // 模型不在列表中，使用自定義輸入框顯示
           this.elements.llmModel.classList.add('hidden');
           this.elements.llmModelCustom.classList.remove('hidden');
           this.elements.llmModelCustom.value = savedModel;
+          this.elements.llmModelHelp.textContent = `當前模型: ${savedModel}`;
         }
+      } else {
+        // 沒有保存的模型，確保下拉框可見
+        this.elements.llmModel.classList.remove('hidden');
+        this.elements.llmModelCustom.classList.add('hidden');
+        this.elements.llmModel.value = '';
       }
     }
 
