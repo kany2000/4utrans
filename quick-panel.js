@@ -124,6 +124,15 @@ const settings = await chrome.storage.local.get([
     }
   }
 
+  // 检查扩展上下文是否仍然有效
+  isContextValid() {
+    try {
+      return !!(chrome && chrome.runtime && chrome.runtime.id);
+    } catch (e) {
+      return false;
+    }
+  }
+
   async translate() {
     if (!this.currentSelection || this.translating) return;
     
@@ -133,16 +142,28 @@ const settings = await chrome.storage.local.get([
     // 隐藏按钮，显示翻译面板
     this.hideButton();
     this.showPanel(text);
+
+    // 最先检查扩展上下文（extension reload 后 content script 会失效）
+    if (!this.isContextValid()) {
+      this.showError('⚠️ 扩展已更新，请按 F5 刷新此网页后重试');
+      this.translating = false;
+      return;
+    }
     
     try {
       // 获取用户设置
-const settings = await chrome.storage.local.get([
- 'targetLanguage',
- 'apiProvider',
- 'apiKey',
- 'llmBaseUrl',
- 'llmModel'
-]);
+      let settings = {};
+      try {
+        settings = await chrome.storage.local.get([
+          'targetLanguage',
+          'apiProvider',
+          'apiKey',
+          'llmBaseUrl',
+          'llmModel'
+        ]);
+      } catch (storageErr) {
+        throw new Error('⚠️ 扩展已更新，请按 F5 刷新此网页后重试');
+      }
       
       // 检测源语言
       const sourceLang = this.detectLanguage(text);
