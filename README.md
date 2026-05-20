@@ -214,68 +214,129 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 <div align="center">
 
-### 📱 主界面设计（版本更替）
+### 📱 主界面演进历程
+
+> 从简洁到精致，每个版本都在追求更好的用户体验
 
 <table>
   <tr>
-    <td><img src="images/main-interface.png" height="220" alt="主界面截图1.3.0"></td>
-    <td><img src="images/main-interface_new.png" height="220" alt="主界面截图1.4.0"></td>
-    <td><img src="images/main-interface_1.5.0.png" height="220" alt="主界面截图1.5.0"></td>
-  </tr>
-  <tr>
-    <td align="center">主界面截图1.3.0</td>
-    <td align="center">主界面截图1.4.0</td>
-    <td align="center">主界面截图1.5.0</td>
+    <td align="center" width="25%">
+      <img src="images/main-interface.png" height="200" alt="v1.3.0 主界面"><br>
+      <sub><b>v1.3.0</b></sub><br>
+      <sub>🎯 简洁设计</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/main-interface_new.png" height="200" alt="v1.4.0 主界面"><br>
+      <sub><b>v1.4.0</b></sub><br>
+      <sub>🚀 功能增强</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/main-interface_1.5.0.png" height="200" alt="v1.5.0 主界面"><br>
+      <sub><b>v1.5.0</b></sub><br>
+      <sub>✨ 视觉升级</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/main-interface_2.0.0.png" height="200" alt="v2.0.0 主界面"><br>
+      <sub><b>v2.0.0 ⭐</b></sub><br>
+      <sub>🎉 快捷翻译</sub>
+    </td>
   </tr>
 </table>
 
-*简洁直观的主界面，一键开始翻译*
+<br>
+
+**💡 设计理念**
+
+简洁直观 · 一键启动 · 智能翻译 · 极致体验
 
 </div>
 
-<details>
-<summary>📋 <strong>界面布局说明</strong></summary>
-
-```
-┌─────────────────────────────┐
-│     截图翻译器 v1.5.0        │  ← 🎨 紫色渐变标题
-├─────────────────────────────┤
-│  📷 开始截图翻译             │  ← 🎯 主操作按钮
-│  拖拽选择区域，自动识别并翻译文字 │  ← 💡 操作提示
-├─────────────────────────────┤
-│ 默认快捷键：Alt+1 智能翻译    │  ← ⌨️ 快捷键说明
-│ （自动检测语言翻译成目标语言） │  ← 🧠 智能翻译提示
-├─────────────────────────────┤
-│ 目标语言: [简体中文 ▼]       │  ← 🌐 语言设置
-│ 识别语言: [自动检测 ▼]       │  ← 🔍 识别设置
-│  💾 保存设置                │  ← 💾 快速保存
-├─────────────────────────────┤
-│  ⚙️ 高级设置                │  ← ⚙️ 高级选项
-└─────────────────────────────┘
-```
-
-</details>
+---
 
 <div align="center">
 
-### ⚙️ 高级设置面板（版本更替）
+### ⚙️ 高级设置演进历程
+
+> 功能丰富，配置灵活，满足专业用户的各种需求
 
 <table>
   <tr>
-    <td><img src="images/advanced-settings.png" height="220" alt="高级设置截图1.3.0"></td>
-    <td><img src="images/advanced-settings_new.png" height="220" alt="高级设置截图1.4.0"></td>
-    <td><img src="images/advanced-settings_1.5.0.png" height="220" alt="高级设置截图图1.5.0"></td>
-  </tr>
-  <tr>
-    <td align="center">高级设置截图1.3.0</td>
-    <td align="center">高级设置截图1.4.0</td>
-    <td align="center">高级设置截图1.5.0</td>
+    <td align="center" width="25%">
+      <img src="images/advanced-settings.png" height="200" alt="v1.3.0 高级设置"><br>
+      <sub><b>v1.3.0</b></sub><br>
+      <sub>⚙️ 基础配置</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/advanced-settings_new.png" height="200" alt="v1.4.0 高级设置"><br>
+      <sub><b>v1.4.0</b></sub><br>
+      <sub>🧠 大模型支持</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/advanced-settings_1.5.0.png" height="200" alt="v1.5.0 高级设置"><br>
+      <sub><b>v1.5.0</b></sub><br>
+      <sub>🎨 界面美化</sub>
+    </td>
+    <td align="center" width="25%">
+      <img src="images/advanced-settings_2.0.0.png" height="200" alt="v2.0.0 高级设置"><br>
+      <sub><b>v2.0.0 ⭐</b></sub><br>
+      <sub>🌟 透明优化</sub>
+    </td>
   </tr>
 </table>
 
-*功能丰富的高级配置选项*
+<br>
+
+**🔧 配置特色**
+
+多引擎支持 · 快捷键自定义 · 智能面板 · 专业配置
 
 </div>
+
+---
+
+<details>
+<summary>📋 <strong>界面布局详解</strong></summary>
+
+<br>
+
+### 主界面结构
+
+```
+┌─────────────────────────────────┐
+│   QuickTranslate 快译 v2.0.0    │  ← 🎨 紫色渐变标题
+├─────────────────────────────────┤
+│      📷 开始翻译                 │  ← 🎯 主操作按钮
+│  拖拽选择区域，自动识别并翻译文字  │  ← 💡 操作提示
+├─────────────────────────────────┤
+│  默认快捷键：Alt+1 智能翻译       │  ← ⌨️ 快捷键说明
+│  （自动检测语言翻译成目标语言）   │  ← 🧠 智能翻译提示
+├─────────────────────────────────┤
+│  目标语言: [简体中文 ▼]          │  ← 🌐 语言设置
+│  识别语言: [自动检测 ▼]          │  ← 🔍 识别设置
+│       💾 保存设置                │  ← 💾 快速保存
+├─────────────────────────────────┤
+│       ⚙️ 高级设置                │  ← ⚙️ 高级选项
+└─────────────────────────────────┘
+```
+
+### 高级设置结构
+
+```
+┌─────────────────────────────────┐
+│  高级设置                    ×   │  ← 📋 设置标题
+├─────────────────────────────────┤
+│  翻译服务: [Google Translate ▼]  │  ← 🔧 服务选择
+│  □ 启用快捷翻译面板              │  ← ✨ 快捷面板
+│  最小选择字数: [2]               │  ← 🎯 触发设置
+│  □ 自动复制翻译结果              │  ← 📋 自动复制
+│  □ 显示识别信心度                │  ← 📊 信心度
+│  快捷键设置: [Alt+1] [修改]      │  ← ⌨️ 快捷键
+├─────────────────────────────────┤
+│  [保存设置]  [重置]              │  ← 💾 操作按钮
+└─────────────────────────────────┘
+```
+
+</details>
 
 ### 🎨 界面特色
 
