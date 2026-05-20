@@ -230,6 +230,9 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 ## 🎨 界面展示
 
+<details>
+
+---
 <div align="center">
 
 ### 📱 主界面演进历程
@@ -310,6 +313,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 </div>
 
+</details>
 ---
 
 <details>
