@@ -347,7 +347,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         // 創建一個虛擬的選擇框來精確匹配用戶選擇的區域
         const tolerance = 5; // 5像素的容差
 
-        // 獲取所有文字節點
+        // 獲取所有文字節點及其位置信息
         const textNodes = this.getAllTextNodes();
         const selectedTexts = [];
 
@@ -362,9 +362,14 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
           for (const nodeRect of nodeRects) {
             if (this.isRectInSelectedArea(nodeRect, rect, tolerance)) {
-              const text = textNode.textContent.trim();
-              if (text && !selectedTexts.includes(text)) {
-                selectedTexts.push(text);
+              const text = textNode.textContent;
+              if (text && text.trim()) {
+                selectedTexts.push({
+                  text: text,
+                  top: nodeRect.top,
+                  left: nodeRect.left,
+                  bottom: nodeRect.bottom
+                });
               }
               break; // 找到一個匹配的就跳出
             }
@@ -376,9 +381,43 @@ if (typeof window.ScreenshotCapture === 'undefined') {
           return this.getTextFromElementsInArea(rect);
         }
 
-        // 組合找到的文字
-        const result = selectedTexts.join(' ').trim();
-        console.log('Content: Found precise text:', result);
+        // 按位置排序並保留換行結構
+        selectedTexts.sort((a, b) => {
+          // 先按Y坐標排序（上到下）
+          const yDiff = a.top - b.top;
+          if (Math.abs(yDiff) > 10) { // 如果Y坐標差距大於10px，認為是不同行
+            return yDiff;
+          }
+          // 同一行內按X坐標排序（左到右）
+          return a.left - b.left;
+        });
+
+        // 組合文字，保留換行
+        const lines = [];
+        let currentLine = [];
+        let lastBottom = -1;
+
+        for (const item of selectedTexts) {
+          // 如果是新行（Y坐標差距較大）
+          if (lastBottom >= 0 && item.top > lastBottom + 10) {
+            if (currentLine.length > 0) {
+              lines.push(currentLine.join(' ').trim());
+              currentLine = [];
+            }
+          }
+          
+          currentLine.push(item.text.trim());
+          lastBottom = item.bottom;
+        }
+
+        // 添加最後一行
+        if (currentLine.length > 0) {
+          lines.push(currentLine.join(' ').trim());
+        }
+
+        // 用換行符連接各行
+        const result = lines.join('\n').trim();
+        console.log('Content: Found precise text with formatting:', result);
         return result;
       } catch (error) {
         console.error('Error in getPreciseTextFromArea:', error);
@@ -1553,9 +1592,8 @@ if (typeof window.ScreenshotCapture === 'undefined') {
           }
         }
 
-        // 對於所有語言，統一使用Google翻譯API
-        console.log('Content: Using Google Translate for all languages');
-        console.log(`Content: Final translation parameters - source: ${sourceLang}, target: ${targetLang}`);
+        // 翻譯請求將通過 background script 根據用戶設置的 apiProvider 路由到相應的翻譯服務
+        console.log(`Content: Translation request - source: ${sourceLang}, target: ${targetLang}`);
 
         // 如果检测到英文但目标语言不是中文，强制设置为中文
         if (sourceLang === 'en' && !targetLang.startsWith('zh')) {
@@ -1563,10 +1601,10 @@ if (typeof window.ScreenshotCapture === 'undefined') {
           targetLang = 'zh';
         }
 
-        // 直接測試Google翻譯
-        console.log(`Content: About to call Google Translate with: "${text}" (${sourceLang} -> ${targetLang})`);
+        // 通過 background script 調用翻譯服務
+        console.log(`Content: Calling translation service with: "${text}" (${sourceLang} -> ${targetLang})`);
         const translatedText = await this.callGoogleTranslate(text, sourceLang, targetLang);
-        console.log(`Content: Google Translate returned: "${translatedText}"`);
+        console.log(`Content: Translation service returned: "${translatedText}"`);
 
         // 檢查翻譯質量（簡化檢查）
         if (translatedText && translatedText !== text && translatedText.trim() !== '') {
@@ -5683,6 +5721,10 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
       const content = document.createElement('div');
       content.style.cssText = `
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
         background: white !important;
         border-radius: 12px !important;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
@@ -5690,8 +5732,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         width: 90% !important;
         max-height: 80vh !important;
         overflow: hidden !important;
-        transform: scale(0.9) !important;
-        transition: transform 0.3s ease !important;
+        transition: opacity 0.3s ease !important;
       `;
 
       const header = document.createElement('div');
@@ -5702,10 +5743,12 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         padding: 20px 24px !important;
         border-bottom: 1px solid #e0e0e0 !important;
         background-color: #f8f9fa !important;
+        cursor: move !important;
+        user-select: none !important;
       `;
 
       const title = document.createElement('h3');
-      title.textContent = '🔤 翻譯結果';
+      title.textContent = '🔤 翻譯結果 (可拖動)';
       title.style.cssText = `
         margin: 0 !important;
         font-size: 18px !important;
@@ -5886,41 +5929,88 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         document.head.appendChild(showStyle);
       }
 
-      // 點擊背景關閉（添加延遲避免立即關閉）
-      let modalClickTimeout;
-      let modalReady = false;
+      // 添加拖動功能 - 使用更简单直接的方式
+      let isDragging = false;
+      let currentX = 0;
+      let currentY = 0;
+      let initialX = 0;
+      let initialY = 0;
 
-      // 設置模態框準備就緒的延遲
-      setTimeout(() => {
-        modalReady = true;
-        console.log('Content: Modal is now ready for interactions');
-      }, 1000);
+      const dragStart = (e) => {
+        // 只在标题栏上才能拖动，排除关闭按钮
+        const target = e.target || e.srcElement;
+        if ((target === header || target === title) && target !== closeBtn) {
+          if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - currentX;
+            initialY = e.touches[0].clientY - currentY;
+          } else {
+            initialX = e.clientX - currentX;
+            initialY = e.clientY - currentY;
+          }
 
-      modal.addEventListener('click', (e) => {
-        console.log('Content: Modal clicked, target:', e.target, 'modalReady:', modalReady);
-        if (e.target === modal && modalReady) {
-          console.log('Content: Background clicked, will close modal');
-          // 添加延遲，避免立即關閉
-          clearTimeout(modalClickTimeout);
-          modalClickTimeout = setTimeout(() => {
-            closeModal();
-          }, 500);
+          isDragging = true;
+          header.style.cursor = 'grabbing';
         }
-      });
+      };
 
-      // 點擊內容區域時取消關閉
+      const drag = (e) => {
+        if (!isDragging) return;
+
+        e.preventDefault();
+
+        let clientX, clientY;
+        if (e.type === "touchmove") {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+
+        currentX = clientX - initialX;
+        currentY = clientY - initialY;
+
+        // 直接设置 top 和 left，不使用 transform
+        content.style.left = `calc(50% + ${currentX}px)`;
+        content.style.top = `calc(50% + ${currentY}px)`;
+      };
+
+      const dragEnd = () => {
+        if (isDragging) {
+          isDragging = false;
+          header.style.cursor = 'move';
+        }
+      };
+
+      // 鼠标事件
+      header.addEventListener('mousedown', dragStart);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', dragEnd);
+
+      // 触摸事件
+      header.addEventListener('touchstart', dragStart, { passive: false });
+      document.addEventListener('touchmove', drag, { passive: false });
+      document.addEventListener('touchend', dragEnd);
+
+      // 禁用背景点击关闭，只保留关闭按钮和ESC键关闭
+      // 这样可以避免拖动时误触发关闭
       content.addEventListener('click', (e) => {
         e.stopPropagation();
-        clearTimeout(modalClickTimeout);
-        console.log('Content: Content area clicked, preventing close');
       });
 
       // ESC 鍵關閉
       const escHandler = (e) => {
-        if (e.key === 'Escape' && modalReady) {
+        if (e.key === 'Escape') {
           console.log('Content: ESC key pressed, closing modal');
           closeModal();
           document.removeEventListener('keydown', escHandler);
+          // 清理拖動事件監聽器
+          header.removeEventListener('mousedown', onMouseDown);
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          header.removeEventListener('touchstart', onTouchStart);
+          document.removeEventListener('touchmove', onTouchMove);
+          document.removeEventListener('touchend', onTouchEnd);
         }
       };
       document.addEventListener('keydown', escHandler);

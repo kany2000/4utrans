@@ -1,4 +1,4 @@
-# 📷 4utrans - 智能网页翻译助手 (v1.4.0)
+# 📷 4utrans - 智能网页翻译助手 (v1.4.1)
 
 > 🚀 **全新升级** - 基于先进DOM技术的智能翻译扩展，支持大模型翻译，为您提供无与伦比的网页翻译体验
 
@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/kany2000/4utrans?style=social)](https://github.com/kany2000/4utrans)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/4utrans)
-[![Version](https://img.shields.io/badge/version-1.4.0-green)](https://github.com/kany2000/4utrans)
+[![Version](https://img.shields.io/badge/version-1.4.1-green)](https://github.com/kany2000/4utrans)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ 核心特色
@@ -36,7 +36,21 @@
 - **响应式设计** - 适配不同屏幕尺寸
 - **紧凑布局** - 优化界面间距，视觉更美观
 
-## 🆕 版本亮点 (v1.4.0)
+## 🆕 版本亮点 (v1.4.1)
+
+### 🎯 **用户体验优化**
+- **翻译结果窗口可拖动** - 翻译结果弹窗现在可以自由拖动，方便查看和对比
+  - 点击标题栏即可拖动窗口到任意位置
+  - 支持鼠标和触摸设备
+  - 流畅的拖动体验，不会出现跳动或卡顿
+- **LLM 自定义模型保存修复** - 修复了自定义 LLM 模型名称无法正确保存的问题
+- **文本格式保留优化** - 改进了文本提取算法，更好地保留原文的换行和格式
+
+### 🔧 **技术改进**
+- **拖动逻辑重构** - 使用更简单直接的 CSS 定位方式，避免 transform 冲突
+- **代码质量提升** - 优化了事件处理和状态管理逻辑
+
+## 🆕 v1.4.0 版本亮点
 
 ### 🚀 **大模型翻译新时代**
 - **GLM 大模型** - 支持智谱 GLM-4-Flash 模型，翻译质量更高
@@ -146,7 +160,7 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ```
 ┌─────────────────────────────┐
-│     截图翻译器 v1.4.0        │  ← 🎨 蓝绿渐变标题
+│     截图翻译器 v1.4.1        │  ← 🎨 蓝绿渐变标题
 ├─────────────────────────────┤
 │  📷 开始截图翻译             │  ← 🎯 主操作按钮
 │  拖拽选择区域，自动识别并翻译文字 │  ← 💡 操作提示
@@ -283,7 +297,21 @@ cd 4utrans
 
 ## 📝 版本历史
 
-### v1.4.0 (当前版本)
+### v1.4.1 (当前版本)
+#### 🎯 **用户体验优化**
+- **翻译结果窗口可拖动** - 翻译结果弹窗支持拖动，方便查看和对比
+  - 点击标题栏拖动窗口
+  - 支持鼠标和触摸操作
+  - 流畅的拖动体验
+- **LLM 配置修复** - 修复自定义 LLM 模型名称保存问题
+- **文本提取优化** - 改进文本格式保留算法
+
+#### 🔧 **技术改进**
+- 重构拖动逻辑，使用 CSS 定位替代 transform
+- 优化事件处理和状态管理
+- 提升代码质量和可维护性
+
+### v1.4.0
 #### 🚀 **大模型翻译支持**
 - **Microsoft Translator** - 新增微软免费翻译服务
 - **GLM 大模型** - 支持智谱 GLM-4-Flash 模型翻译

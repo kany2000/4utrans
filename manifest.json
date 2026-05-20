@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "智能網頁翻譯助手",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "智能網頁翻譯助手 - 自動語言檢測，精確翻譯日韓英文等多語言",
   "author": "Screenshot Translator Team",
   "permissions": [
