@@ -1,6 +1,6 @@
 /**
- * 4utrans - Quick Translation Panel
- * Version: 2.0.0
+ * QuickTranslate - Quick Translation Panel
+ * Version: 2.1.0
  * 快捷翻译面板 - 选中文字即可快速翻译
  */
 
@@ -73,10 +73,12 @@ const settings = await chrome.storage.local.get([
         return;
       }
       
-      // 保存当前选择
+      // 保存当前选择及位置
+      const range = selection.getRangeAt(0);
       this.currentSelection = {
         text: selectedText,
-        range: selection.getRangeAt(0)
+        range: range,
+        rect: range.getBoundingClientRect()
       };
       
       // 显示翻译按钮
@@ -138,10 +140,11 @@ const settings = await chrome.storage.local.get([
     
     this.translating = true;
     const text = this.currentSelection.text;
+    const selectionRect = this.currentSelection.rect;
     
     // 隐藏按钮，显示翻译面板
     this.hideButton();
-    this.showPanel(text);
+    this.showPanel(text, selectionRect);
 
     // 最先检查扩展上下文（extension reload 后 content script 会失效）
     if (!this.isContextValid()) {
@@ -178,7 +181,7 @@ const settings = await chrome.storage.local.get([
       );
       
       // 显示翻译结果
-      this.showResult(text, result.translatedText, sourceLang, targetLang);
+      this.showResult(text, result.translatedText, sourceLang, targetLang, result.isBackup ? result.backupService : null);
       
     } catch (error) {
       console.error('Translation error:', error);
@@ -240,7 +243,7 @@ const settings = await chrome.storage.local.get([
     });
   }
 
-  showPanel(originalText) {
+  showPanel(originalText, selectionRect) {
     // 移除旧面板
     this.hidePanel();
     
@@ -266,6 +269,7 @@ const settings = await chrome.storage.local.get([
         </div>
       </div>
       <div class="panel-footer">
+        <span class="translation-source"></span>
         <button class="panel-btn copy-btn" disabled>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -276,8 +280,36 @@ const settings = await chrome.storage.local.get([
       </div>
     `;
     
-    // 设置位置（屏幕中央）
     document.body.appendChild(this.panel);
+
+    // 计算面板位置（出现在选中文字附近，不遮挡原文）
+    if (selectionRect && selectionRect.width > 0) {
+      const panelWidth = 400;
+      const panelHeight = 220;
+      const gap = 10;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // 水平方向：以选中区域中心为准，不超出视口
+      let left = selectionRect.left + selectionRect.width / 2 - panelWidth / 2;
+      left = Math.max(8, Math.min(left, vw - panelWidth - 8));
+
+      // 垂直方向：优先显示在选中文字下方，空间不足则显示在上方
+      let top;
+      if (vh - selectionRect.bottom >= panelHeight + gap) {
+        top = selectionRect.bottom + gap;
+      } else if (selectionRect.top >= panelHeight + gap) {
+        top = selectionRect.top - panelHeight - gap;
+      } else {
+        // 两侧都放不下，放在底部可见区域内
+        top = Math.max(8, vh - panelHeight - 8);
+      }
+
+      this.panel.style.position = 'fixed';
+      this.panel.style.left = `${left}px`;
+      this.panel.style.top = `${top}px`;
+      this.panel.style.transform = 'none';
+    }
     
     // 添加事件监听
     this.panel.querySelector('.panel-close').addEventListener('click', () => {
@@ -290,12 +322,23 @@ const settings = await chrome.storage.local.get([
     }, 10);
   }
 
-  showResult(originalText, translatedText, sourceLang, targetLang) {
+  showResult(originalText, translatedText, sourceLang, targetLang, backupService) {
     if (!this.panel) return;
     
     const resultDiv = this.panel.querySelector('.translation-result .text-content');
     resultDiv.className = 'text-content';
     resultDiv.textContent = translatedText;
+
+    // 显示翻译来源（备用服务时提示）
+    const sourceEl = this.panel.querySelector('.translation-source');
+    if (sourceEl) {
+      if (backupService) {
+        sourceEl.textContent = `由 ${backupService} 提供`;
+        sourceEl.title = 'Google 翻译不可用，已自动切换至备用服务';
+      } else {
+        sourceEl.textContent = '';
+      }
+    }
     
     // 启用复制按钮
     const copyBtn = this.panel.querySelector('.copy-btn');

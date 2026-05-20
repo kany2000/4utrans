@@ -1,6 +1,6 @@
 /**
- * 4utrans - Quick Translation Panel Styles
- * Version: 2.0.0
+ * QuickTranslate - Quick Translation Panel Styles
+ * Version: 2.1.0
  * 快捷翻译面板样式
  */
 
@@ -203,7 +203,18 @@
   border-top: 1px solid #e9ecef;
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.translation-source {
+  font-size: 11px;
+  color: #f59e0b;
+  font-style: italic;
+}
+
+.translation-source:not(:empty)::before {
+  content: '⚡ ';
 }
 
 .panel-btn {

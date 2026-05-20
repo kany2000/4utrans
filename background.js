@@ -418,14 +418,15 @@ class ScreenshotTranslator {
       try {
         console.log('Background: Trying backup translation service...');
         const backupResult = await this.callBackupTranslateService(text, sourceLang, targetLang);
-        if (backupResult && backupResult !== text) {
-          console.log('Background: Backup translation successful:', backupResult);
+        if (backupResult && backupResult.text && backupResult.text !== text) {
+          console.log('Background: Backup translation successful via', backupResult.service, ':', backupResult.text);
           sendResponse({
             success: true,
-            translatedText: backupResult,
+            translatedText: backupResult.text,
             sourceLang: sourceLang,
             targetLang: targetLang,
-            isBackup: true
+            isBackup: true,
+            backupService: backupResult.service
           });
         } else {
           throw new Error('Backup translation also failed');
@@ -856,7 +857,7 @@ ${text}`;
         const result = data.responseData.translatedText;
         if (result && result !== text && !result.includes('MYMEMORY WARNING')) {
           console.log('Background: MyMemory success:', result);
-          return result;
+          return { text: result, service: 'MyMemory' };
         }
       }
       errors.push('MyMemory: invalid result');
@@ -883,7 +884,7 @@ ${text}`;
         const result = data.translation.trim();
         if (result && result !== text) {
           console.log('Background: Lingva success:', result);
-          return result;
+          return { text: result, service: 'Lingva' };
         }
       }
       errors.push('Lingva: invalid result');

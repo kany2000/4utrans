@@ -5,6 +5,19 @@
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 並且本項目遵循 [語義化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.0] - 2026-05-20
+
+### ✨ 新增 / Added
+- **翻譯面板智能定位**：面板現在出現在選中文字附近（優先顯示在文字下方，空間不足則顯示在上方），不再固定在屏幕正中央，減少對原文的遮擋
+- **翻譯來源顯示**：當 Google 翻譯不可用並自動切換至備用服務（MyMemory / Lingva）時，面板底部顯示 "⚡ 由 MyMemory 提供" 等提示信息
+
+### 🔧 修復 / Fixed
+- 修正 `quick-panel.js` 及 `quick-panel.css` 頭部注釋中殘留的 "4utrans" 標識，統一為 "QuickTranslate"
+
+### 🏗️ 內部改進 / Internal
+- `callBackupTranslateService()` 現在返回 `{ text, service }` 對象，以便上層調用者知道具體使用了哪個備用服務
+- `translateText()` 響應中新增 `backupService` 字段（僅在 `isBackup: true` 時存在）
+
 ## [2.0.0] - 2026-05-20
 
 ### 🎉 重大更新 - 快捷翻譯面板
