@@ -169,9 +169,9 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 <table>
   <tr>
-    <td><img src="images/main-interface.png" height="200" alt="主界面截图1.3.0"></td>
-    <td><img src="images/main-interface_new.png" height="200" alt="主界面截图1.4.0"></td>
-    <td><img src="images/main-interface_1.5.0.png" height="200" alt="主界面截图1.5.0"></td>
+    <td><img src="images/main-interface.png" height="220" alt="主界面截图1.3.0"></td>
+    <td><img src="images/main-interface_new.png" height="220" alt="主界面截图1.4.0"></td>
+    <td><img src="images/main-interface_1.5.0.png" height="220" alt="主界面截图1.5.0"></td>
   </tr>
   <tr>
     <td align="center">主界面截图1.3.0</td>
@@ -211,9 +211,18 @@ git clone https://github.com/kany2000/4utrans.git && open -a "Google Chrome" chr
 
 ### ⚙️ 高级设置面板（版本更替）
 
-<img src="images/advanced-settings.png" alt="高级设置截图" width="220"/>
-<img src="images/advanced-settings_new.png" alt="高级设置截图" width="220"/>
-<img src="images/advanced-settings_1.5.0.png" alt="高级设置截图" width="220"/>
+<table>
+  <tr>
+    <td><img src="images/advanced-settings.png" height="220" alt="高级设置截图1.3.0"></td>
+    <td><img src="images/advanced-settings_new.png" height="220" alt="高级设置截图1.4.0"></td>
+    <td><img src="images/advanced-settings_1.5.0.png" height="220" alt="高级设置截图图1.5.0"></td>
+  </tr>
+  <tr>
+    <td align="center">高级设置截图1.3.0</td>
+    <td align="center">高级设置截图1.4.0</td>
+    <td align="center">高级设置截图1.5.0</td>
+  </tr>
+</table>
 
 *功能丰富的高级配置选项*
 
