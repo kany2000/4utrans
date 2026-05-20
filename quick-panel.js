@@ -39,10 +39,10 @@ class QuickTranslationPanel {
   }
 
   async loadSettings() {
-    const settings = await chrome.storage.sync.get([
-      'quickPanelEnabled',
-      'minSelectionLength'
-    ]);
+const settings = await chrome.storage.local.get([
+ 'quickPanelEnabled',
+ 'minSelectionLength'
+]);
     
     this.isEnabled = settings.quickPanelEnabled !== false; // 默认启用
     this.minSelectionLength = settings.minSelectionLength || 2;
@@ -136,13 +136,13 @@ class QuickTranslationPanel {
     
     try {
       // 获取用户设置
-      const settings = await chrome.storage.sync.get([
-        'targetLanguage',
-        'apiProvider',
-        'apiKey',
-        'llmBaseUrl',
-        'llmModel'
-      ]);
+const settings = await chrome.storage.local.get([
+ 'targetLanguage',
+ 'apiProvider',
+ 'apiKey',
+ 'llmBaseUrl',
+ 'llmModel'
+]);
       
       // 检测源语言
       const sourceLang = this.detectLanguage(text);
