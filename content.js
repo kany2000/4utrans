@@ -1917,25 +1917,27 @@ if (typeof window.ScreenshotCapture === 'undefined') {
           console.log('Content: Translation successful:', result);
 
           // 验证翻译结果
-          if (result && result !== text) {
-            if (targetLang.startsWith('zh')) {
-              const chineseChars = (result.match(/[\u4e00-\u9fff]/g) || []).length;
-              console.log(`Content: Result has ${chineseChars} Chinese characters`);
+if (result && result !== text) {
+  if (targetLang.startsWith('zh')) {
+    const chineseChars = (result.match(/[\u4e00-\u9fff]/g) || []).length;
+    console.log(`Content: Result has ${chineseChars} Chinese characters`);
 
-              if (chineseChars > 0) {
-                console.log('Content: Translation SUCCESS - has Chinese characters');
-                return result;
-              } else {
-                console.log('Content: Translation FAILED - no Chinese characters in result');
-                throw new Error('Translation result has no Chinese characters');
-              }
-            } else {
-              return result;
-            }
-          } else {
-            console.log('Content: Translation FAILED - result is empty or same as original');
-            throw new Error('Translation result is empty or same as original');
-          }
+    if (chineseChars > 0) {
+      console.log('Content: Translation SUCCESS - has Chinese characters');
+      return result;
+    } else {
+      console.log('Content: Translation FAILED - no Chinese characters in result, falling back to custom LLM');
+      // Fallback to custom LLM translation
+      return this.callCustomLLMTranslate(text, sourceLang, targetLang, this.settings.apiKeys?.custom, this.settings.llmConfig);
+    }
+  } else {
+    return result;
+  }
+} else {
+  console.log('Content: Translation FAILED - result is empty or same as original, falling back to custom LLM');
+  // Fallback to custom LLM translation
+  return this.callCustomLLMTranslate(text, sourceLang, targetLang, this.settings.apiKeys?.custom, this.settings.llmConfig);
+}
         } else {
           console.log('Content: Background translation failed:', response);
           throw new Error(response?.error || 'Background translation failed');

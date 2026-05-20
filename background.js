@@ -382,9 +382,15 @@ class ScreenshotTranslator {
           // 使用通用 LLM（OpenAI 兼容格式）
           const customApiKey = settings.apiKeys?.custom;
           const llmConfig = settings.llmConfig || {};
+          console.log('Background: Custom LLM config:', {
+            hasApiKey: !!customApiKey,
+            baseUrl: llmConfig.baseUrl || 'not set',
+            model: llmConfig.model || 'not set'
+          });
           if (!customApiKey || !llmConfig.baseUrl || !llmConfig.model) {
             throw new Error('LLM 自定义配置不完整，请检查 API Key、Base URL 和模型名称');
           }
+          console.log('Background: Calling Custom LLM with model:', llmConfig.model);
           result = await this.callCustomLLMTranslate(text, sourceLang, targetLang, customApiKey, llmConfig);
           break;
 
