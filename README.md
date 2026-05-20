@@ -1,4 +1,4 @@
-# 🚀 QuickTranslate - 快译 (v2.0.0)
+# 🚀 QuickTranslate - 快译 (v2.1.0)
 
 > 🎉 **革命性更新** - 全新快捷翻译面板，选中文字即可翻译！操作步骤减少60%，翻译速度提升75%！
 
@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/kany2000/QuickTranslate?style=social)](https://github.com/kany2000/QuickTranslate)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/QuickTranslate)
-[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/kany2000/QuickTranslate)
+[![Version](https://img.shields.io/badge/version-2.1.0-green)](https://github.com/kany2000/QuickTranslate)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ 核心特色
@@ -45,6 +45,24 @@
 - **智能提示** - 实时状态显示和操作指导
 - **响应式设计** - 适配不同屏幕尺寸
 - **紫色主题** - 优雅的渐变配色方案
+
+## 🆕 版本亮点 (v2.1.0)
+
+### 🎯 **翻译面板智能定位**
+- 面板现在出现在**选中文字附近**，不再固定在屏幕正中央
+- 优先显示在文字**下方**，空间不足时自动切换到**上方**
+- 水平方向以选中区域为中心，自动保持在视口范围内
+
+### 💡 **翻译来源显示**
+- Google 翻译正常时：面板底部留空，干净简洁
+- 切换至备用服务时：显示 **"⚡ 由 MyMemory 提供"** 或 **"⚡ 由 Lingva 提供"**
+- 悬停可查看提示："Google 翻译不可用，已自动切换至备用服务"
+
+### 🔧 **内部改进**
+- 备用翻译服务返回来源信息，响应中新增 `backupService` 字段
+- 代码头部注释统一更新为 "QuickTranslate"
+
+---
 
 ## 🎉 版本亮点 (v2.0.0)
 
