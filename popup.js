@@ -120,10 +120,14 @@ class PopupController {
         this.elements.llmModel.classList.add('hidden');
         this.elements.llmModelCustom.classList.remove('hidden');
         this.elements.llmModelCustom.focus();
+        this.elements.llmModelHelp.textContent = '請輸入模型名稱';
       } else if (selectedValue) {
         this.elements.llmModelHelp.textContent = `已選擇: ${selectedValue}`;
       }
     });
+
+    // 自定義模型輸入框變更時標記未保存
+    this.elements.llmModelCustom.addEventListener('input', () => this.showUnsavedChanges());
 
     // LLM 配置變更時標記未保存
     this.elements.apiKey.addEventListener('input', () => this.showUnsavedChanges());
@@ -511,9 +515,17 @@ class PopupController {
       // 驗證 LLM 自定義配置（如果選擇了 custom）
       if (provider === 'custom') {
         const baseUrl = this.elements.llmBaseUrl.value.trim();
-        const model = this.elements.llmModel.value.trim();
-        if (!baseUrl || !model) {
-          this.showStatus('請填寫完整的 LLM 自定義配置（Base URL 和 模型名稱）', 'error');
+        const isCustomInputVisible = !this.elements.llmModelCustom.classList.contains('hidden');
+        const modelFromDropdown = this.elements.llmModel.value;
+        const modelFromCustomInput = this.elements.llmModelCustom.value.trim();
+        const finalModel = isCustomInputVisible ? modelFromCustomInput : modelFromDropdown;
+        
+        if (!baseUrl) {
+          this.showStatus('請填寫 Base URL', 'error');
+          return;
+        }
+        if (!finalModel || finalModel === '__custom__') {
+          this.showStatus('請選擇或輸入模型名稱', 'error');
           return;
         }
       }
@@ -537,17 +549,27 @@ class PopupController {
         llmConfig: provider === 'custom' ? {
           baseUrl: this.elements.llmBaseUrl.value.trim(),
           model: (() => {
-            const isCustomHidden = this.elements.llmModelCustom.classList.contains('hidden');
+            const isCustomInputVisible = !this.elements.llmModelCustom.classList.contains('hidden');
             const dropdownValue = this.elements.llmModel.value;
             const customValue = this.elements.llmModelCustom.value.trim();
+            
+            // 如果自定義輸入框可見，使用自定義輸入的值
+            // 否則使用下拉框的值（但排除 __custom__ 選項）
+            let finalModel = isCustomInputVisible ? customValue : dropdownValue;
+            
+            // 確保不會保存 __custom__ 這個佔位符
+            if (finalModel === '__custom__') {
+              finalModel = customValue || '';
+            }
+            
             console.log('Popup: Saving LLM model config:', {
-              isCustomHidden,
+              isCustomInputVisible,
               dropdownValue,
               customValue,
-              llmModelSelectedIndex: this.elements.llmModel.selectedIndex,
-              llmModelSelectedText: this.elements.llmModel.options[this.elements.llmModel.selectedIndex]?.text
+              finalModel
             });
-            return isCustomHidden ? (dropdownValue || customValue) : customValue;
+            
+            return finalModel;
           })()
         } : this.settings.llmConfig
       };

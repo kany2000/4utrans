@@ -7,45 +7,22 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  width: 320px;
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  width: 280px;
+  background: white;
   color: #333;
-  line-height: 1.5;
-  padding: 8px;
+  line-height: 1.4;
+  padding: 0;
   position: relative;
   overflow: hidden;
 }
 
-/* 科技感背景动画 */
-body::before {
-  content: '';
-  position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 40% 20%, rgba(72, 118, 255, 0.2) 0%, transparent 50%);
-  animation: backgroundShift 20s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes backgroundShift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(5%, 5%) rotate(120deg); }
-  66% { transform: translate(-5%, 5%) rotate(240deg); }
-}
 
 .popup-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 16px;
+  background: white;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 
-    0 12px 30px rgba(0, 0, 0, 0.2);
-  animation: popupEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: none;
+  animation: popupEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
 }
 
@@ -86,11 +63,11 @@ body::before {
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 16px 12px;
+  padding: 8px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
 .header::before {
@@ -133,10 +110,10 @@ body::before {
 }
 
 .title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
   text-shadow: 
     0 0 10px rgba(255, 255, 255, 0.5),
     0 2px 4px rgba(0, 0, 0, 0.2);
@@ -151,23 +128,23 @@ body::before {
 }
 
 .version {
-  font-size: 11px;
+  font-size: 10px;
   opacity: 0.95;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.25);
-  padding: 4px 12px;
-  border-radius: 14px;
+  padding: 2px 8px;
+  border-radius: 12px;
   display: inline-block;
   backdrop-filter: blur(10px);
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 /* 主要操作區域 - 科技感設計 */
 .main-section {
-  padding: 20px 16px 16px;
+  padding: 12px 12px 10px;
   text-align: center;
   background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
   position: relative;
@@ -189,22 +166,22 @@ body::before {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 14px;
-  padding: 18px 28px;
-  font-size: 16px;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   box-shadow: 
-    0 8px 24px rgba(102, 126, 234, 0.4),
+    0 4px 12px rgba(102, 126, 234, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .primary-btn::before {
@@ -254,7 +231,7 @@ body::before {
 }
 
 .btn-icon {
-  font-size: 22px;
+  font-size: 18px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   animation: iconFloat 3s ease-in-out infinite;
 }
@@ -265,26 +242,26 @@ body::before {
 }
 
 .btn-text {
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
   position: relative;
   z-index: 1;
 }
 
 .quick-info {
-  margin-top: 16px;
+  margin-top: 10px;
   color: #6c757d;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
-  line-height: 1.6;
+  line-height: 1.4;
   font-weight: 500;
 }
 
 .shortcut-hints {
-  margin-top: 12px;
-  padding: 12px 16px;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid rgba(102, 126, 234, 0.2);
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
   position: relative;
@@ -311,21 +288,21 @@ body::before {
 .shortcut-hints small {
   color: #495057;
   font-weight: 600;
-  font-size: 11px;
-  line-height: 1.6;
+  font-size: 10px;
+  line-height: 1.4;
   position: relative;
 }
 
 /* 設置區域 - 科技卡片設計 */
 .settings-section {
-  padding: 16px 12px;
+  padding: 10px 12px;
   background: white;
   position: relative;
 }
 
 .setting-group {
-  margin-bottom: 20px;
-  animation: fadeInUp 0.4s ease backwards;
+  margin-bottom: 12px;
+  animation: fadeInUp 0.3s ease backwards;
 }
 
 .setting-group:nth-child(1) { animation-delay: 0.05s; }
@@ -349,22 +326,21 @@ body::before {
 
 .setting-group label {
   display: block;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
   color: #495057;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  font-size: 11px;
 }
 
 .setting-select,
 .setting-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border: 2px solid #e9ecef;
-  border-radius: 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
   background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 600;
@@ -392,8 +368,8 @@ body::before {
 
 /* 快速保存區域 - 科技感按鈕 */
 .quick-save-section {
-  margin-top: 24px;
-  padding-top: 24px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 2px solid #f1f3f5;
   margin-bottom: 0;
   position: relative;
@@ -415,22 +391,22 @@ body::before {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 14px 24px;
-  font-size: 14px;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   box-shadow: 
-    0 6px 20px rgba(16, 185, 129, 0.4),
+    0 4px 12px rgba(16, 185, 129, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .save-btn::before {
@@ -533,7 +509,7 @@ body::before {
 
 /* 底部操作 - 科技感設計 */
 .footer {
-  padding: 12px 10px 12px;
+  padding: 8px 10px;
   border-top: 1px solid #f1f3f5;
   background: linear-gradient(180deg, #fafbfc 0%, #f8f9fa 100%);
   position: relative;
@@ -555,16 +531,16 @@ body::before {
   background: white;
   color: #6c757d;
   border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 13px 20px;
-  font-size: 13px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   letter-spacing: 0.3px;
   position: relative;
@@ -816,9 +792,8 @@ body::before {
 .shortcut-input:focus {
   background: white !important;
   border-color: #667eea !important;
-  box-shadow: 
-    0 0 0 4px rgba(102, 126, 234, 0.15) !important,
-    0 0 20px rgba(102, 126, 234, 0.3) !important;
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.15) !important,
+              0 0 20px rgba(102,126,234,0.3) !important;
 }
 
 .shortcut-btn {
