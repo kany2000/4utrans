@@ -160,7 +160,7 @@ cd QuickTranslate
 # 2. Chrome 扩展安装
 # 打开 Chrome 浏览器 → chrome://extensions/
 # 开启 "开发者模式" → 点击 "载入未封装项目"
-# 选择 4utrans 文件夹
+# 选择 QuickTranslate 文件夹
 ```
 
 ### ⚡ 一键安装脚本
