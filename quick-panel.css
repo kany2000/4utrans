@@ -67,7 +67,6 @@
 
 .quick-translate-panel.show {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 
