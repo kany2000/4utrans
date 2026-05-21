@@ -1926,17 +1926,15 @@ if (result && result !== text) {
       console.log('Content: Translation SUCCESS - has Chinese characters');
       return result;
     } else {
-      console.log('Content: Translation FAILED - no Chinese characters in result, falling back to custom LLM');
-      // Fallback to custom LLM translation
-      return this.callCustomLLMTranslate(text, sourceLang, targetLang, this.settings.apiKeys?.custom, this.settings.llmConfig);
+      console.log('Content: Translation FAILED - no Chinese characters in result');
+      throw new Error('Translation result validation failed');
     }
   } else {
     return result;
   }
 } else {
-  console.log('Content: Translation FAILED - result is empty or same as original, falling back to custom LLM');
-  // Fallback to custom LLM translation
-  return this.callCustomLLMTranslate(text, sourceLang, targetLang, this.settings.apiKeys?.custom, this.settings.llmConfig);
+  console.log('Content: Translation FAILED - result is empty or same as original');
+  throw new Error('Translation result is empty');
 }
         } else {
           console.log('Content: Background translation failed:', response);

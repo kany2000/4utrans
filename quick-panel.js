@@ -1,6 +1,6 @@
 /**
  * QuickTranslate - Quick Translation Panel
- * Version: 2.1.0
+ * Version: 2.1.1
  * 快捷翻译面板 - 选中文字即可快速翻译
  */
 
@@ -246,7 +246,7 @@ const settings = await chrome.storage.local.get([
   showPanel(originalText, selectionRect) {
     // 移除旧面板
     this.hidePanel();
-    
+
     // 创建翻译面板
     this.panel = document.createElement('div');
     this.panel.className = 'quick-translate-panel';
@@ -279,7 +279,7 @@ const settings = await chrome.storage.local.get([
         </button>
       </div>
     `;
-    
+
     document.body.appendChild(this.panel);
 
     // 计算面板位置（出现在选中文字附近，不遮挡原文）
@@ -310,44 +310,51 @@ const settings = await chrome.storage.local.get([
       this.panel.style.top = `${top}px`;
       this.panel.style.transform = 'none';
     }
-    
-    // 添加事件监听
-this.panel.querySelector('.panel-close').addEventListener('click', () => {
-  this.hidePanel();
-});
 
-// 添加拖拽功能
-this.isDragging = false;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-const header = this.panel.querySelector('.panel-header');
-header.style.cursor = 'move';
-header.addEventListener('mousedown', (e) => {
-  this.isDragging = true;
-  const rect = this.panel.getBoundingClientRect();
-  dragOffsetX = e.clientX - rect.left;
-  dragOffsetY = e.clientY - rect.top;
-  e.preventDefault();
-});
-const moveHandler = (e) => {
-  if (!this.isDragging) return;
-  let left = e.clientX - dragOffsetX;
-  let top = e.clientY - dragOffsetY;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const rect = this.panel.getBoundingClientRect();
-  const panelWidth = rect.width;
-  const panelHeight = rect.height;
-  left = Math.max(0, Math.min(left, vw - panelWidth));
-  top = Math.max(0, Math.min(top, vh - panelHeight));
-  this.panel.style.left = `${left}px`;
-  this.panel.style.top = `${top}px`;
-};
-document.addEventListener('mousemove', moveHandler);
-document.addEventListener('mouseup', () => {
-  this.isDragging = false;
-});
-    
+    // 添加关闭按钮事件
+    this.panel.querySelector('.panel-close').addEventListener('click', () => {
+      this.hidePanel();
+    });
+
+    // 添加拖拽功能
+    this.isDragging = false;
+    this.dragOffsetX = 0;
+    this.dragOffsetY = 0;
+    const header = this.panel.querySelector('.panel-header');
+    header.style.cursor = 'move';
+
+    // 保存监听器引用，以便后续移除
+    this._boundMoveHandler = (e) => {
+      if (!this.isDragging) return;
+      let left = e.clientX - this.dragOffsetX;
+      let top = e.clientY - this.dragOffsetY;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const rect = this.panel.getBoundingClientRect();
+      const panelWidth = rect.width;
+      const panelHeight = rect.height;
+      left = Math.max(0, Math.min(left, vw - panelWidth));
+      top = Math.max(0, Math.min(top, vh - panelHeight));
+      this.panel.style.left = `${left}px`;
+      this.panel.style.top = `${top}px`;
+    };
+    this._boundMouseUpHandler = () => {
+      this.isDragging = false;
+    };
+
+    header.addEventListener('mousedown', (e) => {
+      this.isDragging = true;
+      const rect = this.panel.getBoundingClientRect();
+      this.dragOffsetX = e.clientX - rect.left;
+      this.dragOffsetY = e.clientY - rect.top;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', this._boundMoveHandler);
+    document.addEventListener('mouseup', this._boundMouseUpHandler);
+
+    // 标记copy按钮未绑定事件
+    this._copyBtnBound = false;
+
     // 添加显示动画
     setTimeout(() => {
       this.panel.classList.add('show');
@@ -375,24 +382,29 @@ document.addEventListener('mouseup', () => {
     // 启用复制按钮
     const copyBtn = this.panel.querySelector('.copy-btn');
     copyBtn.disabled = false;
-    copyBtn.addEventListener('click', () => {
-      this.copyToClipboard(translatedText);
-      copyBtn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        已复制
-      `;
-      setTimeout(() => {
+
+    // 避免重复绑定事件
+    if (!this._copyBtnBound) {
+      this._copyBtnBound = true;
+      copyBtn.addEventListener('click', () => {
+        this.copyToClipboard(translatedText);
         copyBtn.innerHTML = `
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          复制
+          已复制
         `;
-      }, 2000);
-    });
+        setTimeout(() => {
+          copyBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            复制
+          `;
+        }, 2000);
+      });
+    }
   }
 
   showError(message) {
@@ -412,6 +424,16 @@ document.addEventListener('mouseup', () => {
 
   hidePanel() {
     if (this.panel) {
+      // 移除拖拽监听器，防止内存泄漏
+      if (this._boundMoveHandler) {
+        document.removeEventListener('mousemove', this._boundMoveHandler);
+        this._boundMoveHandler = null;
+      }
+      if (this._boundMouseUpHandler) {
+        document.removeEventListener('mouseup', this._boundMouseUpHandler);
+        this._boundMouseUpHandler = null;
+      }
+
       this.panel.classList.remove('show');
       setTimeout(() => {
         if (this.panel) {
