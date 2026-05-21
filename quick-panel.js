@@ -19,8 +19,8 @@ class QuickTranslationPanel {
     this.hoverKeyDown = false;
     this.hoverTimeout = null;
     this.currentText = '';
-    this.currentX = 0;
-    this.currentY = 0;
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
 
     this.init();
   }
@@ -101,6 +101,9 @@ class QuickTranslationPanel {
     console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown });
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
+      // 获取当前鼠标位置
+      this.lastMouseX = this.lastMouseX || 0;
+      this.lastMouseY = this.lastMouseY || 0;
       // 立即触发一次翻译
       this.doHoverTranslate();
     }
@@ -116,9 +119,11 @@ class QuickTranslationPanel {
   }
 
   handleHoverMove(e) {
+    // 始终记录鼠标位置，供 Alt 键使用
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
-    this.currentX = e.clientX;
-    this.currentY = e.clientY;
 
     // 清除之前的延迟
     if (this.hoverTimeout) {
@@ -135,14 +140,15 @@ class QuickTranslationPanel {
       hoverEnabled: this.hoverEnabled,
       hoverKeyDown: this.hoverKeyDown,
       currentText: this.currentText,
-      x: this.currentX,
-      y: this.currentY
+      lastX: this.lastMouseX,
+      lastY: this.lastMouseY
     });
 
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
-    const clientX = this.currentX;
-    const clientY = this.currentY;
+    // 使用追踪的鼠标位置
+    const clientX = this.lastMouseX || this.currentX;
+    const clientY = this.lastMouseY || this.currentY;
     const text = this.getWordAtPoint(clientX, clientY);
 
     if (!text || text.length < 2 || text.length > 200) {
