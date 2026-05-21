@@ -17,7 +17,6 @@ class QuickTranslationPanel {
     this.hoverEnabled = false;
     this.hoverBubble = null;
     this.hoverKeyDown = false;
-    this.isHovering = false;
     this.hoverTimeout = null;
     this.currentText = '';
     this.currentX = 0;
@@ -95,9 +94,8 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     if (!this.hoverEnabled) return;
-    if (e.key === 'Alt' && !this.hoverKeyDown) {
+    if (e.key === 'Alt') {
       this.hoverKeyDown = true;
-      this.isHovering = true;
     }
   }
 
@@ -105,26 +103,24 @@ class QuickTranslationPanel {
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt') {
       this.hoverKeyDown = false;
-      this.isHovering = false;
       this.hideHoverBubble();
+      this.currentText = '';
     }
   }
 
   handleHoverMove(e) {
-    if (!this.hoverEnabled) return;
+    if (!this.hoverEnabled || !this.hoverKeyDown) return;
     this.currentX = e.clientX;
     this.currentY = e.clientY;
 
-    if (this.hoverKeyDown && this.isHovering) {
-      // 清除之前的延迟
-      if (this.hoverTimeout) {
-        clearTimeout(this.hoverTimeout);
-      }
-      // 使用更短的延迟
-      this.hoverTimeout = setTimeout(() => {
-        this.doHoverTranslate();
-      }, 100);
+    // 清除之前的延迟
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
     }
+    // 使用更短的延迟
+    this.hoverTimeout = setTimeout(() => {
+      this.doHoverTranslate();
+    }, 100);
   }
 
   async doHoverTranslate() {
