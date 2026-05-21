@@ -465,6 +465,9 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 ## 🛠️ 技术架构
 
+<details>
+<summary>📋 <strong>展开</strong></summary>
+
 ### 🏗️ **核心技术栈**
 - **Manifest V3** - Chrome扩展最新标准，更安全更高效
 - **DOM API** - 直接文字提取技术，避免OCR误差
@@ -486,6 +489,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 - **批量处理** - 优化大量文字的处理效率
 - **资源预加载** - 提前加载常用资源
 
+</details>
 ---
 
 ## 📊 性能指标
