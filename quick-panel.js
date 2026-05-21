@@ -12,21 +12,31 @@ class QuickTranslationPanel {
     this.minSelectionLength = 2;
     this.translating = false;
     this.currentSelection = null;
-    
+
+    // 悬浮翻译相关
+    this.hoverEnabled = false;
+    this.hoverBubble = null;
+    this.hoverKeyDown = false;
+    this.hoverTimeout = null;
+    this.lastHoverText = '';
+
     this.init();
   }
 
   init() {
     // 加载用户设置
     this.loadSettings();
-    
+
     // 监听文字选择
     document.addEventListener('mouseup', (e) => this.handleTextSelection(e));
     document.addEventListener('keyup', (e) => this.handleTextSelection(e));
-    
+
     // 点击其他地方关闭面板
     document.addEventListener('mousedown', (e) => this.handleClickOutside(e));
-    
+
+    // 初始化悬浮翻译
+    this.initHoverTranslation();
+
     // 监听设置变更
     chrome.storage.onChanged.addListener((changes) => {
       if (changes.quickPanelEnabled) {
@@ -35,17 +45,259 @@ class QuickTranslationPanel {
       if (changes.minSelectionLength) {
         this.minSelectionLength = changes.minSelectionLength.newValue;
       }
+      if (changes.hoverTranslationEnabled) {
+        this.hoverEnabled = changes.hoverTranslationEnabled.newValue;
+        if (this.hoverEnabled) {
+          this.bindHoverEvents();
+        } else {
+          this.unbindHoverEvents();
+        }
+      }
     });
   }
 
   async loadSettings() {
-const settings = await chrome.storage.local.get([
- 'quickPanelEnabled',
- 'minSelectionLength'
-]);
-    
+    const settings = await chrome.storage.local.get([
+      'quickPanelEnabled',
+      'minSelectionLength',
+      'hoverTranslationEnabled'
+    ]);
+
     this.isEnabled = settings.quickPanelEnabled !== false; // 默认启用
     this.minSelectionLength = settings.minSelectionLength || 2;
+    this.hoverEnabled = settings.hoverTranslationEnabled || false; // 默认关闭
+  }
+
+  // 初始化悬浮翻译
+  initHoverTranslation() {
+    if (this.hoverEnabled) {
+      this.bindHoverEvents();
+    }
+  }
+
+  // 绑定悬浮翻译事件
+  bindHoverEvents() {
+    document.addEventListener('keydown', (e) => this.handleHoverKeyDown(e));
+    document.addEventListener('keyup', (e) => this.handleHoverKeyUp(e));
+    document.addEventListener('mousemove', (e) => this.handleHoverMove(e));
+  }
+
+  // 解绑悬浮翻译事件
+  unbindHoverEvents() {
+    document.removeEventListener('keydown', (e) => this.handleHoverKeyDown(e));
+    document.removeEventListener('keyup', (e) => this.handleHoverKeyUp(e));
+    document.removeEventListener('mousemove', (e) => this.handleHoverMove(e));
+    this.hideHoverBubble();
+  }
+
+  handleHoverKeyDown(e) {
+    if (!this.hoverEnabled) return;
+    if (e.key === 'Alt' && !this.hoverKeyDown) {
+      this.hoverKeyDown = true;
+      this.handleHoverMove(e);
+    }
+  }
+
+  handleHoverKeyUp(e) {
+    if (!this.hoverEnabled) return;
+    if (e.key === 'Alt') {
+      this.hoverKeyDown = false;
+      this.hideHoverBubble();
+    }
+  }
+
+  handleHoverMove(e) {
+    if (!this.hoverEnabled || !this.hoverKeyDown) return;
+
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+    }
+
+    this.hoverTimeout = setTimeout(() => {
+      this.detectAndShowHoverTranslation(e.clientX, e.clientY);
+    }, 300);
+  }
+
+  async detectAndShowHoverTranslation(clientX, clientY) {
+    const element = document.elementFromPoint(clientX, clientY);
+    if (!element) return;
+
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+      return;
+    }
+
+    const text = this.getTextUnderPoint(clientX, clientY);
+    if (!text || text.length < 2 || text.length > 500) {
+      this.hideHoverBubble();
+      return;
+    }
+
+    if (text === this.lastHoverText && this.hoverBubble) {
+      return;
+    }
+
+    this.lastHoverText = text;
+
+    if (!this.hoverBubble) {
+      this.createHoverBubble();
+    }
+
+    this.updateHoverBubblePosition(clientX, clientY);
+
+    const originalEl = this.hoverBubble.querySelector('.hover-original');
+    originalEl.textContent = text.length > 100 ? text.substring(0, 100) + '...' : text;
+
+    const resultEl = this.hoverBubble.querySelector('.hover-result');
+    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+
+    this.hoverBubble.style.display = 'block';
+
+    try {
+      const translatedText = await this.translateText(text);
+      if (this.hoverBubble) {
+        resultEl.textContent = translatedText;
+      }
+    } catch (error) {
+      if (this.hoverBubble) {
+        resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
+      }
+    }
+  }
+
+  getTextUnderPoint(x, y) {
+    const element = document.elementFromPoint(x, y);
+    if (!element) return '';
+
+    if (element.tagName === 'A' || element.tagName === 'BUTTON' ||
+        element.getAttribute('role') === 'button') {
+      return element.innerText || element.textContent || '';
+    }
+
+    const textNodes = this.getTextNodesInElement(element);
+    let closestText = '';
+    let closestDistance = Infinity;
+
+    for (const node of textNodes) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const rects = range.getClientRects();
+
+      for (const rect of rects) {
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+
+        if (distance < closestDistance && rect.width > 0 && rect.height > 0) {
+          closestDistance = distance;
+          closestText = node.textContent;
+        }
+      }
+    }
+
+    if (closestDistance > 100) {
+      return '';
+    }
+
+    return closestText.trim();
+  }
+
+  getTextNodesInElement(element) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          if (node.textContent.trim().length > 0) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
+
+    let node;
+    while (node = walker.nextNode()) {
+      textNodes.push(node);
+    }
+
+    return textNodes;
+  }
+
+  createHoverBubble() {
+    this.hoverBubble = document.createElement('div');
+    this.hoverBubble.className = 'hover-translate-bubble';
+    this.hoverBubble.innerHTML = `
+      <div class="hover-original"></div>
+      <div class="hover-divider"></div>
+      <div class="hover-result">悬停翻译</div>
+    `;
+    this.hoverBubble.style.display = 'none';
+    document.body.appendChild(this.hoverBubble);
+  }
+
+  updateHoverBubblePosition(x, y) {
+    if (!this.hoverBubble) return;
+
+    const bubbleWidth = 300;
+    const bubbleHeight = 80;
+    const gap = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let left = x - bubbleWidth / 2;
+    left = Math.max(8, Math.min(left, vw - bubbleWidth - 8));
+
+    let top = y - bubbleHeight - gap;
+    if (top < 8) {
+      top = y + gap;
+    }
+
+    this.hoverBubble.style.left = `${left}px`;
+    this.hoverBubble.style.top = `${top}px`;
+  }
+
+  hideHoverBubble() {
+    if (this.hoverBubble) {
+      this.hoverBubble.style.display = 'none';
+    }
+    this.lastHoverText = '';
+  }
+
+  async translateText(text) {
+    const settings = await chrome.storage.local.get([
+      'targetLanguage',
+      'apiProvider',
+      'apiKey',
+      'llmBaseUrl',
+      'llmModel'
+    ]);
+
+    const sourceLang = this.detectLanguage(text);
+    const targetLang = settings.targetLanguage || 'zh-CN';
+
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        action: 'translate',
+        text: text,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        apiProvider: settings.apiProvider,
+        apiKey: settings.apiKey,
+        llmBaseUrl: settings.llmBaseUrl,
+        llmModel: settings.llmModel
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error('连接失败'));
+          return;
+        }
+        if (response && response.success) {
+          resolve(response.translatedText);
+        } else {
+          reject(new Error(response?.error || '翻译失败'));
+        }
+      });
+    });
   }
 
   handleTextSelection(e) {
