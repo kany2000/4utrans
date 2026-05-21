@@ -93,6 +93,7 @@ class QuickTranslationPanel {
   }
 
   handleHoverKeyDown(e) {
+    console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown });
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
@@ -126,6 +127,14 @@ class QuickTranslationPanel {
   }
 
   async doHoverTranslate() {
+    console.log('Quick panel: doHoverTranslate called', {
+      hoverEnabled: this.hoverEnabled,
+      hoverKeyDown: this.hoverKeyDown,
+      currentText: this.currentText,
+      x: this.currentX,
+      y: this.currentY
+    });
+
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
     const clientX = this.currentX;
