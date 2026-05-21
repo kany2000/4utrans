@@ -94,7 +94,7 @@ class QuickTranslationPanel {
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt' && !this.hoverKeyDown) {
       this.hoverKeyDown = true;
-      this.handleHoverMove(e);
+      // 不需要立即获取文字，mousemove 会触发
     }
   }
 
