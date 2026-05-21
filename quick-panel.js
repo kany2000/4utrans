@@ -41,6 +41,7 @@ class QuickTranslationPanel {
 
     // 监听设置变更
     chrome.storage.onChanged.addListener((changes) => {
+      console.log('Quick panel: storage changed', changes);
       if (changes.quickPanelEnabled) {
         this.isEnabled = changes.quickPanelEnabled.newValue;
       }
@@ -49,6 +50,7 @@ class QuickTranslationPanel {
       }
       if (changes.hoverTranslationEnabled) {
         this.hoverEnabled = changes.hoverTranslationEnabled.newValue;
+        console.log('Quick panel: hoverEnabled changed to', this.hoverEnabled);
         if (this.hoverEnabled) {
           this.bindHoverEvents();
         } else {
@@ -72,6 +74,7 @@ class QuickTranslationPanel {
 
   // 初始化悬浮翻译
   initHoverTranslation() {
+    console.log('Quick panel: initHoverTranslation, hoverEnabled:', this.hoverEnabled);
     if (this.hoverEnabled) {
       this.bindHoverEvents();
     }
@@ -79,6 +82,7 @@ class QuickTranslationPanel {
 
   // 绑定悬浮翻译事件
   bindHoverEvents() {
+    console.log('Quick panel: bindHoverEvents called');
     document.addEventListener('keydown', (e) => this.handleHoverKeyDown(e));
     document.addEventListener('keyup', (e) => this.handleHoverKeyUp(e));
     document.addEventListener('mousemove', (e) => this.handleHoverMove(e));
@@ -86,6 +90,7 @@ class QuickTranslationPanel {
 
   // 解绑悬浮翻译事件
   unbindHoverEvents() {
+    console.log('Quick panel: unbindHoverEvents called');
     document.removeEventListener('keydown', (e) => this.handleHoverKeyDown(e));
     document.removeEventListener('keyup', (e) => this.handleHoverKeyUp(e));
     document.removeEventListener('mousemove', (e) => this.handleHoverMove(e));
