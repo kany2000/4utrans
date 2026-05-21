@@ -452,6 +452,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 - **批量处理** - 优化大量文字的处理效率
 - **资源预加载** - 提前加载常用资源
 
+---
+
 ## 📊 性能指标
 
 | 指标 | 数值 | 说明 |
