@@ -270,6 +270,9 @@ class ScreenshotTranslator {
         'apiProvider',
         'autoCopy',
         'showConfidence',
+        'quickPanelEnabled',
+        'hoverTranslationEnabled',
+        'minSelectionLength',
         'apiKeys',
         'llmConfig'
       ]);
@@ -280,6 +283,9 @@ class ScreenshotTranslator {
         apiProvider: result.apiProvider || 'google',
         autoCopy: result.autoCopy || false,
         showConfidence: result.showConfidence !== false,
+        quickPanelEnabled: result.quickPanelEnabled !== false,
+        hoverTranslationEnabled: result.hoverTranslationEnabled || false,
+        minSelectionLength: result.minSelectionLength || 2,
         apiKeys: result.apiKeys || {},
         llmConfig: result.llmConfig || { baseUrl: '', model: '' }
       };
