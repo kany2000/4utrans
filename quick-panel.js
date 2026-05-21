@@ -292,32 +292,6 @@ class QuickTranslationPanel {
     return text.length;
   }
 
-    return closestText.trim();
-  }
-
-  getTextNodesInElement(element) {
-    const textNodes = [];
-    const walker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          if (node.textContent.trim().length > 0) {
-            return NodeFilter.FILTER_ACCEPT;
-          }
-          return NodeFilter.FILTER_REJECT;
-        }
-      }
-    );
-
-    let node;
-    while (node = walker.nextNode()) {
-      textNodes.push(node);
-    }
-
-    return textNodes;
-  }
-
   createHoverBubble() {
     this.hoverBubble = document.createElement('div');
     this.hoverBubble.className = 'hover-translate-bubble';
