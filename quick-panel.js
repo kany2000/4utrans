@@ -99,16 +99,15 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown });
-    if (!this.hoverEnabled) return;
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
-      // 立即触发一次翻译，不需要等 mousemove
+      // 立即触发一次翻译
       this.doHoverTranslate();
     }
   }
 
   handleHoverKeyUp(e) {
-    if (!this.hoverEnabled) return;
+    console.log('Quick panel: Alt key up');
     if (e.key === 'Alt') {
       this.hoverKeyDown = false;
       this.hideHoverBubble();
