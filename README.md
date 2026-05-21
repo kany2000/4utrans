@@ -250,6 +250,12 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 2. **选择文字** - 拖拽框选要翻译的区域
 3. **查看结果** - 自动弹出翻译窗口
 
+### 悬浮翻译（按住 Alt 键）
+1. **启用功能** - 在高级设置中勾选"启用悬浮翻译"
+2. **按住 Alt 键** - 将鼠标悬停在任意文字上
+3. **查看翻译** - 自动显示悬浮翻译气泡，悬停到不同文字自动翻译
+4. **松开 Alt** - 关闭悬浮翻译
+
 ### 手动操作
 1. **启动功能**
    - 点击浏览器工具栏中的 📷 图标
@@ -432,6 +438,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
   - **免费翻译**：Google翻译、Microsoft翻译（无需 API Key）
   - **GLM**：需要智谱 API Key
   - **LLM自定义**：需要 API Key + Base URL + 模型名称
+- **悬浮翻译** - 按住 Alt 键悬停文字即可翻译（需启用）
 - **自动复制** - 翻译完成后自动复制结果
 - **显示信心度** - 显示文字识别准确度
 - **快捷键设置** - 自定义快捷键组合
