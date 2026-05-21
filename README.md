@@ -50,11 +50,9 @@
 
 <details>
   
- <summary>📋 <strong>各版本亮点</strong></summary>
+ <summary>📋 <strong>版本亮点详情</strong></summary>
 
-<br>
-
-## 🆕 版本亮点 (v2.1.0)
+## 🆕 版本亮点 (v2.1.0)（当前版本）
 
 ### 🎯 **翻译面板智能定位**
 - 面板现在出现在**选中文字附近**，不再固定在屏幕正中央
