@@ -312,9 +312,41 @@ const settings = await chrome.storage.local.get([
     }
     
     // 添加事件监听
-    this.panel.querySelector('.panel-close').addEventListener('click', () => {
-      this.hidePanel();
-    });
+this.panel.querySelector('.panel-close').addEventListener('click', () => {
+  this.hidePanel();
+});
+
+// 添加拖拽功能
+this.isDragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+const header = this.panel.querySelector('.panel-header');
+header.style.cursor = 'move';
+header.addEventListener('mousedown', (e) => {
+  this.isDragging = true;
+  const rect = this.panel.getBoundingClientRect();
+  dragOffsetX = e.clientX - rect.left;
+  dragOffsetY = e.clientY - rect.top;
+  e.preventDefault();
+});
+const moveHandler = (e) => {
+  if (!this.isDragging) return;
+  let left = e.clientX - dragOffsetX;
+  let top = e.clientY - dragOffsetY;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const rect = this.panel.getBoundingClientRect();
+  const panelWidth = rect.width;
+  const panelHeight = rect.height;
+  left = Math.max(0, Math.min(left, vw - panelWidth));
+  top = Math.max(0, Math.min(top, vh - panelHeight));
+  this.panel.style.left = `${left}px`;
+  this.panel.style.top = `${top}px`;
+};
+document.addEventListener('mousemove', moveHandler);
+document.addEventListener('mouseup', () => {
+  this.isDragging = false;
+});
     
     // 添加显示动画
     setTimeout(() => {
