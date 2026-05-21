@@ -244,7 +244,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 <summary>📋 <strong>主副界面更替</strong></summary>
 
 <br>
----
+
 <div align="center">
 
 ### 📱 主界面演进历程
