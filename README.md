@@ -390,6 +390,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 </div>
 
+---
+
 ## ⚙️ 设置选项
 
 ### 主界面设置（推荐使用）
@@ -424,6 +426,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 - **用户目标语言** - 使用您设置的目标语言进行翻译
 - **一键启动** - Alt+1 即可开始翻译
 - **灵活配置** - 可在设置中更改目标语言
+
+---
 
 ## 🛠️ 技术架构
 
