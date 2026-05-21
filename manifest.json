@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuickTranslate - 快译",
-"version": "2.1.0",
+"version": "2.1.1",
   "description": "QuickTranslate 快译 - 選中文字即可快速翻譯，支持多種翻譯引擎和大模型",
   "author": "QuickTranslate Team",
   "permissions": [
