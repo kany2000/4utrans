@@ -96,6 +96,8 @@ class QuickTranslationPanel {
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
+      // 立即触发一次翻译，不需要等 mousemove
+      this.doHoverTranslate();
     }
   }
 
