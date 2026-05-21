@@ -46,6 +46,8 @@
 - **响应式设计** - 适配不同屏幕尺寸
 - **紫色主题** - 优雅的渐变配色方案
 
+---
+
 ## 🎨 **各版本亮点说明**
 
 <details>
@@ -67,8 +69,6 @@
 ### 🔧 **内部改进**
 - 备用翻译服务返回来源信息，响应中新增 `backupService` 字段
 - 代码头部注释统一更新为 "QuickTranslate"
-
----
 
 ## 🎉 历史版本亮点 (v2.0.0)
 
@@ -208,6 +208,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 > 💡 **提示**: 首次安装后建议访问 [测试页面](test_page.html) 验证功能正常
 
+---
+
 ## 🚀 使用方法
 
 ### 首次设置
@@ -237,6 +239,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 4. **退出功能**
    - 按 `ESC` 键快速退出
    - 点击覆盖层背景退出
+
+---
 
 ## 🎨 界面展示
 
@@ -276,7 +280,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
   </tr>
 </table>
 
-<br>
+---
 
 **💡 设计理念**
 
@@ -456,6 +460,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 | 支持语言 | 10+ | 日韩英中等主流语言 |
 | 兼容性 | Chrome 88+ | 支持最新浏览器 |
 
+---
+
 ## 🔧 开发指南
 
 ### 本地开发
@@ -476,6 +482,8 @@ cd QuickTranslate
 - **扩展页面** - `chrome://extensions/` 查看扩展状态
 - **背景页面** - 点击"检查视图"调试后台脚本
 - **快捷键测试** - `chrome://extensions/shortcuts` 测试快捷键
+
+---
 
 ## 📝 版本历史
 
@@ -550,6 +558,8 @@ cd QuickTranslate
 - **界面优化** - 主界面添加快速保存按钮，提升用户体验
 
 </details>
+
+---
 
 ## 🤝 常见问题
 
