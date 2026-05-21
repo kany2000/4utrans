@@ -17,8 +17,11 @@ class QuickTranslationPanel {
     this.hoverEnabled = false;
     this.hoverBubble = null;
     this.hoverKeyDown = false;
+    this.isHovering = false;
     this.hoverTimeout = null;
-    this.lastHoverText = '';
+    this.currentText = '';
+    this.currentX = 0;
+    this.currentY = 0;
 
     this.init();
   }
@@ -94,7 +97,7 @@ class QuickTranslationPanel {
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt' && !this.hoverKeyDown) {
       this.hoverKeyDown = true;
-      // 不需要立即获取文字，mousemove 会触发
+      this.isHovering = true;
     }
   }
 
@@ -102,68 +105,73 @@ class QuickTranslationPanel {
     if (!this.hoverEnabled) return;
     if (e.key === 'Alt') {
       this.hoverKeyDown = false;
+      this.isHovering = false;
       this.hideHoverBubble();
     }
   }
 
   handleHoverMove(e) {
-    if (!this.hoverEnabled || !this.hoverKeyDown) return;
-    this.detectAndShowHoverTranslation(e.clientX, e.clientY);
+    if (!this.hoverEnabled) return;
+    this.currentX = e.clientX;
+    this.currentY = e.clientY;
+
+    if (this.hoverKeyDown && this.isHovering) {
+      // 清除之前的延迟
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+      }
+      // 使用更短的延迟
+      this.hoverTimeout = setTimeout(() => {
+        this.doHoverTranslate();
+      }, 100);
+    }
   }
 
-  async detectAndShowHoverTranslation(clientX, clientY) {
+  async doHoverTranslate() {
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
-    // 清除之前的延迟
-    if (this.hoverTimeout) {
-      clearTimeout(this.hoverTimeout);
+    const clientX = this.currentX;
+    const clientY = this.currentY;
+    const text = this.getWordAtPoint(clientX, clientY);
+
+    if (!text || text.length < 2 || text.length > 200) {
+      this.hideHoverBubble();
+      this.currentText = '';
+      return;
     }
 
-    // 清除之前的延迟请求
-    if (this.hoverTimeout) {
-      clearTimeout(this.hoverTimeout);
-    }
-
-    // 使用更短的延迟
-    this.hoverTimeout = setTimeout(async () => {
-      const text = this.getWordAtPoint(clientX, clientY);
-      if (!text || text.length < 2 || text.length > 200) {
-        this.hideHoverBubble();
-        return;
-      }
-
-      // 如果文字没变化，不重复翻译
-      if (text === this.lastHoverText && this.hoverBubble && this.hoverBubble.style.display === 'block') {
-        return;
-      }
-
-      this.lastHoverText = text;
-
-      if (!this.hoverBubble) {
-        this.createHoverBubble();
-      }
-
+    // 如果文字没变化，更新位置即可
+    if (text === this.currentText && this.hoverBubble) {
       this.updateHoverBubblePosition(clientX, clientY);
+      return;
+    }
 
-      const originalEl = this.hoverBubble.querySelector('.hover-original');
-      originalEl.textContent = text;
+    this.currentText = text;
 
-      const resultEl = this.hoverBubble.querySelector('.hover-result');
-      resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+    if (!this.hoverBubble) {
+      this.createHoverBubble();
+    }
 
-      this.hoverBubble.style.display = 'block';
+    this.updateHoverBubblePosition(clientX, clientY);
 
-      try {
-        const translatedText = await this.translateText(text);
-        if (this.hoverBubble) {
-          resultEl.textContent = translatedText;
-        }
-      } catch (error) {
-        if (this.hoverBubble) {
-          resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
-        }
+    const originalEl = this.hoverBubble.querySelector('.hover-original');
+    originalEl.textContent = text;
+
+    const resultEl = this.hoverBubble.querySelector('.hover-result');
+    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+
+    this.hoverBubble.style.display = 'block';
+
+    try {
+      const translatedText = await this.translateText(text);
+      if (this.hoverBubble && this.currentText === text) {
+        resultEl.textContent = translatedText;
       }
-    }, 100);
+    } catch (error) {
+      if (this.hoverBubble && this.currentText === text) {
+        resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
+      }
+    }
   }
 
   // 获取指定坐标处的单词
@@ -329,7 +337,7 @@ class QuickTranslationPanel {
     if (this.hoverBubble) {
       this.hoverBubble.style.display = 'none';
     }
-    this.lastHoverText = '';
+    this.currentText = '';
   }
 
   async translateText(text) {
