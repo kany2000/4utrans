@@ -1,4 +1,4 @@
-# 🚀 QuickTranslate - 快译 (v2.1.1)
+# 🚀 QuickTranslate - 快译 (v2.1.2)
 
 > 🎉 **革命性更新** - 全新快捷翻译面板，选中文字即可翻译！操作步骤减少60%，翻译速度提升75%！
 
@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/kany2000/QuickTranslate?style=social)](https://github.com/kany2000/QuickTranslate)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/QuickTranslate)
-[![Version](https://img.shields.io/badge/version-2.1.1-green)](https://github.com/kany2000/QuickTranslate)
+[![Version](https://img.shields.io/badge/version-2.1.2-green)](https://github.com/kany2000/QuickTranslate)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ 核心特色
