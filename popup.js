@@ -1,15 +1,36 @@
 // Popup 界面控制器
 class PopupController {
-  constructor() {
-    this.elements = {};
-    this.settings = {};
-    this.init();
-  }
+   constructor() {
+     this.elements = {};
+     this.settings = {};
+     this.init();
+   }
 
   init() {
     this.bindElements();
     this.bindEvents();
     this.loadSettings();
+    // 显示欢迎 toast 5 秒
+    this.showWelcomeToast();
+  }
+
+  showWelcomeToast() {
+    const welcomeToast = document.getElementById('welcome-toast');
+    if (welcomeToast) {
+      welcomeToast.classList.remove('hidden');
+      // 5 秒后隐藏
+      setTimeout(() => {
+        welcomeToast.classList.add('hidden');
+      }, 5000);
+      
+      // 点击关闭按钮手动关闭
+      const closeBtn = welcomeToast.querySelector('.toast-close');
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          welcomeToast.classList.add('hidden');
+        };
+      }
+    }
   }
 
   bindElements() {
@@ -133,7 +154,7 @@ class PopupController {
 
     // 自定義模型輸入框變更時標記未保存
     this.elements.llmModelCustom.addEventListener('input', () => this.showUnsavedChanges());
-    
+
     // 自定義模型輸入框失去焦點時，如果為空則顯示下拉框
     this.elements.llmModelCustom.addEventListener('blur', () => {
       const customValue = this.elements.llmModelCustom.value.trim();
@@ -394,7 +415,7 @@ class PopupController {
     this.elements.apiProvider.value = this.settings.apiProvider || 'google';
     this.elements.autoCopy.checked = this.settings.autoCopy || false;
     this.elements.showConfidence.checked = this.settings.showConfidence !== false;
-    
+
     // 更新快捷面板設置
     this.elements.quickPanelEnabled.checked = this.settings.quickPanelEnabled !== false;
     this.elements.minSelectionLength.value = this.settings.minSelectionLength || 2;
@@ -409,12 +430,12 @@ class PopupController {
     if (this.settings.llmConfig) {
       this.elements.llmBaseUrl.value = this.settings.llmConfig.baseUrl || '';
       const savedModel = this.settings.llmConfig.model || '';
-      
+
       if (savedModel) {
         // 檢查模型是否已在下拉列表中
         const options = this.elements.llmModel.options;
         let found = false;
-        
+
         for (let i = 0; i < options.length; i++) {
           if (options[i].value === savedModel) {
             this.elements.llmModel.value = savedModel;
@@ -425,7 +446,7 @@ class PopupController {
             break;
           }
         }
-        
+
         if (!found) {
           // 模型不在列表中，使用自定義輸入框顯示
           this.elements.llmModel.classList.add('hidden');
@@ -553,7 +574,7 @@ class PopupController {
         const modelFromDropdown = this.elements.llmModel.value;
         const modelFromCustomInput = this.elements.llmModelCustom.value.trim();
         const finalModel = isCustomInputVisible ? modelFromCustomInput : modelFromDropdown;
-        
+
         if (!baseUrl) {
           this.showStatus('請填寫 Base URL', 'error');
           return;
@@ -588,23 +609,23 @@ class PopupController {
             const isCustomInputVisible = !this.elements.llmModelCustom.classList.contains('hidden');
             const dropdownValue = this.elements.llmModel.value;
             const customValue = this.elements.llmModelCustom.value.trim();
-            
+
             // 如果自定義輸入框可見，使用自定義輸入的值
             // 否則使用下拉框的值（但排除 __custom__ 選項）
             let finalModel = isCustomInputVisible ? customValue : dropdownValue;
-            
+
             // 確保不會保存 __custom__ 這個佔位符
             if (finalModel === '__custom__') {
               finalModel = customValue || '';
             }
-            
+
             console.log('Popup: Saving LLM model config:', {
               isCustomInputVisible,
               dropdownValue,
               customValue,
               finalModel
             });
-            
+
             return finalModel;
           })()
         } : this.settings.llmConfig

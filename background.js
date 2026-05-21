@@ -6,7 +6,37 @@ class ScreenshotTranslator {
     console.log('ScreenshotTranslator constructor called');
     this.isProcessing = false;
     this.setupMessageListeners();
+    this.setupInstallListener();
     console.log('ScreenshotTranslator initialized');
+  }
+
+  setupInstallListener() {
+    chrome.runtime.onInstalled.addListener((details) => {
+      console.log('Extension installed or updated:', details);
+      if (details.reason === 'install') {
+        // 使用 storage 存储安装标记，popup 打开时会检查
+        chrome.storage.local.set({ shouldShowWelcome: true });
+
+        // 安装完成后立即显示欢迎通知，持续5秒
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon16.png',
+          title: 'QuickTranslate 安装完成',
+          message: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。',
+          requireInteraction: false,
+          silent: false
+        });
+
+        // 5秒后自动关闭通知
+        setTimeout(() => {
+          chrome.notifications.getAll((notifications) => {
+            Object.keys(notifications).forEach(id => {
+              chrome.notifications.clear(id);
+            });
+          });
+        }, 5000);
+      }
+    });
   }
 
   setupMessageListeners() {
