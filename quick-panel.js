@@ -23,9 +23,9 @@ class QuickTranslationPanel {
     this.init();
   }
 
-  init() {
+  async init() {
     // 加载用户设置
-    this.loadSettings();
+    await this.loadSettings();
 
     // 监听文字选择
     document.addEventListener('mouseup', (e) => this.handleTextSelection(e));
