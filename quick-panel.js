@@ -108,95 +108,189 @@ class QuickTranslationPanel {
 
   handleHoverMove(e) {
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
+    this.detectAndShowHoverTranslation(e.clientX, e.clientY);
+  }
 
+  async detectAndShowHoverTranslation(clientX, clientY) {
+    if (!this.hoverEnabled || !this.hoverKeyDown) return;
+
+    // 清除之前的延迟
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
     }
 
-    this.hoverTimeout = setTimeout(() => {
-      this.detectAndShowHoverTranslation(e.clientX, e.clientY);
-    }, 300);
+    // 清除之前的延迟请求
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+    }
+
+    // 使用更短的延迟
+    this.hoverTimeout = setTimeout(async () => {
+      const text = this.getWordAtPoint(clientX, clientY);
+      if (!text || text.length < 2 || text.length > 200) {
+        this.hideHoverBubble();
+        return;
+      }
+
+      // 如果文字没变化，不重复翻译
+      if (text === this.lastHoverText && this.hoverBubble && this.hoverBubble.style.display === 'block') {
+        return;
+      }
+
+      this.lastHoverText = text;
+
+      if (!this.hoverBubble) {
+        this.createHoverBubble();
+      }
+
+      this.updateHoverBubblePosition(clientX, clientY);
+
+      const originalEl = this.hoverBubble.querySelector('.hover-original');
+      originalEl.textContent = text;
+
+      const resultEl = this.hoverBubble.querySelector('.hover-result');
+      resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+
+      this.hoverBubble.style.display = 'block';
+
+      try {
+        const translatedText = await this.translateText(text);
+        if (this.hoverBubble) {
+          resultEl.textContent = translatedText;
+        }
+      } catch (error) {
+        if (this.hoverBubble) {
+          resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
+        }
+      }
+    }, 100);
   }
 
-  async detectAndShowHoverTranslation(clientX, clientY) {
-    const element = document.elementFromPoint(clientX, clientY);
-    if (!element) return;
-
-    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
-      return;
-    }
-
-    const text = this.getTextUnderPoint(clientX, clientY);
-    if (!text || text.length < 2 || text.length > 500) {
-      this.hideHoverBubble();
-      return;
-    }
-
-    if (text === this.lastHoverText && this.hoverBubble) {
-      return;
-    }
-
-    this.lastHoverText = text;
-
-    if (!this.hoverBubble) {
-      this.createHoverBubble();
-    }
-
-    this.updateHoverBubblePosition(clientX, clientY);
-
-    const originalEl = this.hoverBubble.querySelector('.hover-original');
-    originalEl.textContent = text.length > 100 ? text.substring(0, 100) + '...' : text;
-
-    const resultEl = this.hoverBubble.querySelector('.hover-result');
-    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
-
-    this.hoverBubble.style.display = 'block';
-
-    try {
-      const translatedText = await this.translateText(text);
-      if (this.hoverBubble) {
-        resultEl.textContent = translatedText;
-      }
-    } catch (error) {
-      if (this.hoverBubble) {
-        resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
-      }
-    }
-  }
-
-  getTextUnderPoint(x, y) {
+  // 获取指定坐标处的单词
+  getWordAtPoint(x, y) {
+    // 跳过输入框
     const element = document.elementFromPoint(x, y);
     if (!element) return '';
-
-    if (element.tagName === 'A' || element.tagName === 'BUTTON' ||
-        element.getAttribute('role') === 'button') {
-      return element.innerText || element.textContent || '';
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+      return '';
     }
 
-    const textNodes = this.getTextNodesInElement(element);
-    let closestText = '';
-    let closestDistance = Infinity;
+    // 如果是链接或按钮，获取其文字
+    if (element.tagName === 'A' || element.tagName === 'BUTTON' ||
+        element.getAttribute('role') === 'button') {
+      return (element.innerText || element.textContent || '').trim();
+    }
 
-    for (const node of textNodes) {
+    // 使用 caretRangeFromPoint 获取精确位置
+    let textNode = null;
+    let offset = 0;
+
+    if (document.caretRangeFromPoint) {
+      const range = document.caretRangeFromPoint(x, y);
+      if (range) {
+        textNode = range.startContainer;
+        offset = range.startOffset;
+      }
+    } else {
+      // 降级方案
+      const pos = this.getPositionFromPoint(x, y);
+      if (!pos) return '';
+      textNode = pos.node;
+      offset = pos.offset;
+    }
+
+    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+      return '';
+    }
+
+    const text = textNode.textContent;
+    if (!text) return '';
+
+    // 找到单词边界
+    let start = offset;
+    let end = offset;
+
+    // 向前查找单词开始
+    while (start > 0 && /\w/.test(text[start - 1])) {
+      start--;
+    }
+
+    // 向后查找单词结束
+    while (end < text.length && /\w/.test(text[end])) {
+      end++;
+    }
+
+    const word = text.substring(start, end).trim();
+
+    // 如果没有找到有效单词，尝试获取附近的短句
+    if (!word || word.length < 2) {
+      // 获取当前位置附近的几个字符作为备选
+      const nearbyText = text.substring(Math.max(0, offset - 10), Math.min(text.length, offset + 10));
+      const trimmed = nearbyText.trim();
+      if (trimmed.length >= 2) {
+        return trimmed;
+      }
+      return '';
+    }
+
+    return word;
+  }
+
+  // 降级方案：通过遍历获取位置
+  getPositionFromPoint(x, y) {
+    const element = document.elementFromPoint(x, y);
+    if (!element) return null;
+
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          if (node.textContent.trim().length > 0) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
+
+    let node;
+    while (node = walker.nextNode()) {
       const range = document.createRange();
       range.selectNodeContents(node);
+
       const rects = range.getClientRects();
-
-      for (const rect of rects) {
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-
-        if (distance < closestDistance && rect.width > 0 && rect.height > 0) {
-          closestDistance = distance;
-          closestText = node.textContent;
+      for (let i = 0; i < rects.length; i++) {
+        const rect = rects[i];
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          // 找到了包含点的节点，计算偏移
+          const offset = this.getOffsetAtPoint(x, y, node, rect);
+          return { node, offset };
         }
       }
     }
 
-    if (closestDistance > 100) {
-      return '';
+    return null;
+  }
+
+  getOffsetAtPoint(x, y, textNode, rect) {
+    const text = textNode.textContent;
+    const range = document.createRange();
+
+    for (let i = 0; i <= text.length; i++) {
+      range.setStart(textNode, i);
+      range.collapse(true);
+      const rects = range.getClientRects();
+      if (rects.length === 0) continue;
+
+      const charRect = rects[0];
+      if (x < charRect.left + charRect.width / 2) {
+        return i;
+      }
     }
+
+    return text.length;
+  }
 
     return closestText.trim();
   }
