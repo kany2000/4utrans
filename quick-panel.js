@@ -119,6 +119,11 @@ class QuickTranslationPanel {
     console.log('Quick panel: Alt key up');
     if (e.key === 'Alt') {
       this.hoverKeyDown = false;
+      // 清除悬停延迟
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+        this.hoverTimeout = null;
+      }
       this.hideHoverBubble();
       this.currentText = '';
     }
