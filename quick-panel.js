@@ -142,14 +142,13 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
-    // 只记录 Alt 键状态，不做其他操作
-    // 所有翻译逻辑都在 mousemove 中处理
+    this.hoverKeyDown = true;
   }
 
   handleHoverKeyUp(e) {
     if (e.key !== 'Alt') return;
+    this.hoverKeyDown = false;
 
-    // 清除悬停延迟
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
       this.hoverTimeout = null;
@@ -159,38 +158,33 @@ class QuickTranslationPanel {
     this.currentText = '';
   }
 
-  // 在当前光标位置进行翻译
-  translateAtCurrentPosition() {
-    if (!this.hoverEnabled) return;
+  handleHoverMove(e) {
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
 
-    // 首先尝试使用 mousemove 记录的位置
-    if (typeof this.lastMouseX === 'number' && typeof this.lastMouseY === 'number') {
-      const text = this.getWordAtPoint(this.lastMouseX, this.lastMouseY);
-      if (text && text.length >= 2) {
-        this.startHoverTranslation(text, this.lastMouseX, this.lastMouseY);
-        return;
-      }
-    }
+    if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
-    // 如果 mousemove 位置没有有效文字，尝试使用 Selection API
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const text = this.getWordAtPoint(x, y);
-        if (text && text.length >= 2) {
-          this.startHoverTranslation(text, x, y);
-          return;
-        }
-      }
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
     }
+    this.hoverTimeout = setTimeout(() => {
+      this.doHoverTranslate();
+    }, 50);
   }
 
-  // 开始悬停翻译
-  startHoverTranslation(text, x, y) {
+  doHoverTranslate() {
+    if (!this.hoverEnabled || !this.hoverKeyDown) return;
+    if (typeof this.lastMouseX !== 'number' || typeof this.lastMouseY !== 'number') return;
+
+    const x = this.lastMouseX;
+    const y = this.lastMouseY;
+    const text = this.getWordAtPoint(x, y);
+
+    if (!text || text.length < 2) {
+      this.hideHoverBubble();
+      return;
+    }
+
     if (!this.hoverBubble) {
       this.createHoverBubble();
     }
@@ -200,17 +194,15 @@ class QuickTranslationPanel {
     originalEl.textContent = text;
 
     const resultEl = this.hoverBubble.querySelector('.hover-result');
-    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
 
-    this.hoverBubble.style.display = 'block';
-
-    // 如果文字没变化，不需要重新翻译
-    if (text === this.currentText) {
+    if (text === this.currentText && this.hoverBubble.style.display !== 'none') {
+      this.hoverBubble.style.display = 'block';
       return;
     }
 
     this.currentText = text;
-    this.isHovering = true;
+    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+    this.hoverBubble.style.display = 'block';
 
     this.performHoverTranslate(text);
   }
@@ -221,19 +213,19 @@ class QuickTranslationPanel {
       let translatedText;
       if (this.multiEngineEnabled) {
         const multiResult = await this.translateMultiEngineHover(text);
-        if (this.isHovering && text === this.currentText) {
+        if (text === this.currentText) {
           this.showMultiEngineHoverResults(multiResult, text);
         }
         return;
       } else {
         translatedText = await this.translateText(text);
       }
-      if (this.isHovering && this.hoverBubble && text === this.currentText) {
+      if (this.hoverBubble && text === this.currentText) {
         const resultEl = this.hoverBubble.querySelector('.hover-result');
         resultEl.textContent = translatedText;
       }
     } catch (error) {
-      if (this.isHovering && this.hoverBubble && text === this.currentText) {
+      if (this.hoverBubble && text === this.currentText) {
         const resultEl = this.hoverBubble.querySelector('.hover-result');
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
