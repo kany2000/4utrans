@@ -143,38 +143,34 @@ class QuickTranslationPanel {
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
 
+    // 始终重置状态，确保 Alt 键可以再次触发
     this.hoverKeyDown = true;
 
     // 立即获取当前光标位置并翻译
     this.translateAtCurrentPosition();
   }
 
+  handleHoverKeyUp(e) {
+    if (e.key !== 'Alt') return;
+
+    this.hoverKeyDown = false;
+
+    // 清除悬停延迟
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = null;
+    }
+
+    this.hideHoverBubble();
+    this.currentText = '';
+    this.isHovering = false;
+  }
+
   // 在当前光标位置进行翻译
   translateAtCurrentPosition() {
     if (!this.hoverEnabled) return;
 
-    // 尝试使用 CaretRangeFromPoint 获取当前位置的文字
-    // 这种方式不依赖于 mousemove 记录的位置
-    if (document.caretRangeFromPoint) {
-      // 使用一个临时的不存在的坐标来触发caretRangeFromPoint
-      // 实际上我们需要用鼠标事件的位置，但 keydown 没有鼠标位置
-      // 所以我们需要用 Selection API 来获取当前光标位置
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        // 有选中的文字，使用选区中心点
-        const text = this.getWordAtPoint(x, y);
-        if (text && text.length >= 2) {
-          this.startHoverTranslation(text, x, y);
-          return;
-        }
-      }
-    }
-
-    // 如果没有选中文字，使用 mousemove 记录的位置
+    // 首先尝试使用 mousemove 记录的位置
     if (typeof this.lastMouseX === 'number' && typeof this.lastMouseY === 'number') {
       const text = this.getWordAtPoint(this.lastMouseX, this.lastMouseY);
       if (text && text.length >= 2) {
@@ -183,8 +179,21 @@ class QuickTranslationPanel {
       }
     }
 
-    // 如果都没有，记录位置等待 mousemove
-    // 下次 mousemove 会触发翻译
+    // 如果 mousemove 位置没有有效文字，尝试使用 Selection API
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const text = this.getWordAtPoint(x, y);
+        if (text && text.length >= 2) {
+          this.startHoverTranslation(text, x, y);
+          return;
+        }
+      }
+    }
   }
 
   // 开始悬停翻译
