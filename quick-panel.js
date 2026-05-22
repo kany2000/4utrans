@@ -116,12 +116,15 @@ class QuickTranslationPanel {
   }
 
   handleHoverKeyDown(e) {
-    console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown });
+    console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown, hasClientX: 'clientX' in e });
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
-      // 使用当前鼠标位置，而不是旧的位置
-      this.lastMouseX = e.clientX;
-      this.lastMouseY = e.clientY;
+      // keydown 事件没有 clientX/clientY，使用 mousemove 记录的位置
+      // 如果位置无效（undefined），不触发翻译
+      if (this.lastMouseX === undefined || this.lastMouseY === undefined) {
+        console.log('Quick panel: No mouse position yet, skipping translate');
+        return;
+      }
       // 立即触发一次翻译
       this.doHoverTranslate();
     }
@@ -146,6 +149,13 @@ class QuickTranslationPanel {
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
 
+    // 如果鼠标在输入框上，清除位置
+    const element = document.elementFromPoint(e.clientX, e.clientY);
+    if (element && (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable)) {
+      this.lastMouseX = undefined;
+      this.lastMouseY = undefined;
+    }
+
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
     // 清除之前的延迟
@@ -169,9 +179,16 @@ class QuickTranslationPanel {
 
     if (!this.hoverEnabled || !this.hoverKeyDown) return;
 
-    // 使用追踪的鼠标位置
-    const clientX = this.lastMouseX || this.currentX;
-    const clientY = this.lastMouseY || this.currentY;
+    // 检查位置是否有效
+    if (this.lastMouseX === undefined || this.lastMouseY === undefined ||
+        typeof this.lastMouseX !== 'number' || typeof this.lastMouseY !== 'number' ||
+        isNaN(this.lastMouseX) || isNaN(this.lastMouseY)) {
+      console.log('Quick panel: Invalid mouse position, skipping');
+      return;
+    }
+
+    const clientX = this.lastMouseX;
+    const clientY = this.lastMouseY;
     const text = this.getWordAtPoint(clientX, clientY);
 
     if (!text || text.length < 2 || text.length > 200) {
@@ -264,7 +281,8 @@ class QuickTranslationPanel {
         action: 'translateMultiEngine',
         text: text,
         sourceLang: sourceLang,
-        targetLang: targetLang
+        targetLang: targetLang,
+        includeLLM: this.multiEngineEnabled
       }, (response) => {
         if (chrome.runtime.lastError) {
           reject(new Error('连接失败'));
@@ -663,32 +681,6 @@ class QuickTranslationPanel {
         }
         if (response && response.success) {
           this.showMultiResults(text, response.results, response.errors, sourceLang, targetLang);
-          resolve(response);
-        } else {
-          reject(new Error(response?.error || '多引擎翻译失败'));
-        }
-      });
-    });
-  }
-
-  // 悬停翻译的多引擎方法
-  async translateMultiEngineHover(text) {
-    const sourceLang = this.detectLanguage(text);
-    const targetLang = this.targetLanguage || 'zh-CN';
-
-    return new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({
-        action: 'translateMultiEngine',
-        text: text,
-        sourceLang: sourceLang,
-        targetLang: targetLang,
-        includeLLM: this.multiEngineEnabled  // 传递多引擎开关状态
-      }, (response) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error('连接失败'));
-          return;
-        }
-        if (response && response.success) {
           resolve(response);
         } else {
           reject(new Error(response?.error || '多引擎翻译失败'));

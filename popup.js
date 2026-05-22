@@ -173,12 +173,12 @@ class PopupController {
     });
 
     // LLM 配置變更時標記未保存
-    this.elements.apiKey.addEventListener('input', () => this.showUnsavedChanges());
+    this.elements.customApiKey?.addEventListener('input', () => this.showUnsavedChanges());
     this.elements.llmBaseUrl.addEventListener('input', () => this.showUnsavedChanges());
   }
 
   async fetchAvailableModels() {
-    const apiKey = this.elements.apiKey.value.trim();
+    const apiKey = this.elements.customApiKey?.value.trim() || this.elements.apiKey?.value.trim() || '';
     const baseUrl = this.elements.llmBaseUrl.value.trim();
 
     if (!apiKey || !baseUrl) {
@@ -489,8 +489,18 @@ class PopupController {
     // LLM 自定義配置顯示/隱藏（只有 custom 需要）
     if (provider === 'custom') {
       this.elements.llmCustomConfig.classList.remove('hidden');
+      // 启用 LLM 相关输入框
+      this.elements.llmBaseUrl?.removeAttribute('disabled');
+      this.elements.llmModel?.removeAttribute('disabled');
+      this.elements.llmModelCustom?.removeAttribute('disabled');
+      this.elements.fetchModels?.removeAttribute('disabled');
     } else {
       this.elements.llmCustomConfig.classList.add('hidden');
+      // 禁用 LLM 相关输入框
+      this.elements.llmBaseUrl?.setAttribute('disabled', 'true');
+      this.elements.llmModel?.setAttribute('disabled', 'true');
+      this.elements.llmModelCustom?.setAttribute('disabled', 'true');
+      this.elements.fetchModels?.setAttribute('disabled', 'true');
     }
 
     // 根据 provider 显示对应的 API Key 输入框
