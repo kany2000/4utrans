@@ -260,9 +260,8 @@ class QuickTranslationPanel {
       if (this.hoverTimeout) {
         clearTimeout(this.hoverTimeout);
       }
-      // 延迟触发翻译，避免过于频繁
       this.hoverTimeout = setTimeout(() => {
-        this.translateAtCurrentPosition();
+        this.doHoverTranslate();
       }, 50);
     }
   }
