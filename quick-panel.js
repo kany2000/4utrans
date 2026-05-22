@@ -560,7 +560,7 @@ class QuickTranslationPanel {
           return;
         }
         if (response && response.success) {
-          this.showMultiResults(text, response.results, sourceLang, targetLang);
+          this.showMultiResults(text, response.results, response.errors, sourceLang, targetLang);
           resolve(response);
         } else {
           reject(new Error(response?.error || '多引擎翻译失败'));
@@ -570,7 +570,7 @@ class QuickTranslationPanel {
   }
 
   // 显示多引擎结果
-  showMultiResults(originalText, results, sourceLang, targetLang) {
+  showMultiResults(originalText, results, errors, sourceLang, targetLang) {
     if (!this.panel) return;
 
     const body = this.panel.querySelector('.panel-body');
@@ -605,7 +605,7 @@ class QuickTranslationPanel {
       glm: '#f59e0b'
     };
 
-    // 添加每个引擎的结果
+    // 显示成功的结果
     for (const [engine, translation] of Object.entries(results)) {
       const resultItem = document.createElement('div');
       resultItem.className = 'multi-result-item';
@@ -651,13 +651,40 @@ class QuickTranslationPanel {
       resultsContainer.appendChild(resultItem);
     }
 
+    // 显示失败的引擎
+    for (const [engine, errorMsg] of Object.entries(errors)) {
+      const engineName = engineNames[engine] || engine;
+      const engineColor = engineColors[engine] || '#667eea';
+
+      const errorItem = document.createElement('div');
+      errorItem.className = 'multi-result-item multi-error-item';
+      errorItem.innerHTML = `
+        <div class="multi-result-header">
+          <span class="multi-engine-name" style="color: ${engineColor}">${engineName}</span>
+          <span class="multi-error-badge">失败</span>
+        </div>
+        <div class="multi-result-text multi-error-text">${this.escapeHtml(errorMsg)}</div>
+      `;
+      resultsContainer.appendChild(errorItem);
+    }
+
     body.appendChild(resultsContainer);
 
     // 更新 footer
     const footer = this.panel.querySelector('.panel-footer');
+    const successCount = Object.keys(results).length;
+    const errorCount = Object.keys(errors).length;
+    let hintText = '';
+    if (successCount > 0 && errorCount > 0) {
+      hintText = `${successCount}个成功，${errorCount}个失败`;
+    } else if (successCount > 0) {
+      hintText = '点击复制各引擎结果';
+    } else {
+      hintText = '所有引擎均失败';
+    }
     footer.innerHTML = `
       <span class="translation-source"></span>
-      <span class="multi-engine-hint">点击复制各引擎结果</span>
+      <span class="multi-engine-hint">${hintText}</span>
     `;
   }
 
