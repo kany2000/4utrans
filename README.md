@@ -12,7 +12,7 @@
 ## ✨ 核心特色
 
 <details>
-<summary>📋 <strong>展开</strong></summary>
+<summary>✨ <strong>展开</strong></summary>
 
 ### 🌟 **快捷翻译面板 (v2.0.0 新功能！)**
 - **选中即翻译** - 在网页上选中文字后自动显示翻译按钮，无需打开扩展
@@ -53,7 +53,7 @@
 </details>
 ---
 
-## 🎨 **各版本亮点说明**
+## 🤩 **各版本亮点说明**
 
 ## 版本亮点更新为 v2.2.0（当前版本）
 - 添加了多引擎结果对比功能
@@ -62,7 +62,7 @@
 
 <details>
 
- <summary>📋 <strong>版本亮点详情</strong></summary>
+ <summary>✨ <strong>版本亮点详情</strong></summary>
 
 ## 🆕 版本亮点 (v2.2.0)（当前版本）
 
