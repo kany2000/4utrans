@@ -19,8 +19,9 @@ class QuickTranslationPanel {
     this.hoverKeyDown = false;
     this.hoverTimeout = null;
     this.currentText = '';
-    this.lastMouseX = 0;
-    this.lastMouseY = 0;
+    this.lastMouseX = undefined;
+    this.lastMouseY = undefined;
+    this.isHovering = false;  // 是否正在悬停翻译
 
     this.init();
   }
@@ -134,6 +135,7 @@ class QuickTranslationPanel {
     console.log('Quick panel: Alt key up');
     if (e.key === 'Alt') {
       this.hoverKeyDown = false;
+      this.isHovering = false;
       // 清除悬停延迟
       if (this.hoverTimeout) {
         clearTimeout(this.hoverTimeout);
@@ -169,21 +171,14 @@ class QuickTranslationPanel {
   }
 
   async doHoverTranslate() {
-    console.log('Quick panel: doHoverTranslate called', {
-      hoverEnabled: this.hoverEnabled,
-      hoverKeyDown: this.hoverKeyDown,
-      currentText: this.currentText,
-      lastX: this.lastMouseX,
-      lastY: this.lastMouseY
-    });
-
-    if (!this.hoverEnabled || !this.hoverKeyDown) return;
+    // 如果没有启用悬停翻译或者 Alt 键没有按下，不执行
+    if (!this.hoverEnabled || !this.hoverKeyDown) {
+      return;
+    }
 
     // 检查位置是否有效
-    if (this.lastMouseX === undefined || this.lastMouseY === undefined ||
-        typeof this.lastMouseX !== 'number' || typeof this.lastMouseY !== 'number' ||
+    if (typeof this.lastMouseX !== 'number' || typeof this.lastMouseY !== 'number' ||
         isNaN(this.lastMouseX) || isNaN(this.lastMouseY)) {
-      console.log('Quick panel: Invalid mouse position, skipping');
       return;
     }
 
@@ -197,45 +192,45 @@ class QuickTranslationPanel {
       return;
     }
 
-    // 如果文字没变化，更新位置即可
-    if (text === this.currentText && this.hoverBubble) {
-      this.updateHoverBubblePosition(clientX, clientY);
-      return;
-    }
-
-    this.currentText = text;
-
+    // 始终创建/显示气泡
     if (!this.hoverBubble) {
       this.createHoverBubble();
     }
-
     this.updateHoverBubblePosition(clientX, clientY);
 
     const originalEl = this.hoverBubble.querySelector('.hover-original');
     originalEl.textContent = text;
 
     const resultEl = this.hoverBubble.querySelector('.hover-result');
-    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
 
+    // 如果文字没变化，不需要重新翻译，只更新位置
+    if (text === this.currentText) {
+      this.hoverBubble.style.display = 'block';
+      return;
+    }
+
+    this.currentText = text;
+    this.isHovering = true;  // 开始新的悬停翻译
+
+    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
     this.hoverBubble.style.display = 'block';
 
     try {
       let translatedText;
       if (this.multiEngineEnabled) {
-        // 多引擎模式：获取所有结果
         const multiResult = await this.translateMultiEngineHover(text);
-        // 显示多引擎结果
-        this.showMultiEngineHoverResults(multiResult, text);
+        if (this.isHovering && text === this.currentText) {
+          this.showMultiEngineHoverResults(multiResult, text);
+        }
         return;
       } else {
-        // 单引擎模式：使用用户选择的引擎
         translatedText = await this.translateText(text);
       }
-      if (this.hoverBubble && this.currentText === text) {
+      if (this.isHovering && this.hoverBubble && text === this.currentText) {
         resultEl.textContent = translatedText;
       }
     } catch (error) {
-      if (this.hoverBubble && this.currentText === text) {
+      if (this.isHovering && this.hoverBubble && text === this.currentText) {
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
     }

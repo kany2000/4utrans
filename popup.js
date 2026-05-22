@@ -486,8 +486,8 @@ class PopupController {
     this.elements.glmApiKeyGroup?.classList.add('hidden');
     this.elements.customApiKeyGroup?.classList.add('hidden');
 
-    // LLM 自定義配置顯示/隱藏（只有 custom 需要）
-    if (provider === 'custom') {
+    // LLM 自定義配置顯示/隱藏（custom 和 offline 需要）
+    if (provider === 'custom' || provider === 'offline') {
       this.elements.llmCustomConfig.classList.remove('hidden');
       // 启用 LLM 相关输入框
       this.elements.llmBaseUrl?.removeAttribute('disabled');
@@ -512,6 +512,7 @@ class PopupController {
         this.elements.glmApiKeyGroup?.classList.remove('hidden');
         break;
       case 'custom':
+      case 'offline':
         this.elements.customApiKeyGroup?.classList.remove('hidden');
         break;
     }
