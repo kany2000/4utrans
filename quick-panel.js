@@ -142,12 +142,12 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
-    this.hoverKeyDown = true;
+    // 强制获取焦点，确保事件处理
+    e.preventDefault();
   }
 
   handleHoverKeyUp(e) {
     if (e.key !== 'Alt') return;
-    this.hoverKeyDown = false;
 
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
@@ -159,17 +159,20 @@ class QuickTranslationPanel {
   }
 
   handleHoverMove(e) {
+    if (!this.hoverEnabled) return;
+
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
 
-    if (!this.hoverEnabled || !this.hoverKeyDown) return;
-
-    if (this.hoverTimeout) {
-      clearTimeout(this.hoverTimeout);
+    // 直接检查 e.altKey，不依赖 hoverKeyDown 状态
+    if (e.altKey) {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+      }
+      this.hoverTimeout = setTimeout(() => {
+        this.doHoverTranslate();
+      }, 100);
     }
-    this.hoverTimeout = setTimeout(() => {
-      this.doHoverTranslate();
-    }, 50);
   }
 
   doHoverTranslate() {
