@@ -60,7 +60,6 @@ class PopupController {
       multiEngineEnabled: document.getElementById('multi-engine-enabled'),
       minSelectionLength: document.getElementById('min-selection-length'),
       autoCopy: document.getElementById('auto-copy'),
-      showConfidence: document.getElementById('show-confidence'),
       saveSettings: document.getElementById('save-settings'),
       resetSettings: document.getElementById('reset-settings'),
       statusMessage: document.getElementById('status-message'),
@@ -393,7 +392,6 @@ class PopupController {
       ocrLanguage: 'eng',
       apiProvider: 'google',
       autoCopy: false,
-      showConfidence: true,
       quickPanelEnabled: true,
       hoverTranslationEnabled: false,
       multiEngineEnabled: false,
@@ -422,7 +420,6 @@ class PopupController {
     // 更新高級設置
     this.elements.apiProvider.value = this.settings.apiProvider || 'google';
     this.elements.autoCopy.checked = this.settings.autoCopy || false;
-    this.elements.showConfidence.checked = this.settings.showConfidence !== false;
 
     // 更新快捷面板設置
     this.elements.quickPanelEnabled.checked = this.settings.quickPanelEnabled !== false;
@@ -619,7 +616,6 @@ class PopupController {
         ocrLanguage: this.elements.ocrLanguage.value,
         apiProvider: provider,
         autoCopy: this.elements.autoCopy.checked,
-        showConfidence: this.elements.showConfidence.checked,
         quickPanelEnabled: this.elements.quickPanelEnabled.checked,
         hoverTranslationEnabled: this.elements.hoverTranslationEnabled.checked,
         multiEngineEnabled: this.elements.multiEngineEnabled.checked,
@@ -699,7 +695,6 @@ class PopupController {
         ocrLanguage: 'eng',
         apiProvider: 'google',
         autoCopy: false,
-        showConfidence: true,
         quickPanelEnabled: true,
         hoverTranslationEnabled: false,
         multiEngineEnabled: false,

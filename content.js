@@ -5877,21 +5877,6 @@ if (result && result !== text) {
         white-space: pre-wrap !important;
       `;
 
-      // 信心度
-      const confidenceSection = document.createElement('div');
-      confidenceSection.style.cssText = `
-        text-align: center !important;
-        padding-top: 16px !important;
-        border-top: 1px solid #e0e0e0 !important;
-      `;
-
-      const confidenceText = document.createElement('small');
-      confidenceText.textContent = `識別信心度: ${Math.round(result.confidence * 100)}%`;
-      confidenceText.style.cssText = `
-        color: #666 !important;
-        font-size: 12px !important;
-      `;
-
       // 組裝元素
       header.appendChild(title);
       header.appendChild(closeBtn);
@@ -5902,11 +5887,8 @@ if (result && result !== text) {
       translatedSection.appendChild(translatedLabel);
       translatedSection.appendChild(translatedText);
 
-      confidenceSection.appendChild(confidenceText);
-
       body.appendChild(originalSection);
       body.appendChild(translatedSection);
-      body.appendChild(confidenceSection);
 
       content.appendChild(header);
       content.appendChild(body);

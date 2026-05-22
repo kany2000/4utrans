@@ -149,20 +149,14 @@ class QuickTranslationPanel {
   handleHoverKeyUp(e) {
     if (e.key !== 'Alt') return;
 
-    console.log('Quick panel: Alt key up', { altWasPressed: this.altWasPressed, hoverEnabled: this.hoverEnabled });
+    console.log('Quick panel: Alt key up', { hoverEnabled: this.hoverEnabled });
 
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
       this.hoverTimeout = null;
     }
 
-    // 如果之前 Alt 键被按下过，立即触发翻译
-    if (this.altWasPressed && this.hoverEnabled) {
-      this.altWasPressed = false;
-      console.log('Quick panel: triggering translate from keyup');
-      this.doHoverTranslate();
-    }
-
+    // 隐藏气泡并清除状态
     this.hideHoverBubble();
     this.currentText = '';
   }
@@ -173,18 +167,14 @@ class QuickTranslationPanel {
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
 
-    if (this.altWasPressed) {
-      if (this.hoverTimeout) {
-        clearTimeout(this.hoverTimeout);
-      }
-      this.hoverTimeout = setTimeout(() => {
-        this.doHoverTranslate();
-      }, 100);
+    // 直接使用 e.altKey（keydown被Windows拦截，不依赖altWasPressed）
+    if (e.altKey) {
+      this.doHoverTranslate();
     }
   }
 
   doHoverTranslate() {
-    if (!this.hoverEnabled || !this.hoverKeyDown) return;
+    if (!this.hoverEnabled) return;
     if (typeof this.lastMouseX !== 'number' || typeof this.lastMouseY !== 'number') return;
 
     const x = this.lastMouseX;
@@ -240,40 +230,6 @@ class QuickTranslationPanel {
         const resultEl = this.hoverBubble.querySelector('.hover-result');
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
-    }
-  }
-
-  handleHoverKeyUp(e) {
-    console.log('Quick panel: Alt key up');
-    if (e.key === 'Alt') {
-      this.hoverKeyDown = false;
-      this.isHovering = false;
-      // 清除悬停延迟
-      if (this.hoverTimeout) {
-        clearTimeout(this.hoverTimeout);
-        this.hoverTimeout = null;
-      }
-      this.hideHoverBubble();
-      this.currentText = '';
-    }
-  }
-
-  handleHoverMove(e) {
-    // 始终记录鼠标位置
-    this.lastMouseX = e.clientX;
-    this.lastMouseY = e.clientY;
-
-    if (!this.hoverEnabled) return;
-
-    // 直接检查 Alt 键状态
-    if (e.altKey) {
-      // 清除之前的延迟
-      if (this.hoverTimeout) {
-        clearTimeout(this.hoverTimeout);
-      }
-      this.hoverTimeout = setTimeout(() => {
-        this.doHoverTranslate();
-      }, 50);
     }
   }
 

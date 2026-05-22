@@ -141,7 +141,6 @@ class ScreenshotTranslator {
         'ocrLanguage',
         'apiProvider',
         'autoCopy',
-        'showConfidence',
         'apiKeys',
         'llmConfig'
       ]);
@@ -151,7 +150,6 @@ class ScreenshotTranslator {
         ocrLanguage: result.ocrLanguage || 'auto',
         apiProvider: result.apiProvider || 'google',
         autoCopy: result.autoCopy || false,
-        showConfidence: result.showConfidence || false,
         apiKeys: result.apiKeys || {},
         llmConfig: result.llmConfig || { baseUrl: '', model: '' }
       };
@@ -162,7 +160,6 @@ class ScreenshotTranslator {
         ocrLanguage: 'auto',
         apiProvider: 'google',
         autoCopy: false,
-        showConfidence: false,
         apiKeys: {},
         llmConfig: { baseUrl: '', model: '' }
       };
@@ -273,7 +270,6 @@ class ScreenshotTranslator {
         'ocrLanguage',
         'apiProvider',
         'autoCopy',
-        'showConfidence',
         'quickPanelEnabled',
         'hoverTranslationEnabled',
         'multiEngineEnabled',
@@ -287,7 +283,6 @@ class ScreenshotTranslator {
         ocrLanguage: result.ocrLanguage || 'eng',
         apiProvider: result.apiProvider || 'google',
         autoCopy: result.autoCopy || false,
-        showConfidence: result.showConfidence !== false,
         quickPanelEnabled: result.quickPanelEnabled !== false,
         hoverTranslationEnabled: result.hoverTranslationEnabled || false,
         multiEngineEnabled: result.multiEngineEnabled || false,

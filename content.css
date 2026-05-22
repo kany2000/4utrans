@@ -236,18 +236,6 @@
   background-color: #3367d6 !important;
 }
 
-.confidence-section {
-  text-align: center !important;
-  padding-top: 16px !important;
-  border-top: 1px solid #e0e0e0 !important;
-  margin-top: 16px !important;
-}
-
-.confidence-section small {
-  color: #666 !important;
-  font-size: 12px !important;
-}
-
 /* 動畫效果 */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
