@@ -23,6 +23,11 @@ class QuickTranslationPanel {
     this.lastMouseY = undefined;
     this.isHovering = false;  // 是否正在悬停翻译
 
+    // 保存事件处理器引用，以便正确移除
+    this._hoverKeyDownHandler = null;
+    this._hoverKeyUpHandler = null;
+    this._hoverMoveHandler = null;
+
     this.init();
   }
 
@@ -102,25 +107,41 @@ class QuickTranslationPanel {
   // 绑定悬浮翻译事件
   bindHoverEvents() {
     console.log('Quick panel: bindHoverEvents called');
-    document.addEventListener('keydown', (e) => this.handleHoverKeyDown(e));
-    document.addEventListener('keyup', (e) => this.handleHoverKeyUp(e));
-    document.addEventListener('mousemove', (e) => this.handleHoverMove(e));
+
+    // 创建并保存事件处理器引用
+    this._hoverKeyDownHandler = (e) => this.handleHoverKeyDown(e);
+    this._hoverKeyUpHandler = (e) => this.handleHoverKeyUp(e);
+    this._hoverMoveHandler = (e) => this.handleHoverMove(e);
+
+    // 使用 capture 阶段确保事件被捕获
+    document.addEventListener('keydown', this._hoverKeyDownHandler, { capture: true });
+    document.addEventListener('keyup', this._hoverKeyUpHandler, { capture: true });
+    document.addEventListener('mousemove', this._hoverMoveHandler, { capture: true });
   }
 
   // 解绑悬浮翻译事件
   unbindHoverEvents() {
     console.log('Quick panel: unbindHoverEvents called');
-    document.removeEventListener('keydown', (e) => this.handleHoverKeyDown(e));
-    document.removeEventListener('keyup', (e) => this.handleHoverKeyUp(e));
-    document.removeEventListener('mousemove', (e) => this.handleHoverMove(e));
+
+    // 使用保存的引用来移除事件监听器
+    if (this._hoverKeyDownHandler) {
+      document.removeEventListener('keydown', this._hoverKeyDownHandler, { capture: true });
+      this._hoverKeyDownHandler = null;
+    }
+    if (this._hoverKeyUpHandler) {
+      document.removeEventListener('keyup', this._hoverKeyUpHandler, { capture: true });
+      this._hoverKeyUpHandler = null;
+    }
+    if (this._hoverMoveHandler) {
+      document.removeEventListener('mousemove', this._hoverMoveHandler, { capture: true });
+      this._hoverMoveHandler = null;
+    }
+
     this.hideHoverBubble();
   }
 
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
-
-    // 阻止 Alt 键的默认行为（比如切换焦点）
-    // e.preventDefault();
 
     this.hoverKeyDown = true;
 
