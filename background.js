@@ -542,12 +542,12 @@ class ScreenshotTranslator {
     throw new Error('Google translation failed - invalid response format');
   }
 
-  // Microsoft Translator（免费）
-  async callMicrosoftTranslate(text, sourceLang, targetLang) {
+  // Microsoft Translator（需要 API Key）
+  async callMicrosoftTranslate(text, sourceLang, targetLang, apiKey) {
     try {
       console.log(`Background: Calling Microsoft Translator - ${sourceLang} -> ${targetLang}`);
 
-      // Microsoft Translator API 端点（免费版本）
+      // Microsoft Translator API 端点
       const endpoint = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
 
       // 语言代码映射
@@ -573,7 +573,8 @@ class ScreenshotTranslator {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Ocp-Apim-Subscription-Key': apiKey
         },
         body: JSON.stringify([{ text: text }])
       });
@@ -884,6 +885,9 @@ ${text}`;
     const results = {};
     const errors = {};
 
+    // 0. 获取用户设置
+    const settings = await this.getUserSettings();
+
     // 1. Google 翻译
     try {
       const googleResult = await this.callGoogleTranslate(text, sourceLang, targetLang);
@@ -892,16 +896,20 @@ ${text}`;
       errors.google = e.message;
     }
 
-    // 2. Microsoft 翻译
-    try {
-      const microsoftResult = await this.callMicrosoftTranslate(text, sourceLang, targetLang);
-      results.microsoft = microsoftResult;
-    } catch (e) {
-      errors.microsoft = e.message;
+    // 2. Microsoft 翻译（需要 API Key）
+    const microsoftApiKey = settings.apiKeys?.microsoft;
+    if (microsoftApiKey) {
+      try {
+        const microsoftResult = await this.callMicrosoftTranslate(text, sourceLang, targetLang, microsoftApiKey);
+        results.microsoft = microsoftResult;
+      } catch (e) {
+        errors.microsoft = e.message;
+      }
+    } else {
+      errors.microsoft = '未配置 Microsoft API Key';
     }
 
     // 3. 检查是否有自定义 LLM 配置
-    const settings = await this.getUserSettings();
     const customApiKey = settings.apiKeys?.custom;
     const llmConfig = settings.llmConfig || {};
 

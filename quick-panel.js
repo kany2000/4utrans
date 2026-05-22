@@ -61,6 +61,10 @@ class QuickTranslationPanel {
         this.multiEngineEnabled = changes.multiEngineEnabled.newValue;
         console.log('Quick panel: multiEngineEnabled changed to', this.multiEngineEnabled);
       }
+      if (changes.targetLanguage) {
+        this.targetLanguage = changes.targetLanguage.newValue;
+        console.log('Quick panel: targetLanguage changed to', this.targetLanguage);
+      }
     });
   }
 
@@ -69,13 +73,15 @@ class QuickTranslationPanel {
       'quickPanelEnabled',
       'minSelectionLength',
       'hoverTranslationEnabled',
-      'multiEngineEnabled'
+      'multiEngineEnabled',
+      'targetLanguage'
     ]);
 
     this.isEnabled = settings.quickPanelEnabled !== false; // 默认启用
     this.minSelectionLength = settings.minSelectionLength || 2;
     this.hoverEnabled = settings.hoverTranslationEnabled || false; // 默认关闭
     this.multiEngineEnabled = settings.multiEngineEnabled || false; // 默认关闭
+    this.targetLanguage = settings.targetLanguage || 'zh-CN';
   }
 
   // 初始化悬浮翻译
@@ -191,7 +197,21 @@ class QuickTranslationPanel {
     this.hoverBubble.style.display = 'block';
 
     try {
-      const translatedText = await this.translateText(text);
+      let translatedText;
+      if (this.multiEngineEnabled) {
+        // 多引擎模式：获取所有结果，取第一个成功的
+        const multiResult = await this.translateMultiEngineHover(text);
+        // 取第一个成功的引擎结果
+        const firstSuccess = Object.values(multiResult.results)[0];
+        if (firstSuccess) {
+          translatedText = firstSuccess;
+        } else {
+          const errors = Object.values(multiResult.errors);
+          throw new Error(errors[0] || '所有引擎均失败');
+        }
+      } else {
+        translatedText = await this.translateText(text);
+      }
       if (this.hoverBubble && this.currentText === text) {
         resultEl.textContent = translatedText;
       }
@@ -200,6 +220,31 @@ class QuickTranslationPanel {
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
     }
+  }
+
+  // 悬停翻译的多引擎方法
+  async translateMultiEngineHover(text) {
+    const sourceLang = this.detectLanguage(text);
+    const targetLang = this.targetLanguage || 'zh-CN';
+
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        action: 'translateMultiEngine',
+        text: text,
+        sourceLang: sourceLang,
+        targetLang: targetLang
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error('连接失败'));
+          return;
+        }
+        if (response && response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response?.error || '多引擎翻译失败'));
+        }
+      });
+    });
   }
 
   // 获取指定坐标处的单词
@@ -217,6 +262,15 @@ class QuickTranslationPanel {
       return (element.innerText || element.textContent || '').trim();
     }
 
+    // 清除当前选择，确保 caretRangeFromPoint 返回光标位置而非选区
+    const selection = window.getSelection();
+    const hadSelection = selection && selection.rangeCount > 0 && !selection.isCollapsed;
+    let savedRange = null;
+    if (hadSelection) {
+      savedRange = selection.getRangeAt(0).cloneRange();
+      selection.removeAllRanges();
+    }
+
     // 使用 caretRangeFromPoint 获取精确位置
     let textNode = null;
     let offset = 0;
@@ -230,9 +284,19 @@ class QuickTranslationPanel {
     } else {
       // 降级方案
       const pos = this.getPositionFromPoint(x, y);
-      if (!pos) return '';
+      if (!pos) {
+        if (hadSelection && savedRange) {
+          selection.addRange(savedRange);
+        }
+        return '';
+      }
       textNode = pos.node;
       offset = pos.offset;
+    }
+
+    // 恢复之前的选择
+    if (hadSelection && savedRange) {
+      selection.addRange(savedRange);
     }
 
     if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
