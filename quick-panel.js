@@ -22,6 +22,7 @@ class QuickTranslationPanel {
     this.lastMouseX = undefined;
     this.lastMouseY = undefined;
     this.isHovering = false;  // 是否正在悬停翻译
+    this.altWasPressed = false;  // Alt键是否被按下过
 
     // 保存事件处理器引用，以便正确移除
     this._hoverKeyDownHandler = null;
@@ -142,6 +143,7 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
+    this.altWasPressed = true;
   }
 
   handleHoverKeyUp(e) {
@@ -150,6 +152,12 @@ class QuickTranslationPanel {
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
       this.hoverTimeout = null;
+    }
+
+    // 如果之前 Alt 键被按下过，立即触发翻译
+    if (this.altWasPressed && this.hoverEnabled) {
+      this.altWasPressed = false;
+      this.doHoverTranslate();
     }
 
     this.hideHoverBubble();
@@ -162,7 +170,7 @@ class QuickTranslationPanel {
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
 
-    if (e.altKey) {
+    if (this.altWasPressed) {
       if (this.hoverTimeout) {
         clearTimeout(this.hoverTimeout);
       }
