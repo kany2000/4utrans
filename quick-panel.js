@@ -65,6 +65,10 @@ class QuickTranslationPanel {
         this.targetLanguage = changes.targetLanguage.newValue;
         console.log('Quick panel: targetLanguage changed to', this.targetLanguage);
       }
+      if (changes.apiProvider) {
+        this.apiProvider = changes.apiProvider.newValue;
+        console.log('Quick panel: apiProvider changed to', this.apiProvider);
+      }
     });
   }
 
@@ -74,7 +78,8 @@ class QuickTranslationPanel {
       'minSelectionLength',
       'hoverTranslationEnabled',
       'multiEngineEnabled',
-      'targetLanguage'
+      'targetLanguage',
+      'apiProvider'
     ]);
 
     this.isEnabled = settings.quickPanelEnabled !== false; // 默认启用
@@ -82,6 +87,7 @@ class QuickTranslationPanel {
     this.hoverEnabled = settings.hoverTranslationEnabled || false; // 默认关闭
     this.multiEngineEnabled = settings.multiEngineEnabled || false; // 默认关闭
     this.targetLanguage = settings.targetLanguage || 'zh-CN';
+    this.apiProvider = settings.apiProvider || 'google';
   }
 
   // 初始化悬浮翻译
@@ -199,17 +205,24 @@ class QuickTranslationPanel {
     try {
       let translatedText;
       if (this.multiEngineEnabled) {
-        // 多引擎模式：获取所有结果，取第一个成功的
+        // 多引擎模式：获取所有结果
         const multiResult = await this.translateMultiEngineHover(text);
-        // 取第一个成功的引擎结果
-        const firstSuccess = Object.values(multiResult.results)[0];
-        if (firstSuccess) {
-          translatedText = firstSuccess;
+        // 优先使用用户选择的引擎结果
+        const userEngine = this.apiProvider || 'google';
+        if (multiResult.results[userEngine]) {
+          translatedText = multiResult.results[userEngine];
         } else {
-          const errors = Object.values(multiResult.errors);
-          throw new Error(errors[0] || '所有引擎均失败');
+          // 用户选择的引擎失败了，取第一个成功的
+          const firstSuccess = Object.values(multiResult.results)[0];
+          if (firstSuccess) {
+            translatedText = firstSuccess;
+          } else {
+            const errors = Object.values(multiResult.errors);
+            throw new Error(errors[0] || '所有引擎均失败');
+          }
         }
       } else {
+        // 单引擎模式：使用用户选择的引擎
         translatedText = await this.translateText(text);
       }
       if (this.hoverBubble && this.currentText === text) {
@@ -622,7 +635,8 @@ class QuickTranslationPanel {
         action: 'translateMultiEngine',
         text: text,
         sourceLang: sourceLang,
-        targetLang: targetLang
+        targetLang: targetLang,
+        includeLLM: this.multiEngineEnabled  // 传递多引擎开关状态
       }, (response) => {
         if (chrome.runtime.lastError) {
           reject(new Error('连接失败'));
@@ -630,6 +644,32 @@ class QuickTranslationPanel {
         }
         if (response && response.success) {
           this.showMultiResults(text, response.results, response.errors, sourceLang, targetLang);
+          resolve(response);
+        } else {
+          reject(new Error(response?.error || '多引擎翻译失败'));
+        }
+      });
+    });
+  }
+
+  // 悬停翻译的多引擎方法
+  async translateMultiEngineHover(text) {
+    const sourceLang = this.detectLanguage(text);
+    const targetLang = this.targetLanguage || 'zh-CN';
+
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        action: 'translateMultiEngine',
+        text: text,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        includeLLM: this.multiEngineEnabled  // 传递多引擎开关状态
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error('连接失败'));
+          return;
+        }
+        if (response && response.success) {
           resolve(response);
         } else {
           reject(new Error(response?.error || '多引擎翻译失败'));

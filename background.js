@@ -204,7 +204,7 @@ class ScreenshotTranslator {
           break;
         case 'translateMultiEngine':
           console.log('Multi-engine translate request...');
-          this.translateMultiEngine(request.text, request.sourceLang, request.targetLang, sendResponse);
+          this.translateMultiEngine(request.text, request.sourceLang, request.targetLang, request.includeLLM, sendResponse);
           break;
         case 'getModels':
           console.log('Getting available models...');
@@ -881,14 +881,14 @@ ${text}`;
   }
 
   // 多引擎翻译 - 同时调用多个翻译服务
-  async translateMultiEngine(text, sourceLang, targetLang, sendResponse) {
+  async translateMultiEngine(text, sourceLang, targetLang, includeLLM, sendResponse) {
     const results = {};
     const errors = {};
 
     // 0. 获取用户设置
     const settings = await this.getUserSettings();
 
-    // 1. Google 翻译
+    // 1. Google 翻译（始终调用）
     try {
       const googleResult = await this.callGoogleTranslate(text, sourceLang, targetLang);
       results.google = googleResult;
@@ -909,27 +909,30 @@ ${text}`;
       errors.microsoft = '未配置 Microsoft API Key';
     }
 
-    // 3. 检查是否有自定义 LLM 配置
-    const customApiKey = settings.apiKeys?.custom;
-    const llmConfig = settings.llmConfig || {};
+    // 3. 只有在开启多引擎模式时才包含 LLM 和 GLM
+    if (includeLLM) {
+      // 检查是否有自定义 LLM 配置
+      const customApiKey = settings.apiKeys?.custom;
+      const llmConfig = settings.llmConfig || {};
 
-    if (customApiKey && llmConfig.baseUrl && llmConfig.model) {
-      try {
-        const llmResult = await this.callCustomLLMTranslate(text, sourceLang, targetLang, customApiKey, llmConfig);
-        results.llm = llmResult;
-      } catch (e) {
-        errors.llm = e.message;
+      if (customApiKey && llmConfig.baseUrl && llmConfig.model) {
+        try {
+          const llmResult = await this.callCustomLLMTranslate(text, sourceLang, targetLang, customApiKey, llmConfig);
+          results.llm = llmResult;
+        } catch (e) {
+          errors.llm = e.message;
+        }
       }
-    }
 
-    // 4. 检查 GLM 配置（如果有）
-    const glmApiKey = settings.apiKeys?.glm;
-    if (glmApiKey) {
-      try {
-        const glmResult = await this.callGLMTranslate(text, sourceLang, targetLang, glmApiKey);
-        results.glm = glmResult;
-      } catch (e) {
-        errors.glm = e.message;
+      // 检查 GLM 配置（如果有）
+      const glmApiKey = settings.apiKeys?.glm;
+      if (glmApiKey) {
+        try {
+          const glmResult = await this.callGLMTranslate(text, sourceLang, targetLang, glmApiKey);
+          results.glm = glmResult;
+        } catch (e) {
+          errors.glm = e.message;
+        }
       }
     }
 
