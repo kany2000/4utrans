@@ -43,8 +43,12 @@ class PopupController {
       settingsModal: document.getElementById('settings-modal'),
       closeSettings: document.getElementById('close-settings'),
       apiProvider: document.getElementById('api-provider'),
-      apiKey: document.getElementById('api-key'),
-      apiKeyGroup: document.querySelector('.api-key-group'),
+      microsoftApiKey: document.getElementById('microsoft-api-key'),
+      microsoftApiKeyGroup: document.getElementById('microsoft-api-key-group'),
+      glmApiKey: document.getElementById('glm-api-key'),
+      glmApiKeyGroup: document.getElementById('glm-api-key-group'),
+      customApiKey: document.getElementById('custom-api-key'),
+      customApiKeyGroup: document.getElementById('custom-api-key-group'),
       llmCustomConfig: document.getElementById('llm-custom-config'),
       llmBaseUrl: document.getElementById('llm-base-url'),
       llmModel: document.getElementById('llm-model'),
@@ -426,11 +430,10 @@ class PopupController {
     this.elements.multiEngineEnabled.checked = this.settings.multiEngineEnabled || false;
     this.elements.minSelectionLength.value = this.settings.minSelectionLength || 2;
 
-    // 更新 API Key
-    const provider = this.settings.apiProvider || 'google';
-    if (this.settings.apiKeys && this.settings.apiKeys[provider]) {
-      this.elements.apiKey.value = this.settings.apiKeys[provider];
-    }
+    // 更新 API Key（根据 provider 显示对应的输入框）
+    this.elements.microsoftApiKey.value = this.settings.apiKeys?.microsoft || '';
+    this.elements.glmApiKey.value = this.settings.apiKeys?.glm || '';
+    this.elements.customApiKey.value = this.settings.apiKeys?.custom || '';
 
     // 更新 LLM 自定義配置
     if (this.settings.llmConfig) {
@@ -477,28 +480,30 @@ class PopupController {
 
   toggleApiKeyInput() {
     const provider = this.elements.apiProvider.value;
-    // Google翻譯、Microsoft翻譯和離線翻譯使用免費API，不需要API Key
-    const needsApiKey = provider !== 'offline' && provider !== 'google' && provider !== 'microsoft';
 
-    if (needsApiKey) {
-      this.elements.apiKeyGroup.classList.remove('hidden');
-      // 更新 API Key 输入框的提示文本
-      if (provider === 'glm') {
-        this.elements.apiKey.nextElementSibling.textContent = '輸入您的智譜 API Key（GLM-4-Flash 模型）';
-      } else if (provider === 'custom') {
-        this.elements.apiKey.nextElementSibling.textContent = 'OpenAI 兼容格式的 API Key';
-      } else {
-        this.elements.apiKey.nextElementSibling.textContent = 'API密鑰將安全存儲在本地';
-      }
-    } else {
-      this.elements.apiKeyGroup.classList.add('hidden');
-    }
+    // 隐藏所有 API Key 输入框
+    this.elements.microsoftApiKeyGroup?.classList.add('hidden');
+    this.elements.glmApiKeyGroup?.classList.add('hidden');
+    this.elements.customApiKeyGroup?.classList.add('hidden');
 
-    // LLM 自定義配置顯示/隱藏
+    // LLM 自定義配置顯示/隱藏（只有 custom 需要）
     if (provider === 'custom') {
       this.elements.llmCustomConfig.classList.remove('hidden');
     } else {
       this.elements.llmCustomConfig.classList.add('hidden');
+    }
+
+    // 根据 provider 显示对应的 API Key 输入框
+    switch (provider) {
+      case 'microsoft':
+        this.elements.microsoftApiKeyGroup?.classList.remove('hidden');
+        break;
+      case 'glm':
+        this.elements.glmApiKeyGroup?.classList.remove('hidden');
+        break;
+      case 'custom':
+        this.elements.customApiKeyGroup?.classList.remove('hidden');
+        break;
     }
   }
 
@@ -565,13 +570,6 @@ class PopupController {
   async saveSettings() {
     try {
       const provider = this.elements.apiProvider.value;
-      const apiKey = this.elements.apiKey.value.trim();
-
-      // 驗證 API Key（如果需要）
-      if (provider !== 'offline' && provider !== 'google' && provider !== 'microsoft' && !apiKey) {
-        this.showStatus(`請輸入 ${provider === 'glm' ? '智譜' : 'API'} Key`, 'error');
-        return;
-      }
 
       // 驗證 LLM 自定義配置（如果選擇了 custom）
       if (provider === 'custom') {
@@ -597,6 +595,14 @@ class PopupController {
       saveBtn.textContent = '保存中...';
       saveBtn.disabled = true;
 
+      // 收集各 provider 的 API Key
+      const apiKeys = {
+        ...this.settings.apiKeys,
+        microsoft: this.elements.microsoftApiKey?.value.trim() || '',
+        glm: this.elements.glmApiKey?.value.trim() || '',
+        custom: this.elements.customApiKey?.value.trim() || ''
+      };
+
       const settings = {
         targetLanguage: this.elements.targetLanguage.value,
         ocrLanguage: this.elements.ocrLanguage.value,
@@ -607,10 +613,7 @@ class PopupController {
         hoverTranslationEnabled: this.elements.hoverTranslationEnabled.checked,
         multiEngineEnabled: this.elements.multiEngineEnabled.checked,
         minSelectionLength: parseInt(this.elements.minSelectionLength.value) || 2,
-        apiKeys: {
-          ...this.settings.apiKeys,
-          [provider]: apiKey
-        },
+        apiKeys: apiKeys,
         llmConfig: provider === 'custom' ? {
           baseUrl: this.elements.llmBaseUrl.value.trim(),
           model: (() => {

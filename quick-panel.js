@@ -119,9 +119,9 @@ class QuickTranslationPanel {
     console.log('Quick panel: Alt key down', { hoverEnabled: this.hoverEnabled, hoverKeyDown: this.hoverKeyDown });
     if (e.key === 'Alt') {
       this.hoverKeyDown = true;
-      // 获取当前鼠标位置
-      this.lastMouseX = this.lastMouseX || 0;
-      this.lastMouseY = this.lastMouseY || 0;
+      // 使用当前鼠标位置，而不是旧的位置
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
       // 立即触发一次翻译
       this.doHoverTranslate();
     }
@@ -207,20 +207,9 @@ class QuickTranslationPanel {
       if (this.multiEngineEnabled) {
         // 多引擎模式：获取所有结果
         const multiResult = await this.translateMultiEngineHover(text);
-        // 优先使用用户选择的引擎结果
-        const userEngine = this.apiProvider || 'google';
-        if (multiResult.results[userEngine]) {
-          translatedText = multiResult.results[userEngine];
-        } else {
-          // 用户选择的引擎失败了，取第一个成功的
-          const firstSuccess = Object.values(multiResult.results)[0];
-          if (firstSuccess) {
-            translatedText = firstSuccess;
-          } else {
-            const errors = Object.values(multiResult.errors);
-            throw new Error(errors[0] || '所有引擎均失败');
-          }
-        }
+        // 显示多引擎结果
+        this.showMultiEngineHoverResults(multiResult, text);
+        return;
       } else {
         // 单引擎模式：使用用户选择的引擎
         translatedText = await this.translateText(text);
@@ -233,6 +222,36 @@ class QuickTranslationPanel {
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
     }
+  }
+
+  // 显示悬停翻译的多引擎结果
+  showMultiEngineHoverResults(multiResult, originalText) {
+    if (!this.hoverBubble) return;
+
+    // 引擎名称映射
+    const engineNames = {
+      google: 'Google',
+      microsoft: 'Microsoft',
+      llm: 'LLM',
+      glm: 'GLM'
+    };
+
+    // 构建多引擎结果的 HTML
+    let resultsHtml = '';
+    for (const [engine, translation] of Object.entries(multiResult.results)) {
+      const name = engineNames[engine] || engine;
+      resultsHtml += `<div class="hover-multi-result"><span class="hover-engine-label">${name}:</span> ${this.escapeHtml(translation)}</div>`;
+    }
+    for (const [engine, errorMsg] of Object.entries(multiResult.errors)) {
+      const name = engineNames[engine] || engine;
+      resultsHtml += `<div class="hover-multi-result hover-multi-error"><span class="hover-engine-label">${name}:</span> ${this.escapeHtml(errorMsg)}</div>`;
+    }
+
+    const originalEl = this.hoverBubble.querySelector('.hover-original');
+    originalEl.textContent = originalText;
+
+    const resultEl = this.hoverBubble.querySelector('.hover-result');
+    resultEl.innerHTML = resultsHtml;
   }
 
   // 悬停翻译的多引擎方法

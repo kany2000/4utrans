@@ -102,9 +102,21 @@
           </select>
         </div>
 
-        <div class="setting-group api-key-group hidden">
-          <label for="api-key">API Key:</label>
-          <input type="password" id="api-key" class="setting-input" placeholder="輸入您的API密鑰">
+        <div class="setting-group api-key-group hidden" id="microsoft-api-key-group">
+          <label for="microsoft-api-key">Microsoft API Key:</label>
+          <input type="password" id="microsoft-api-key" class="setting-input" placeholder="輸入 Microsoft Translator API Key">
+          <small class="help-text">Microsoft Translator 需要 API Key</small>
+        </div>
+
+        <div class="setting-group api-key-group hidden" id="glm-api-key-group">
+          <label for="glm-api-key">GLM API Key:</label>
+          <input type="password" id="glm-api-key" class="setting-input" placeholder="輸入智譜 GLM API Key">
+          <small class="help-text">GLM 大模型翻譯需要 API Key</small>
+        </div>
+
+        <div class="setting-group api-key-group hidden" id="custom-api-key-group">
+          <label for="custom-api-key">自定義 LLM API Key:</label>
+          <input type="password" id="custom-api-key" class="setting-input" placeholder="輸入您的 API Key">
           <small class="help-text">API密鑰將安全存儲在本地</small>
         </div>
 
