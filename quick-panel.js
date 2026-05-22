@@ -114,27 +114,26 @@ class QuickTranslationPanel {
     this._hoverKeyUpHandler = (e) => this.handleHoverKeyUp(e);
     this._hoverMoveHandler = (e) => this.handleHoverMove(e);
 
-    // 使用 capture 阶段确保事件被捕获
-    document.addEventListener('keydown', this._hoverKeyDownHandler, { capture: true });
-    document.addEventListener('keyup', this._hoverKeyUpHandler, { capture: true });
-    document.addEventListener('mousemove', this._hoverMoveHandler, { capture: true });
+    // 使用 bubbling 阶段（默认），因为 capture 阶段可能收不到 Alt 键事件
+    document.addEventListener('keydown', this._hoverKeyDownHandler);
+    document.addEventListener('keyup', this._hoverKeyUpHandler);
+    document.addEventListener('mousemove', this._hoverMoveHandler);
   }
 
   // 解绑悬浮翻译事件
   unbindHoverEvents() {
     console.log('Quick panel: unbindHoverEvents called');
 
-    // 使用保存的引用来移除事件监听器
     if (this._hoverKeyDownHandler) {
-      document.removeEventListener('keydown', this._hoverKeyDownHandler, { capture: true });
+      document.removeEventListener('keydown', this._hoverKeyDownHandler);
       this._hoverKeyDownHandler = null;
     }
     if (this._hoverKeyUpHandler) {
-      document.removeEventListener('keyup', this._hoverKeyUpHandler, { capture: true });
+      document.removeEventListener('keyup', this._hoverKeyUpHandler);
       this._hoverKeyUpHandler = null;
     }
     if (this._hoverMoveHandler) {
-      document.removeEventListener('mousemove', this._hoverMoveHandler, { capture: true });
+      document.removeEventListener('mousemove', this._hoverMoveHandler);
       this._hoverMoveHandler = null;
     }
 
@@ -143,11 +142,14 @@ class QuickTranslationPanel {
 
   handleHoverKeyDown(e) {
     if (e.key !== 'Alt') return;
+    console.log('Quick panel: Alt key down');
     this.altWasPressed = true;
   }
 
   handleHoverKeyUp(e) {
     if (e.key !== 'Alt') return;
+
+    console.log('Quick panel: Alt key up', { altWasPressed: this.altWasPressed, hoverEnabled: this.hoverEnabled });
 
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
@@ -157,6 +159,7 @@ class QuickTranslationPanel {
     // 如果之前 Alt 键被按下过，立即触发翻译
     if (this.altWasPressed && this.hoverEnabled) {
       this.altWasPressed = false;
+      console.log('Quick panel: triggering translate from keyup');
       this.doHoverTranslate();
     }
 
