@@ -274,6 +274,70 @@
   }
 }
 
+/* 多引擎结果容器 */
+.multi-results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.multi-result-item {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: all 0.2s;
+}
+
+.multi-result-item:hover {
+  background: #f1f3f5;
+  transform: translateY(-1px);
+}
+
+.multi-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.multi-engine-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.multi-copy-btn {
+  background: white;
+  border: 1px solid #e9ecef;
+  color: #6c757d;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.multi-copy-btn:hover {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.multi-result-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.multi-engine-hint {
+  font-size: 11px;
+  color: #adb5bd;
+  font-style: italic;
+}
+
 /* 悬浮翻译气泡 */
 .hover-translate-bubble {
   position: fixed;

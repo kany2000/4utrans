@@ -1,4 +1,4 @@
-# 🚀 QuickTranslate - 快译 (v2.1.2)
+# 🚀 QuickTranslate - 快译 (v2.2.0)
 
 > 🎉 **革命性更新** - 全新快捷翻译面板，选中文字即可翻译！操作步骤减少60%，翻译速度提升75%！
 
@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/kany2000/QuickTranslate?style=social)](https://github.com/kany2000/QuickTranslate)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/kany2000/QuickTranslate)
-[![Version](https://img.shields.io/badge/version-2.1.2-green)](https://github.com/kany2000/QuickTranslate)
+[![Version](https://img.shields.io/badge/version-2.2.0-green)](https://github.com/kany2000/QuickTranslate)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ 核心特色
@@ -55,18 +55,31 @@
 
 ## 🎨 **各版本亮点说明**
 
-## 版本亮点更新为 v2.1.2（当前版本）
-- 添加了悬浮翻译功能的完整说明
-- 修复了性能优化和 Bug 修复列表
-- 历史版本 v2.1.0 和 v2.1.1 已移入历史记录
+## 版本亮点更新为 v2.2.0（当前版本）
+- 添加了多引擎结果对比功能
+- 同时展示 Google / Microsoft / LLM 翻译结果
+- 历史版本 v2.1.0 - v2.1.2 已移入历史记录
 
 <details>
 
  <summary>📋 <strong>版本亮点详情</strong></summary>
 
-## 🆕 版本亮点 (v2.1.2)（当前版本）
+## 🆕 版本亮点 (v2.2.0)（当前版本）
 
-### 🌟 **悬浮翻译功能（全新！）**
+### 🌟 **多引擎结果对比（全新！）**
+- 同时展示 **Google / Microsoft / LLM** 等多个翻译引擎的结果
+- 每个引擎结果独立展示，可对比选择更好的翻译
+- 独立的复制按钮，点击即可复制对应结果
+- 可在高级设置中启用/关闭此功能
+
+### 🎨 **界面优化**
+- Google 翻译（蓝色标签）、Microsoft（青色）
+- GLM 大模型（橙色）、自定义 LLM（绿色）
+- 卡片式布局，清晰易读
+
+## 🎉 历史版本亮点 (v2.1.2)
+
+### 🌟 **悬浮翻译功能**
 - 按住 **Alt 键**并将鼠标悬停在文字上即可翻译
 - 无需选中文字，沉浸式阅读翻译
 - 精美的悬浮气泡展示，包含原文和译文
@@ -78,7 +91,6 @@
 - 修复悬浮翻译坐标追踪问题
 - 修复快捷翻译面板内存泄漏
 - 修复快捷翻译面板复制按钮事件重复绑定
-- 移除 content.js 中对不存在的 this.settings 的引用
 
 ### ⚡ **性能优化**
 - 悬浮翻译响应延迟从 300ms 优化到 100ms

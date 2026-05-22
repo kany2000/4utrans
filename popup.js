@@ -53,6 +53,7 @@ class PopupController {
       fetchModels: document.getElementById('fetch-models'),
       quickPanelEnabled: document.getElementById('quick-panel-enabled'),
       hoverTranslationEnabled: document.getElementById('hover-translation-enabled'),
+      multiEngineEnabled: document.getElementById('multi-engine-enabled'),
       minSelectionLength: document.getElementById('min-selection-length'),
       autoCopy: document.getElementById('auto-copy'),
       showConfidence: document.getElementById('show-confidence'),
@@ -391,6 +392,7 @@ class PopupController {
       showConfidence: true,
       quickPanelEnabled: true,
       hoverTranslationEnabled: false,
+      multiEngineEnabled: false,
       minSelectionLength: 2,
       apiKeys: {},
       llmConfig: {
@@ -421,6 +423,7 @@ class PopupController {
     // 更新快捷面板設置
     this.elements.quickPanelEnabled.checked = this.settings.quickPanelEnabled !== false;
     this.elements.hoverTranslationEnabled.checked = this.settings.hoverTranslationEnabled || false;
+    this.elements.multiEngineEnabled.checked = this.settings.multiEngineEnabled || false;
     this.elements.minSelectionLength.value = this.settings.minSelectionLength || 2;
 
     // 更新 API Key
@@ -602,6 +605,7 @@ class PopupController {
         showConfidence: this.elements.showConfidence.checked,
         quickPanelEnabled: this.elements.quickPanelEnabled.checked,
         hoverTranslationEnabled: this.elements.hoverTranslationEnabled.checked,
+        multiEngineEnabled: this.elements.multiEngineEnabled.checked,
         minSelectionLength: parseInt(this.elements.minSelectionLength.value) || 2,
         apiKeys: {
           ...this.settings.apiKeys,
@@ -684,6 +688,7 @@ class PopupController {
         showConfidence: true,
         quickPanelEnabled: true,
         hoverTranslationEnabled: false,
+        multiEngineEnabled: false,
         minSelectionLength: 2,
         apiKeys: {},
         llmConfig: {

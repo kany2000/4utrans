@@ -1,6 +1,6 @@
 /**
  * QuickTranslate - Quick Translation Panel
- * Version: 2.1.1
+ * Version: 2.2.0
  * 快捷翻译面板 - 选中文字即可快速翻译
  */
 
@@ -57,6 +57,10 @@ class QuickTranslationPanel {
           this.unbindHoverEvents();
         }
       }
+      if (changes.multiEngineEnabled) {
+        this.multiEngineEnabled = changes.multiEngineEnabled.newValue;
+        console.log('Quick panel: multiEngineEnabled changed to', this.multiEngineEnabled);
+      }
     });
   }
 
@@ -64,12 +68,14 @@ class QuickTranslationPanel {
     const settings = await chrome.storage.local.get([
       'quickPanelEnabled',
       'minSelectionLength',
-      'hoverTranslationEnabled'
+      'hoverTranslationEnabled',
+      'multiEngineEnabled'
     ]);
 
     this.isEnabled = settings.quickPanelEnabled !== false; // 默认启用
     this.minSelectionLength = settings.minSelectionLength || 2;
     this.hoverEnabled = settings.hoverTranslationEnabled || false; // 默认关闭
+    this.multiEngineEnabled = settings.multiEngineEnabled || false; // 默认关闭
   }
 
   // 初始化悬浮翻译
@@ -482,11 +488,11 @@ class QuickTranslationPanel {
 
   async translate() {
     if (!this.currentSelection || this.translating) return;
-    
+
     this.translating = true;
     const text = this.currentSelection.text;
     const selectionRect = this.currentSelection.rect;
-    
+
     // 隐藏按钮，显示翻译面板
     this.hideButton();
     this.showPanel(text, selectionRect);
@@ -497,7 +503,7 @@ class QuickTranslationPanel {
       this.translating = false;
       return;
     }
-    
+
     try {
       // 获取用户设置
       let settings = {};
@@ -507,32 +513,198 @@ class QuickTranslationPanel {
           'apiProvider',
           'apiKey',
           'llmBaseUrl',
-          'llmModel'
+          'llmModel',
+          'multiEngineEnabled'
         ]);
       } catch (storageErr) {
         throw new Error('⚠️ 扩展已更新，请按 F5 刷新此网页后重试');
       }
-      
+
       // 检测源语言
       const sourceLang = this.detectLanguage(text);
       const targetLang = settings.targetLanguage || 'zh-CN';
-      
-      // 调用翻译API
-      const result = await this.callTranslationAPI(
-        text,
-        sourceLang,
-        targetLang,
-        settings
-      );
-      
-      // 显示翻译结果
-      this.showResult(text, result.translatedText, sourceLang, targetLang, result.isBackup ? result.backupService : null);
-      
+
+      // 检查是否启用多引擎对比
+      if (settings.multiEngineEnabled) {
+        await this.translateMultiEngine(text, sourceLang, targetLang);
+      } else {
+        // 单引擎翻译
+        const result = await this.callTranslationAPI(
+          text,
+          sourceLang,
+          targetLang,
+          settings
+        );
+        this.showSingleResult(text, result.translatedText, sourceLang, targetLang, result.isBackup ? result.backupService : null);
+      }
+
     } catch (error) {
       console.error('Translation error:', error);
       this.showError(error.message || '翻译失败，请稍后重试');
     } finally {
       this.translating = false;
+    }
+  }
+
+  // 多引擎翻译
+  async translateMultiEngine(text, sourceLang, targetLang) {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        action: 'translateMultiEngine',
+        text: text,
+        sourceLang: sourceLang,
+        targetLang: targetLang
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error('连接失败'));
+          return;
+        }
+        if (response && response.success) {
+          this.showMultiResults(text, response.results, sourceLang, targetLang);
+          resolve(response);
+        } else {
+          reject(new Error(response?.error || '多引擎翻译失败'));
+        }
+      });
+    });
+  }
+
+  // 显示多引擎结果
+  showMultiResults(originalText, results, sourceLang, targetLang) {
+    if (!this.panel) return;
+
+    const body = this.panel.querySelector('.panel-body');
+    body.innerHTML = '';
+
+    // 显示原文
+    const originalDiv = document.createElement('div');
+    originalDiv.className = 'original-text';
+    originalDiv.innerHTML = `
+      <div class="text-label">原文</div>
+      <div class="text-content">${this.escapeHtml(originalText)}</div>
+    `;
+    body.appendChild(originalDiv);
+
+    // 创建结果容器
+    const resultsContainer = document.createElement('div');
+    resultsContainer.className = 'multi-results-container';
+
+    // 定义引擎名称映射
+    const engineNames = {
+      google: 'Google 翻译',
+      microsoft: 'Microsoft',
+      llm: '自定义 LLM',
+      glm: 'GLM 大模型'
+    };
+
+    // 引擎颜色映射
+    const engineColors = {
+      google: '#4285f4',
+      microsoft: '#00a4ef',
+      llm: '#10b981',
+      glm: '#f59e0b'
+    };
+
+    // 添加每个引擎的结果
+    for (const [engine, translation] of Object.entries(results)) {
+      const resultItem = document.createElement('div');
+      resultItem.className = 'multi-result-item';
+
+      const engineName = engineNames[engine] || engine;
+      const engineColor = engineColors[engine] || '#667eea';
+
+      resultItem.innerHTML = `
+        <div class="multi-result-header">
+          <span class="multi-engine-name" style="color: ${engineColor}">${engineName}</span>
+          <button class="multi-copy-btn" data-text="${this.escapeHtml(translation)}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            复制
+          </button>
+        </div>
+        <div class="multi-result-text">${this.escapeHtml(translation)}</div>
+      `;
+
+      // 绑定复制按钮事件
+      const copyBtn = resultItem.querySelector('.multi-copy-btn');
+      copyBtn.addEventListener('click', () => {
+        this.copyToClipboard(translation);
+        copyBtn.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          已复制
+        `;
+        setTimeout(() => {
+          copyBtn.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            复制
+          `;
+        }, 2000);
+      });
+
+      resultsContainer.appendChild(resultItem);
+    }
+
+    body.appendChild(resultsContainer);
+
+    // 更新 footer
+    const footer = this.panel.querySelector('.panel-footer');
+    footer.innerHTML = `
+      <span class="translation-source"></span>
+      <span class="multi-engine-hint">点击复制各引擎结果</span>
+    `;
+  }
+
+  // 显示单引擎结果
+  showSingleResult(originalText, translatedText, sourceLang, targetLang, backupService) {
+    if (!this.panel) return;
+
+    const resultDiv = this.panel.querySelector('.translation-result .text-content');
+    resultDiv.className = 'text-content';
+    resultDiv.textContent = translatedText;
+
+    // 显示翻译来源（备用服务时提示）
+    const sourceEl = this.panel.querySelector('.translation-source');
+    if (sourceEl) {
+      if (backupService) {
+        sourceEl.textContent = `由 ${backupService} 提供`;
+        sourceEl.title = 'Google 翻译不可用，已自动切换至备用服务';
+      } else {
+        sourceEl.textContent = '';
+      }
+    }
+
+    // 启用复制按钮
+    const copyBtn = this.panel.querySelector('.copy-btn');
+    copyBtn.disabled = false;
+
+    // 避免重复绑定事件
+    if (!this._copyBtnBound) {
+      this._copyBtnBound = true;
+      copyBtn.addEventListener('click', () => {
+        this.copyToClipboard(translatedText);
+        copyBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          已复制
+        `;
+        setTimeout(() => {
+          copyBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            复制
+          `;
+        }, 2000);
+      });
     }
   }
 

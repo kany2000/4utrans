@@ -202,6 +202,10 @@ class ScreenshotTranslator {
           console.log('Quick panel translate request...');
           this.handleQuickPanelTranslate(request, sendResponse);
           break;
+        case 'translateMultiEngine':
+          console.log('Multi-engine translate request...');
+          this.translateMultiEngine(request.text, request.sourceLang, request.targetLang, sendResponse);
+          break;
         case 'getModels':
           console.log('Getting available models...');
           this.getAvailableModels(request.apiKey, request.baseUrl, sendResponse);
@@ -272,6 +276,7 @@ class ScreenshotTranslator {
         'showConfidence',
         'quickPanelEnabled',
         'hoverTranslationEnabled',
+        'multiEngineEnabled',
         'minSelectionLength',
         'apiKeys',
         'llmConfig'
@@ -285,6 +290,7 @@ class ScreenshotTranslator {
         showConfidence: result.showConfidence !== false,
         quickPanelEnabled: result.quickPanelEnabled !== false,
         hoverTranslationEnabled: result.hoverTranslationEnabled || false,
+        multiEngineEnabled: result.multiEngineEnabled || false,
         minSelectionLength: result.minSelectionLength || 2,
         apiKeys: result.apiKeys || {},
         llmConfig: result.llmConfig || { baseUrl: '', model: '' }
@@ -855,7 +861,7 @@ ${text}`;
   async handleQuickPanelTranslate(request, sendResponse) {
     try {
       const { text, sourceLang, targetLang } = request;
-      
+
       console.log('Quick panel translate:', {
         textLength: text?.length,
         sourceLang,
@@ -871,6 +877,62 @@ ${text}`;
         error: error.message || '翻译失败'
       });
     }
+  }
+
+  // 多引擎翻译 - 同时调用多个翻译服务
+  async translateMultiEngine(text, sourceLang, targetLang, sendResponse) {
+    const results = {};
+    const errors = {};
+
+    // 1. Google 翻译
+    try {
+      const googleResult = await this.callGoogleTranslate(text, sourceLang, targetLang);
+      results.google = googleResult;
+    } catch (e) {
+      errors.google = e.message;
+    }
+
+    // 2. Microsoft 翻译
+    try {
+      const microsoftResult = await this.callMicrosoftTranslate(text, sourceLang, targetLang);
+      results.microsoft = microsoftResult;
+    } catch (e) {
+      errors.microsoft = e.message;
+    }
+
+    // 3. 检查是否有自定义 LLM 配置
+    const settings = await this.getUserSettings();
+    const customApiKey = settings.apiKeys?.custom;
+    const llmConfig = settings.llmConfig || {};
+
+    if (customApiKey && llmConfig.baseUrl && llmConfig.model) {
+      try {
+        const llmResult = await this.callCustomLLMTranslate(text, sourceLang, targetLang, customApiKey, llmConfig);
+        results.llm = llmResult;
+      } catch (e) {
+        errors.llm = e.message;
+      }
+    }
+
+    // 4. 检查 GLM 配置（如果有）
+    const glmApiKey = settings.apiKeys?.glm;
+    if (glmApiKey) {
+      try {
+        const glmResult = await this.callGLMTranslate(text, sourceLang, targetLang, glmApiKey);
+        results.glm = glmResult;
+      } catch (e) {
+        errors.glm = e.message;
+      }
+    }
+
+    // 返回所有结果
+    sendResponse({
+      success: true,
+      results: results,
+      errors: errors,
+      sourceLang: sourceLang,
+      targetLang: targetLang
+    });
   }
 
   async callBackupTranslateService(text, sourceLang, targetLang) {

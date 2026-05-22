@@ -5,6 +5,24 @@
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 並且本項目遵循 [語義化版本](https://semver.org/lang/zh-CN/).
 
+## [2.2.0] - 2026-05-22
+
+### ✨ 新增 / Added
+- **多引擎結果對比**：同時展示 Google / Microsoft / LLM 等多個翻譯引擎的結果
+- **多引擎開關設置**：可在高級設置中啟用/關閉多引擎對比功能
+- **獨立複製按鈕**：每個翻譯結果都有獨立的複製按鈕
+
+### 🎨 界面優化
+- 多引擎結果以卡片形式展示，每個引擎有獨立標籤和顏色區分
+- Google 翻譯（藍色）、Microsoft（青色）、GLM（橙色）、自定義 LLM（綠色）
+
+### 📝 文件變更
+- `background.js` - 新增 `translateMultiEngine` 方法
+- `quick-panel.js` - 新增多引擎翻譯 UI 和邏輯
+- `quick-panel.css` - 新增多結果展示樣式
+- `popup.html` - 新增多引擎開關設置項
+- `popup.js` - 集成多引擎設置保存/加載
+
 ## [2.1.2] - 2026-05-21
 
 ### ✨ 新增 / Added
