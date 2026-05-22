@@ -256,6 +256,10 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 ## 🚀 使用方法
 
+<details>
+<summary>📢 <strong>请务必使用前先了解一下</strong></summary>
+<br>
+
 ### 首次设置
 1. **打开设置** - 点击浏览器工具栏中的 📷 图标
 2. **配置语言** - 选择目标语言（推荐：简体中文）和识别语言（推荐：自动检测）
@@ -290,6 +294,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
    - 按 `ESC` 键快速退出
    - 点击覆盖层背景退出
 
+</details>
 ---
 
 ## 🎨 界面展示
