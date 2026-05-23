@@ -64,13 +64,12 @@ class PopupController {
 
       const welcomeToast = document.getElementById('welcome-toast');
       if (welcomeToast) {
-        // 添加 visible 类，显示 toast
+        // 添加 visible 类，显示 toast（使用 transition 动画）
         welcomeToast.classList.add('visible');
 
         // 5 秒后隐藏
         setTimeout(() => {
           welcomeToast.classList.remove('visible');
-          welcomeToast.classList.add('hidden');
         }, 5000);
 
         // 点击关闭按钮手动关闭
@@ -78,7 +77,6 @@ class PopupController {
         if (closeBtn) {
           closeBtn.onclick = () => {
             welcomeToast.classList.remove('visible');
-            welcomeToast.classList.add('hidden');
           };
         }
       }
