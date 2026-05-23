@@ -5,7 +5,7 @@ const translations = {
   'zh-CN': {
     // 标题和版本
     'app.title': 'QuickTranslate 快译',
-    'app.version': 'v2.3.0',
+    'app.version': 'v2.5.0',
 
     // 主要按钮
     'btn.startCapture': '开始截图',
@@ -135,7 +135,7 @@ const translations = {
   'zh-TW': {
     // 標題和版本
     'app.title': 'QuickTranslate 快譯',
-    'app.version': 'v2.3.0',
+    'app.version': 'v2.5.0',
 
     // 主要按鈕
     'btn.startCapture': '開始截圖',
@@ -265,7 +265,7 @@ const translations = {
   'en': {
     // Title and version
     'app.title': 'QuickTranslate',
-    'app.version': 'v2.3.0',
+    'app.version': 'v2.5.0',
 
     // Main buttons
     'btn.startCapture': 'Start Capture',
@@ -395,7 +395,7 @@ const translations = {
   'ja': {
     // タイトルとバージョン
     'app.title': 'QuickTranslate',
-    'app.version': 'v2.3.0',
+    'app.version': 'v2.5.0',
 
     // メインボタン
     'btn.startCapture': 'キャプチャ開始',
@@ -525,7 +525,7 @@ const translations = {
   'ko': {
     // 제목 및 버전
     'app.title': 'QuickTranslate',
-    'app.version': 'v2.3.0',
+    'app.version': 'v2.5.0',
 
     // 주요 버튼
     'btn.startCapture': '캡처 시작',

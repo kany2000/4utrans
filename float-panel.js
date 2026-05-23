@@ -1,6 +1,6 @@
 /**
  * FloatPanel - 独立翻译面板
- * Version: 2.3.0
+ * Version: 2.5.0
  * 独立浮动面板，可打字翻译，附带历史记录和生词本功能
  */
 
@@ -552,8 +552,8 @@ class FloatPanel {
       chrome.runtime.sendMessage({ action: 'addToHistory', item }, (response) => {
         if (response && response.success) {
           this.history.unshift(response.data);
-          if (this.history.length > 100) {
-            this.history = this.history.slice(0, 100);
+          if (this.history.length > 500) {
+            this.history = this.history.slice(0, 500);
           }
         }
         resolve(response);
@@ -623,8 +623,8 @@ class FloatPanel {
       chrome.runtime.sendMessage({ action: 'addToSavedWords', item }, (response) => {
         if (response && response.success) {
           this.savedWords.unshift(response.data);
-          if (this.savedWords.length > 100) {
-            this.savedWords = this.savedWords.slice(0, 100);
+          if (this.savedWords.length > 500) {
+            this.savedWords = this.savedWords.slice(0, 500);
           }
         }
         resolve(response);

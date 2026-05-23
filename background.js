@@ -289,7 +289,7 @@ class ScreenshotTranslator {
         translationHistory: result.translationHistory || [],
         savedWords: result.savedWords || [],
         exportTime: new Date().toISOString(),
-        version: '2.3.0'
+        version: '2.5.0'
       };
       sendResponse({ success: true, data: data });
     } catch (error) {
