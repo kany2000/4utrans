@@ -237,6 +237,9 @@ body {
 .welcome-toast.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.welcome-toast.hiding {
   transition: opacity 0.3s ease;
 }
 
