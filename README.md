@@ -1,4 +1,8 @@
-<p align="center"># 🚀 QuickTranslate - 快译</p>
+<p align="center"
+  
+  # 🚀 QuickTranslate - 快译
+  
+</p>
 
 <p align="center">
   <img src="icons/icon128.png" alt="QuickTranslate" width="128"/>
