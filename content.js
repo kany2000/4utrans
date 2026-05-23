@@ -44,6 +44,13 @@ if (typeof window.ScreenshotCapture === 'undefined') {
             this.showError(request.error);
             sendResponse({ success: true });
             break;
+          case 'openFloatPanel':
+            // 转发给 float-panel (float-panel.js 已加载)
+            if (window.floatPanel) {
+              window.floatPanel.init();
+            }
+            sendResponse({ success: true });
+            break;
           default:
             console.warn('Content: Unknown action:', request.action);
             sendResponse({ error: 'Unknown action' });
@@ -5887,8 +5894,62 @@ if (result && result !== text) {
       translatedSection.appendChild(translatedLabel);
       translatedSection.appendChild(translatedText);
 
+      // 添加操作按钮区域
+      const actionsDiv = document.createElement('div');
+      actionsDiv.style.cssText = `
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 12px !important;
+        margin-top: 16px !important;
+        padding-top: 16px !important;
+        border-top: 1px solid #e0e0e0 !important;
+      `;
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = '⭐ 收藏';
+      saveBtn.style.cssText = `
+        padding: 8px 16px !important;
+        background-color: #f8f9fa !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        color: #333 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: background-color 0.2s ease !important;
+      `;
+      saveBtn.addEventListener('click', () => {
+        chrome.runtime.sendMessage({
+          action: 'addToSavedWords',
+          item: {
+            original: result.originalText,
+            translation: result.translatedText
+          }
+        }, (response) => {
+          if (response && response.success) {
+            saveBtn.textContent = '✅ 已收藏';
+            saveBtn.disabled = true;
+            saveBtn.style.backgroundColor = '#e8f5e9';
+            saveBtn.style.borderColor = '#4caf50';
+          }
+        });
+      });
+      saveBtn.addEventListener('mouseenter', () => {
+        saveBtn.style.backgroundColor = '#e0e0e0';
+      });
+      saveBtn.addEventListener('mouseleave', () => {
+        if (!saveBtn.disabled) {
+          saveBtn.style.backgroundColor = '#f8f9fa';
+        }
+      });
+
+      actionsDiv.appendChild(saveBtn);
+
       body.appendChild(originalSection);
       body.appendChild(translatedSection);
+      body.appendChild(actionsDiv);
 
       content.appendChild(header);
       content.appendChild(body);

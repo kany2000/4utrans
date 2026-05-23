@@ -5,9 +5,88 @@ class ScreenshotTranslator {
   constructor() {
     console.log('ScreenshotTranslator constructor called');
     this.isProcessing = false;
+    this.MAX_HISTORY = 500; // 历史记录和生词本最大条数
     this.setupMessageListeners();
     this.setupInstallListener();
+    // 检查是否是首次启动（开发者模式下 onInstalled 不会触发）
+    this.checkFirstRun();
     console.log('ScreenshotTranslator initialized');
+  }
+
+  // 获取通知文本（根据浏览器语言）
+  getNotificationText() {
+    const lang = navigator.language || 'en';
+    const langMap = {
+      'zh': { title: 'QuickTranslate 安装完成', msg: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。' },
+      'zh-CN': { title: 'QuickTranslate 安装完成', msg: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。' },
+      'zh-TW': { title: 'QuickTranslate 安裝完成', msg: 'QuickTranslate已安裝！請點擊插件圖標開始使用。溫馨提示：請把插件固定在快捷工具欄方便使用。' },
+      'zh-HK': { title: 'QuickTranslate 安裝完成', msg: 'QuickTranslate已安裝！請點擊插件圖標開始使用。溫馨提示：請把插件固定在快捷工具欄方便使用。' },
+      'ja': { title: 'QuickTranslate インストール完了', msg: 'QuickTranslateがインストールされました！アイコンをクリックして開始してください。ヒント：ツールバーに固定すると便利です。' },
+      'ko': { title: 'QuickTranslate 설치 완료', msg: 'QuickTranslate이 설치되었습니다! 아이콘을 클릭하여 시작하세요. 팁：도구 모음에 고정하면 편리합니다.' },
+      'en':
+      { title: 'QuickTranslate Installed', msg: 'QuickTranslate installed! Click the icon to start. Tip: Pin to toolbar for easy access.' }
+    };
+
+    // 尝试精确匹配
+    if (langMap[lang]) return langMap[lang];
+
+    // 尝试语言前缀匹配
+    const prefix = lang.split('-')[0];
+    for (const key in langMap) {
+      if (key.startsWith(prefix)) return langMap[key];
+    }
+
+    // 默认英文
+    return langMap['en'];
+  }
+
+  // 检查是否是首次运行
+  checkFirstRun() {
+    chrome.storage.local.get(['hasRunBefore'], (result) => {
+      console.log('Storage check - hasRunBefore:', result.hasRunBefore);
+      if (!result.hasRunBefore) {
+        console.log('First run! Setting up...');
+        // 首次运行，设置标记
+        chrome.storage.local.set({
+          shouldShowWelcome: true,
+          hasRunBefore: true
+        }, () => {
+          console.log('Storage set, now showing notification...');
+          // 设置默认 UI 语言
+          this.setDefaultUILanguage();
+
+          // 获取对应语言的通知文本
+          const notifText = this.getNotificationText();
+
+          // 显示安装通知
+          chrome.notifications.create({
+            type: 'basic',
+            iconUrl: 'icons/icon16.png',
+            title: notifText.title,
+            message: notifText.msg,
+            requireInteraction: false,
+            silent: false
+          }, (notificationId) => {
+            console.log('Notification created, ID:', notificationId);
+            if (chrome.runtime.lastError) {
+              console.error('Notification error:', chrome.runtime.lastError);
+            }
+          });
+
+          // 5秒后关闭通知
+          setTimeout(() => {
+            chrome.notifications.getAll((notifications) => {
+              console.log('Current notifications:', notifications);
+              Object.keys(notifications).forEach(id => {
+                chrome.notifications.clear(id);
+              });
+            });
+          }, 5000);
+        });
+      } else {
+        console.log('Not first run, skipping notification');
+      }
+    });
   }
 
   setupInstallListener() {
@@ -17,12 +96,18 @@ class ScreenshotTranslator {
         // 使用 storage 存储安装标记，popup 打开时会检查
         chrome.storage.local.set({ shouldShowWelcome: true });
 
+        // 根据浏览器语言设置默认的 UI 语言
+        this.setDefaultUILanguage();
+
+        // 获取对应语言的通知文本
+        const notifText = this.getNotificationText();
+
         // 安装完成后立即显示欢迎通知，持续5秒
         chrome.notifications.create({
           type: 'basic',
           iconUrl: 'icons/icon16.png',
-          title: 'QuickTranslate 安装完成',
-          message: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。',
+          title: notifText.title,
+          message: notifText.msg,
           requireInteraction: false,
           silent: false
         });
@@ -39,6 +124,201 @@ class ScreenshotTranslator {
     });
   }
 
+  // 根据浏览器语言设置默认 UI 语言
+  async setDefaultUILanguage() {
+    // 支持的语言
+    const supportedLangs = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'];
+    const langMap = {
+      'zh': 'zh-CN',
+      'zh-CN': 'zh-CN',
+      'zh-TW': 'zh-TW',
+      'zh-HK': 'zh-TW',
+      'zh-SG': 'zh-CN',
+      'en': 'en',
+      'en-US': 'en',
+      'en-GB': 'en',
+      'en-AU': 'en',
+      'en-CA': 'en',
+      'ja': 'ja',
+      'ja-JP': 'ja',
+      'ko': 'ko',
+      'ko-KR': 'ko'
+    };
+
+    // 获取浏览器语言
+    const browserLang = chrome.runtime.getManifest().default_locale || 'en';
+    console.log('Background: Browser default locale:', browserLang);
+
+    // 尝试匹配
+    let uiLang = langMap[browserLang];
+    if (!uiLang) {
+      const langPrefix = browserLang.split('-')[0].toLowerCase();
+      uiLang = langMap[langPrefix];
+    }
+
+    // 如果不匹配支持的语言，默认英文
+    if (!uiLang || !supportedLangs.includes(uiLang)) {
+      uiLang = 'en';
+    }
+
+    console.log('Background: Setting default UI language to:', uiLang);
+
+    // 保存到 storage
+    await chrome.storage.local.set({ uiLanguage: uiLang });
+  }
+
+  // ==================== 历史记录和生词本 ====================
+
+  async getTranslationHistory(sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['translationHistory']);
+      const history = result.translationHistory || [];
+      sendResponse({ success: true, data: history });
+    } catch (error) {
+      console.error('Failed to get translation history:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async addToHistory(item, sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['translationHistory']);
+      let history = result.translationHistory || [];
+
+      // 生成唯一ID
+      const newItem = {
+        id: Date.now(),
+        original: item.original,
+        translation: item.translation,
+        sourceLang: item.sourceLang || 'auto',
+        targetLang: item.targetLang || 'zh-CN',
+        timestamp: Date.now()
+      };
+
+      // 添加到开头
+      history.unshift(newItem);
+
+      // 限制条数
+      if (history.length > this.MAX_HISTORY) {
+        history = history.slice(0, this.MAX_HISTORY);
+      }
+
+      await chrome.storage.local.set({ translationHistory: history });
+      sendResponse({ success: true, data: newItem });
+    } catch (error) {
+      console.error('Failed to add to history:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async clearHistory(sendResponse) {
+    try {
+      await chrome.storage.local.set({ translationHistory: [] });
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Failed to clear history:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async getSavedWords(sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['savedWords']);
+      const words = result.savedWords || [];
+      sendResponse({ success: true, data: words });
+    } catch (error) {
+      console.error('Failed to get saved words:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async addToSavedWords(item, sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['savedWords']);
+      let words = result.savedWords || [];
+
+      // 检查是否已存在
+      const exists = words.some(w => w.original === item.original && w.translation === item.translation);
+      if (exists) {
+        sendResponse({ success: false, error: '已存在' });
+        return;
+      }
+
+      const newItem = {
+        id: Date.now(),
+        original: item.original,
+        translation: item.translation,
+        sourceLang: item.sourceLang || 'auto',
+        targetLang: item.targetLang || 'zh-CN',
+        timestamp: Date.now()
+      };
+
+      words.unshift(newItem);
+
+      if (words.length > this.MAX_HISTORY) {
+        words = words.slice(0, this.MAX_HISTORY);
+      }
+
+      await chrome.storage.local.set({ savedWords: words });
+      sendResponse({ success: true, data: newItem });
+    } catch (error) {
+      console.error('Failed to add to saved words:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async removeFromSavedWords(id, sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['savedWords']);
+      let words = result.savedWords || [];
+
+      words = words.filter(w => w.id !== id);
+
+      await chrome.storage.local.set({ savedWords: words });
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Failed to remove from saved words:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async exportData(sendResponse) {
+    try {
+      const result = await chrome.storage.local.get(['translationHistory', 'savedWords']);
+      const data = {
+        translationHistory: result.translationHistory || [],
+        savedWords: result.savedWords || [],
+        exportTime: new Date().toISOString(),
+        version: '2.3.0'
+      };
+      sendResponse({ success: true, data: data });
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  async importData(data, sendResponse) {
+    try {
+      if (!data || !data.version) {
+        sendResponse({ success: false, error: 'Invalid data format' });
+        return;
+      }
+
+      if (data.translationHistory) {
+        await chrome.storage.local.set({ translationHistory: data.translationHistory });
+      }
+      if (data.savedWords) {
+        await chrome.storage.local.set({ savedWords: data.savedWords });
+      }
+
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
   setupMessageListeners() {
     console.log('Setting up message listeners...');
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -52,6 +332,8 @@ class ScreenshotTranslator {
       console.log('Command received:', command);
       if (command === 'smart-translate') {
         this.handleSmartTranslate();
+      } else if (command === 'open-float-panel') {
+        this.handleOpenFloatPanel();
       } else {
         console.log('Unknown command:', command);
       }
@@ -63,12 +345,10 @@ class ScreenshotTranslator {
   async handleSmartTranslate() {
     try {
       console.log('Smart translate triggered');
-
       // 获取当前活动标签
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tabs[0]) {
-        console.error('No active tab found');
-        return;
+        throw new Error('No active tab found');
       }
 
       const tab = tabs[0];
@@ -131,6 +411,34 @@ class ScreenshotTranslator {
 
     } catch (error) {
       console.error('Smart translate failed:', error);
+    }
+  }
+
+  async handleOpenFloatPanel() {
+    try {
+      console.log('Opening float panel...');
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tabs[0]) {
+        console.error('No active tab found');
+        return;
+      }
+
+      const tab = tabs[0];
+
+      // 检查是否是受限页面
+      if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://')) {
+        console.error('Cannot use on restricted pages');
+        return;
+      }
+
+      // 发送消息给 content script，如果失败就忽略
+      try {
+        chrome.tabs.sendMessage(tab.id, { action: 'openFloatPanel' });
+      } catch (msgError) {
+        console.log('Content script not ready, will retry on next shortcut press');
+      }
+    } catch (error) {
+      console.error('Failed to open float panel:', error);
     }
   }
 
@@ -207,6 +515,30 @@ class ScreenshotTranslator {
           console.log('Getting available models...');
           this.getAvailableModels(request.apiKey, request.baseUrl, sendResponse);
           break;
+        case 'getTranslationHistory':
+          this.getTranslationHistory(sendResponse);
+          break;
+        case 'addToHistory':
+          this.addToHistory(request.item, sendResponse);
+          break;
+        case 'clearHistory':
+          this.clearHistory(sendResponse);
+          break;
+        case 'getSavedWords':
+          this.getSavedWords(sendResponse);
+          break;
+        case 'addToSavedWords':
+          this.addToSavedWords(request.item, sendResponse);
+          break;
+        case 'removeFromSavedWords':
+          this.removeFromSavedWords(request.id, sendResponse);
+          break;
+        case 'exportData':
+          this.exportData(sendResponse);
+          break;
+        case 'importData':
+          this.importData(request.data, sendResponse);
+          break;
         default:
           console.warn('Unknown action:', request.action);
           sendResponse({ error: 'Unknown action' });
@@ -275,7 +607,8 @@ class ScreenshotTranslator {
         'multiEngineEnabled',
         'minSelectionLength',
         'apiKeys',
-        'llmConfig'
+        'llmConfig',
+        'uiLanguage'
       ]);
 
       const settings = {
@@ -288,7 +621,8 @@ class ScreenshotTranslator {
         multiEngineEnabled: result.multiEngineEnabled || false,
         minSelectionLength: result.minSelectionLength || 2,
         apiKeys: result.apiKeys || {},
-        llmConfig: result.llmConfig || { baseUrl: '', model: '' }
+        llmConfig: result.llmConfig || { baseUrl: '', model: '' },
+        uiLanguage: result.uiLanguage || 'en'
       };
 
       sendResponse({ success: true, settings });
@@ -657,7 +991,21 @@ ${text}`;
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Background: GLM API error:', errorData);
-        throw new Error(`GLM API error: ${response.status}`);
+        // 尝试解析错误消息
+        let errorMessage = `GLM API 错误: ${response.status}`;
+        try {
+          const errorJson = JSON.parse(errorData);
+          if (errorJson.error) {
+            if (typeof errorJson.error === 'string') {
+              errorMessage = errorJson.error;
+            } else if (errorJson.error.message) {
+              errorMessage = errorJson.error.message;
+            }
+          }
+        } catch (e) {
+          // 解析失败，使用默认消息
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -776,14 +1124,22 @@ ${text}`;
           const errorData = await response.text();
           console.error('Background: LLM API error:', errorData);
           // 尝试解析错误消息
-          let errorMessage = `LLM API error: ${response.status}`;
+          let errorMessage = `LLM API 错误: ${response.status}`;
           try {
             const errorJson = JSON.parse(errorData);
-            if (errorJson.error && errorJson.error.message) {
-              errorMessage = errorJson.error.message;
+            // 处理不同的错误格式
+            if (errorJson.error) {
+              if (typeof errorJson.error === 'string') {
+                errorMessage = errorJson.error;
+              } else if (errorJson.error.message) {
+                errorMessage = errorJson.error.message;
+              } else if (errorJson.error.code) {
+                errorMessage = `${errorJson.error.code}: ${errorJson.error.message || errorJson.error.type || 'Unknown error'}`;
+              }
             }
           } catch (e) {
             // 解析失败，使用默认消息
+            errorMessage = `LLM API 错误: ${response.status} - ${errorData.substring(0, 100)}`;
           }
           reject(new Error(errorMessage));
           return;

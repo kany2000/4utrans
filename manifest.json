@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuickTranslate - 快译",
-"version": "2.2.0",
+  "version": "2.5.0",
   "description": "QuickTranslate 快译 - 選中文字即可快速翻譯，支持多種翻譯引擎和大模型",
   "author": "QuickTranslate Team",
   "permissions": [
@@ -38,8 +38,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js", "quick-panel.js"],
-      "css": ["content.css", "quick-panel.css"],
+      "js": ["content.js", "quick-panel.js", "float-panel.js"],
+      "css": ["content.css", "quick-panel.css", "float-panel.css"],
       "run_at": "document_idle",
       "all_frames": false
     }
@@ -59,6 +59,15 @@
         "linux": "Alt+1"
       },
       "description": "智能翻譯（自動檢測語言翻譯成目標語言）"
+    },
+    "open-float-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Q",
+        "mac": "Command+Shift+Q",
+        "windows": "Ctrl+Shift+Q",
+        "linux": "Ctrl+Shift+Q"
+      },
+      "description": "打開獨立翻譯面板"
     }
   }
 }

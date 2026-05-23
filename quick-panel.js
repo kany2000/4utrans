@@ -1,6 +1,6 @@
 /**
  * QuickTranslate - Quick Translation Panel
- * Version: 2.2.0
+ * Version: 2.3.0
  * 快捷翻译面板 - 选中文字即可快速翻译
  */
 
@@ -215,6 +215,7 @@ class QuickTranslationPanel {
       if (this.multiEngineEnabled) {
         const multiResult = await this.translateMultiEngineHover(text);
         if (text === this.currentText) {
+          this._hoverTranslation = multiResult.results.google || Object.values(multiResult.results)[0] || text;
           this.showMultiEngineHoverResults(multiResult, text);
         }
         return;
@@ -222,11 +223,13 @@ class QuickTranslationPanel {
         translatedText = await this.translateText(text);
       }
       if (this.hoverBubble && text === this.currentText) {
+        this._hoverTranslation = translatedText;
         const resultEl = this.hoverBubble.querySelector('.hover-result');
         resultEl.textContent = translatedText;
       }
     } catch (error) {
       if (this.hoverBubble && text === this.currentText) {
+        this._hoverTranslation = text;
         const resultEl = this.hoverBubble.querySelector('.hover-result');
         resultEl.innerHTML = `<span class="hover-error">${error.message}</span>`;
       }
@@ -441,9 +444,21 @@ class QuickTranslationPanel {
       <div class="hover-original"></div>
       <div class="hover-divider"></div>
       <div class="hover-result">悬停翻译</div>
+      <div class="hover-actions">
+        <button class="hover-save-btn">⭐ 收藏</button>
+      </div>
     `;
     this.hoverBubble.style.display = 'none';
     document.body.appendChild(this.hoverBubble);
+
+    // 绑定收藏按钮事件
+    const saveBtn = this.hoverBubble.querySelector('.hover-save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.saveHoverToWords();
+      });
+    }
   }
 
   updateHoverBubblePosition(x, y) {
@@ -794,19 +809,53 @@ class QuickTranslationPanel {
     } else {
       hintText = '所有引擎均失败';
     }
+
+    // 保存原文和译文用于收藏
+    this._currentOriginal = originalText;
+    this._currentTranslation = results.google || Object.values(results)[0] || '';
+
     footer.innerHTML = `
       <span class="translation-source"></span>
+      <button class="panel-btn save-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+        </svg>
+        收藏
+      </button>
       <span class="multi-engine-hint">${hintText}</span>
     `;
+
+    // 绑定收藏按钮
+    const saveBtn = footer.querySelector('.save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        this.saveToWords();
+      });
+    }
   }
 
   // 显示单引擎结果
   showSingleResult(originalText, translatedText, sourceLang, targetLang, backupService) {
+    console.log('showSingleResult called', { originalText, translatedText });
+    console.log('this.panel exists:', !!this.panel);
     if (!this.panel) return;
+
+    // 保存原文和译文
+    this._currentOriginal = originalText;
+    this._currentTranslation = translatedText;
 
     const resultDiv = this.panel.querySelector('.translation-result .text-content');
     resultDiv.className = 'text-content';
     resultDiv.textContent = translatedText;
+
+    // 检查按钮是否存在
+    const saveBtn = this.panel.querySelector('.save-btn');
+    const copyBtn = this.panel.querySelector('.copy-btn');
+    const footer = this.panel.querySelector('.panel-footer');
+    console.log('saveBtn exists:', !!saveBtn, saveBtn);
+    console.log('copyBtn exists:', !!copyBtn, copyBtn);
+    console.log('footer exists:', !!footer, footer);
+    console.log('footer innerHTML:', footer?.innerHTML);
 
     // 显示翻译来源（备用服务时提示）
     const sourceEl = this.panel.querySelector('.translation-source');
@@ -820,7 +869,6 @@ class QuickTranslationPanel {
     }
 
     // 启用复制按钮
-    const copyBtn = this.panel.querySelector('.copy-btn');
     copyBtn.disabled = false;
 
     // 避免重复绑定事件
@@ -843,6 +891,14 @@ class QuickTranslationPanel {
             复制
           `;
         }, 2000);
+      });
+    }
+
+    // 绑定收藏按钮
+    if (saveBtn) {
+      saveBtn.addEventListener('click', (e) => {
+        console.log('Save button clicked!', e);
+        this.saveToWords();
       });
     }
   }
@@ -926,6 +982,12 @@ class QuickTranslationPanel {
       </div>
       <div class="panel-footer">
         <span class="translation-source"></span>
+        <button class="panel-btn save-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+          </svg>
+          收藏
+        </button>
         <button class="panel-btn copy-btn" disabled>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1019,7 +1081,11 @@ class QuickTranslationPanel {
 
   showResult(originalText, translatedText, sourceLang, targetLang, backupService) {
     if (!this.panel) return;
-    
+
+    // 保存原文和译文
+    this._currentOriginal = originalText;
+    this._currentTranslation = translatedText;
+
     const resultDiv = this.panel.querySelector('.translation-result .text-content');
     resultDiv.className = 'text-content';
     resultDiv.textContent = translatedText;
@@ -1034,7 +1100,7 @@ class QuickTranslationPanel {
         sourceEl.textContent = '';
       }
     }
-    
+
     // 启用复制按钮
     const copyBtn = this.panel.querySelector('.copy-btn');
     copyBtn.disabled = false;
@@ -1059,6 +1125,17 @@ class QuickTranslationPanel {
             复制
           `;
         }, 2000);
+      });
+    }
+
+    // 绑定收藏按钮
+    const saveBtn = this.panel.querySelector('.save-btn');
+    if (saveBtn) {
+      // 移除已有的监听器并重新绑定
+      saveBtn.replaceWith(saveBtn.cloneNode(true));
+      const newSaveBtn = this.panel.querySelector('.save-btn');
+      newSaveBtn.addEventListener('click', () => {
+        this.saveToWords();
       });
     }
   }
@@ -1131,6 +1208,77 @@ class QuickTranslationPanel {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  saveToWords() {
+    console.log('saveToWords called', {
+      original: this._currentOriginal,
+      translation: this._currentTranslation
+    });
+    if (!this._currentOriginal || !this._currentTranslation) {
+      console.log('saveToWords: missing data');
+      return;
+    }
+
+    chrome.runtime.sendMessage({
+      action: 'addToSavedWords',
+      item: {
+        original: this._currentOriginal,
+        translation: this._currentTranslation
+      }
+    }, (response) => {
+      console.log('saveToWords response:', response);
+      if (response && response.success) {
+        const saveBtn = this.panel?.querySelector('.save-btn');
+        if (saveBtn) {
+          saveBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+            </svg>
+            已收藏
+          `;
+          saveBtn.disabled = true;
+          setTimeout(() => {
+            if (this.panel) {
+              const btn = this.panel.querySelector('.save-btn');
+              if (btn) {
+                btn.innerHTML = `
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+                  </svg>
+                  收藏
+                `;
+                btn.disabled = false;
+              }
+            }
+          }, 2000);
+        }
+      }
+    });
+  }
+
+  saveHoverToWords() {
+    if (!this.currentText) return;
+
+    chrome.runtime.sendMessage({
+      action: 'addToSavedWords',
+      item: {
+        original: this.currentText,
+        translation: this._hoverTranslation || this.currentText
+      }
+    }, (response) => {
+      if (response && response.success) {
+        const saveBtn = this.hoverBubble?.querySelector('.hover-save-btn');
+        if (saveBtn) {
+          saveBtn.textContent = '✅ 已收藏';
+          saveBtn.disabled = true;
+          setTimeout(() => {
+            saveBtn.textContent = '⭐ 收藏';
+            saveBtn.disabled = false;
+          }, 2000);
+        }
+      }
+    });
   }
 }
 

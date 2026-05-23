@@ -1,36 +1,89 @@
 // Popup 界面控制器
 class PopupController {
-   constructor() {
-     this.elements = {};
-     this.settings = {};
-     this.init();
-   }
+  constructor() {
+    this.elements = {};
+    this.settings = {};
+    this.init();
+  }
 
   init() {
     this.bindElements();
     this.bindEvents();
     this.loadSettings();
+    // 初始化 i18n 并更新 UI
+    this.initI18n();
     // 显示欢迎 toast 5 秒
     this.showWelcomeToast();
   }
 
-  showWelcomeToast() {
-    const welcomeToast = document.getElementById('welcome-toast');
-    if (welcomeToast) {
-      welcomeToast.classList.remove('hidden');
-      // 5 秒后隐藏
-      setTimeout(() => {
-        welcomeToast.classList.add('hidden');
-      }, 5000);
-      
-      // 点击关闭按钮手动关闭
-      const closeBtn = welcomeToast.querySelector('.toast-close');
-      if (closeBtn) {
-        closeBtn.onclick = () => {
-          welcomeToast.classList.add('hidden');
-        };
-      }
+  initI18n() {
+    // i18n 已在 i18n.js 中初始化
+    // 如果有保存的 UI 语言设置，使用它
+    if (this.settings.uiLanguage && supportedLanguages.includes(this.settings.uiLanguage)) {
+      i18n.setLanguage(this.settings.uiLanguage);
     }
+    // 更新 UI 文字
+    i18n.updateUI();
+    // 设置语言选择器的值
+    if (this.elements.uiLanguage) {
+      this.elements.uiLanguage.value = i18n.getCurrentLanguage();
+    }
+
+    // 监听语言变更事件
+    window.addEventListener('qtLanguageChanged', (e) => {
+      console.log('Language changed to:', e.detail.language);
+    });
+  }
+
+  async changeUILanguage() {
+    const newLang = this.elements.uiLanguage.value;
+    console.log('Changing UI language to:', newLang);
+
+    // 更新 i18n 语言
+    i18n.setLanguage(newLang);
+
+    // 保存到 storage
+    try {
+      await chrome.storage.local.set({ uiLanguage: newLang });
+      this.showStatus(i18n.t('status.saved'), 'success');
+    } catch (error) {
+      console.error('Failed to save UI language:', error);
+    }
+  }
+
+  showWelcomeToast() {
+    // 检查是否是首次安装或需要显示欢迎提示
+    // 注意：在开发者模式下 onInstalled 不会触发，所以我们也检查是否有任何已保存的设置
+    chrome.storage.local.get(['shouldShowWelcome', 'targetLanguage'], (result) => {
+      // 如果 shouldShowWelcome 为 true，或者没有任何已保存的设置（首次安装）
+      const isFirstInstall = !result.shouldShowWelcome && !result.targetLanguage;
+
+      if (result.shouldShowWelcome === false && !isFirstInstall) {
+        return; // 不是首次安装，且不需要显示
+      }
+
+      const welcomeToast = document.getElementById('welcome-toast');
+      if (welcomeToast) {
+        // 移除 hidden 类，显示 toast
+        welcomeToast.classList.remove('hidden');
+
+        // 5 秒后隐藏
+        setTimeout(() => {
+          welcomeToast.classList.add('hidden');
+        }, 5000);
+
+        // 点击关闭按钮手动关闭
+        const closeBtn = welcomeToast.querySelector('.toast-close');
+        if (closeBtn) {
+          closeBtn.onclick = () => {
+            welcomeToast.classList.add('hidden');
+          };
+        }
+      }
+
+      // 显示后清除标记，避免下次打开 popup 时重复显示
+      chrome.storage.local.set({ shouldShowWelcome: false });
+    });
   }
 
   bindElements() {
@@ -38,8 +91,11 @@ class PopupController {
       startCapture: document.getElementById('start-capture'),
       targetLanguage: document.getElementById('target-language'),
       ocrLanguage: document.getElementById('ocr-language'),
+      uiLanguage: document.getElementById('ui-language'),
       quickSave: document.getElementById('quick-save'),
       settingsBtn: document.getElementById('settings-btn'),
+      historyBtn: document.getElementById('history-btn'),
+      wordsBtn: document.getElementById('words-btn'),
       settingsModal: document.getElementById('settings-modal'),
       closeSettings: document.getElementById('close-settings'),
       apiProvider: document.getElementById('api-provider'),
@@ -84,6 +140,16 @@ class PopupController {
       this.showSettingsModal();
     });
 
+    // 歷史按鈕
+    this.elements.historyBtn.addEventListener('click', () => {
+      this.showHistoryModal();
+    });
+
+    // 生詞本按鈕
+    this.elements.wordsBtn.addEventListener('click', () => {
+      this.showWordsModal();
+    });
+
     // 關閉設置
     this.elements.closeSettings.addEventListener('click', () => {
       this.hideSettingsModal();
@@ -118,6 +184,11 @@ class PopupController {
 
     this.elements.ocrLanguage.addEventListener('change', () => {
       this.showUnsavedChanges();
+    });
+
+    // UI 語言設置變更時即時切換
+    this.elements.uiLanguage.addEventListener('change', () => {
+      this.changeUILanguage();
     });
 
     // ESC 鍵關閉模態框
@@ -400,7 +471,8 @@ class PopupController {
       llmConfig: {
         baseUrl: '',
         model: ''
-      }
+      },
+      uiLanguage: 'en'
     };
     this.updateUI();
   }
@@ -416,6 +488,14 @@ class PopupController {
     // 更新基本設置
     this.elements.targetLanguage.value = this.settings.targetLanguage || 'zh-TW';
     this.elements.ocrLanguage.value = this.settings.ocrLanguage || 'eng';
+
+    // 更新 UI 語言設置
+    if (this.elements.uiLanguage) {
+      const savedLang = this.settings.uiLanguage || 'en';
+      if (supportedLanguages.includes(savedLang)) {
+        this.elements.uiLanguage.value = savedLang;
+      }
+    }
 
     // 更新高級設置
     this.elements.apiProvider.value = this.settings.apiProvider || 'google';
@@ -689,7 +769,7 @@ class PopupController {
   }
 
   resetSettings() {
-    if (confirm('確定要重置所有設置嗎？')) {
+    if (confirm(i18n.t('status.resetConfirm'))) {
       const defaultSettings = {
         targetLanguage: 'zh-TW',
         ocrLanguage: 'eng',
@@ -713,7 +793,7 @@ class PopupController {
         if (response && response.success) {
           this.settings = defaultSettings;
           this.updateUI();
-          this.showStatus('設置已重置', 'success');
+          this.showStatus(i18n.t('status.reset'), 'success');
         } else {
           this.showStatus('重置失敗', 'error');
         }
@@ -723,6 +803,157 @@ class PopupController {
 
   showSettingsModal() {
     this.elements.settingsModal.classList.remove('hidden');
+  }
+
+  showHistoryModal() {
+    chrome.runtime.sendMessage({ action: 'getTranslationHistory' }, (response) => {
+      if (response && response.success) {
+        const history = response.data || [];
+        const list = history.map(item =>
+          `<div class="modal-list-item">
+            <div class="modal-item-original">${this.escapeHtml(item.original)}</div>
+            <div class="modal-item-translation">${this.escapeHtml(item.translation)}</div>
+            <div class="modal-item-time">${new Date(item.timestamp).toLocaleString()}</div>
+          </div>`
+        ).join('');
+
+        const content = history.length === 0
+          ? `<div class="modal-empty">${i18n.t('float.history.empty')}</div>`
+          : `<div class="modal-list">${list}</div>`;
+
+        this.showModal(`${i18n.t('btn.history')} (${history.length}/500)`, content);
+      }
+    });
+  }
+
+  showWordsModal() {
+    chrome.runtime.sendMessage({ action: 'getSavedWords' }, (response) => {
+      if (response && response.success) {
+        const words = response.data || [];
+        const list = words.map(item =>
+          `<div class="modal-list-item">
+            <div class="modal-item-original">${this.escapeHtml(item.original)}</div>
+            <div class="modal-item-translation">${this.escapeHtml(item.translation)}</div>
+            <button class="modal-delete-btn" data-id="${item.id}">${i18n.t('float.btn.delete')}</button>
+          </div>`
+        ).join('');
+
+        const actionButtons = `
+          <div class="modal-actions">
+            <button id="words-export-btn" class="secondary-btn">${i18n.t('btn.export')}</button>
+            <button id="words-import-btn" class="secondary-btn">${i18n.t('btn.import')}</button>
+          </div>
+        `;
+
+        const content = words.length === 0
+          ? `<div class="modal-empty">${i18n.t('float.words.empty')}</div>${actionButtons}`
+          : `<div class="modal-list">${list}</div>${actionButtons}`;
+
+        this.showModal(`${i18n.t('btn.words')} (${words.length}/500)`, content);
+
+        // 绑定删除按钮事件
+        document.querySelectorAll('.modal-delete-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            chrome.runtime.sendMessage({ action: 'removeFromSavedWords', id }, () => {
+              this.showWordsModal(); // 刷新
+            });
+          });
+        });
+
+        // 绑定导出按钮事件
+        document.getElementById('words-export-btn')?.addEventListener('click', () => {
+          this.exportData();
+        });
+
+        // 绑定导入按钮事件
+        document.getElementById('words-import-btn')?.addEventListener('click', () => {
+          this.importData();
+        });
+      }
+    });
+  }
+
+  exportData() {
+    chrome.runtime.sendMessage({ action: 'exportData' }, (response) => {
+      if (response && response.success) {
+        const jsonStr = JSON.stringify(response.data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `quicktranslate-backup-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showStatus('導出成功', 'success');
+      } else {
+        this.showStatus('導出失敗', 'error');
+      }
+    });
+  }
+
+  importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          chrome.runtime.sendMessage({ action: 'importData', data }, (response) => {
+            if (response && response.success) {
+              this.showStatus('導入成功', 'success');
+            } else {
+              this.showStatus('導入失敗: ' + (response?.error || '未知錯誤'), 'error');
+            }
+          });
+        } catch (err) {
+          this.showStatus('文件格式錯誤', 'error');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  showModal(title, content) {
+    // 移除已存在的模态框
+    const existing = document.querySelector('.float-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'float-modal';
+    modal.innerHTML = `
+      <div class="float-modal-content">
+        <div class="float-modal-header">
+          <span>${title}</span>
+          <button class="float-modal-close">×</button>
+        </div>
+        <div class="float-modal-body">${content}</div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('.float-modal-close').addEventListener('click', () => {
+      modal.remove();
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   hideSettingsModal() {
