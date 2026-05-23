@@ -1,6 +1,145 @@
 // 截圖翻譯器內容腳本
 console.log('Content script loading...');
 
+// 內置翻譯表（content script 無法訪問 popup 的 i18n.js）
+const contentTranslations = {
+  'zh-CN': {
+    'quick.btn.translate': '翻译',
+    'quick.panel.title': '快速翻译',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '译文',
+    'quick.btn.copy': '复制',
+    'quick.btn.save': '收藏',
+    'quick.msg.copied': '已复制',
+    'quick.msg.saved': '已收藏',
+    'quick.msg.translating': '翻译中...',
+    'quick.hint.hover': '悬停翻译',
+    'quick.hint.clickToCopy': '点击复制各引擎结果',
+    'quick.hint.multiSuccess': '{success}个成功，{error}个失败',
+    'quick.hint.allFailed': '所有引擎均失败',
+    'quick.error.noText': '未识别到文字',
+    'quick.error.screenshotFailed': '截图失败',
+    'quick.error.processFailed': '处理失败',
+    'quick.error.ocrNoText': '图片中没有找到可识别的文字，请尝试选择包含清晰文字的区域',
+    'quick.result.title': '翻译结果（可拖动）',
+    'quick.result.recognized': '识别文字',
+    'quick.result.translated': '翻译结果',
+    'engine.google': 'Google 翻译',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '自定义 LLM',
+    'engine.glm': 'GLM 大模型',
+    'engine.backup': '由 {service} 提供'
+  },
+  'zh-TW': {
+    'quick.btn.translate': '翻譯',
+    'quick.panel.title': '快速翻譯',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '譯文',
+    'quick.btn.copy': '複製',
+    'quick.btn.save': '收藏',
+    'quick.msg.copied': '已複製',
+    'quick.msg.saved': '已收藏',
+    'quick.msg.translating': '翻譯中...',
+    'quick.hint.hover': '懸停翻譯',
+    'quick.hint.clickToCopy': '點擊複製各引擎結果',
+    'quick.hint.multiSuccess': '{success}個成功，{error}個失敗',
+    'quick.hint.allFailed': '所有引擎均失敗',
+    'quick.error.noText': '未識別到文字',
+    'quick.error.screenshotFailed': '截圖失敗',
+    'quick.error.processFailed': '處理失敗',
+    'quick.error.ocrNoText': '圖片中沒有找到可識別的文字，請嘗試選擇包含清晰文字的區域',
+    'quick.result.title': '翻譯結果（可拖動）',
+    'quick.result.recognized': '識別文字',
+    'quick.result.translated': '翻譯結果',
+    'engine.google': 'Google 翻譯',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '自訂 LLM',
+    'engine.glm': 'GLM 大模型',
+    'engine.backup': '由 {service} 提供'
+  },
+  'en': {
+    'quick.btn.translate': 'Translate',
+    'quick.panel.title': 'Quick Translate',
+    'quick.panel.original': 'Original',
+    'quick.panel.translated': 'Translation',
+    'quick.btn.copy': 'Copy',
+    'quick.btn.save': 'Save',
+    'quick.msg.copied': 'Copied',
+    'quick.msg.saved': 'Saved',
+    'quick.msg.translating': 'Translating...',
+    'quick.hint.hover': 'Hover Translate',
+    'quick.hint.clickToCopy': 'Click to copy engine results',
+    'quick.hint.multiSuccess': '{success} succeeded, {error} failed',
+    'quick.hint.allFailed': 'All engines failed',
+    'quick.error.noText': 'No text recognized',
+    'quick.error.screenshotFailed': 'Screenshot failed',
+    'quick.error.processFailed': 'Processing failed',
+    'quick.error.ocrNoText': 'No recognizable text found in image. Try selecting an area with clear text.',
+    'quick.result.title': 'Translation Result (Draggable)',
+    'quick.result.recognized': 'Recognized Text',
+    'quick.result.translated': 'Translation',
+    'engine.google': 'Google Translate',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': 'Custom LLM',
+    'engine.glm': 'GLM',
+    'engine.backup': 'Provided by {service}'
+  },
+  'ja': {
+    'quick.btn.translate': '翻訳',
+    'quick.panel.title': 'クイック翻訳',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '訳文',
+    'quick.btn.copy': 'コピー',
+    'quick.btn.save': '保存',
+    'quick.msg.copied': 'コピーしました',
+    'quick.msg.saved': '保存しました',
+    'quick.msg.translating': '翻訳中...',
+    'quick.hint.hover': 'ホバー翻訳',
+    'quick.hint.clickToCopy': 'クリックして各エンジンの結果をコピー',
+    'quick.hint.multiSuccess': '{success}個成功、{error}個失敗',
+    'quick.hint.allFailed': 'すべてのエンジンが失敗',
+    'quick.error.noText': 'テキストが認識されませんでした',
+    'quick.error.screenshotFailed': 'スクリーンショットの取得に失敗',
+    'quick.error.processFailed': '処理に失敗',
+    'quick.error.ocrNoText': '画像内に認識可能なテキストが見つかりませんでした。鮮明なテキストが含まれる領域を選択してください。',
+    'quick.result.title': '翻訳結果（ドラッグ可能）',
+    'quick.result.recognized': '認識されたテキスト',
+    'quick.result.translated': '翻訳結果',
+    'engine.google': 'Google翻訳',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': 'カスタムLLM',
+    'engine.glm': 'GLM',
+    'engine.backup': '{service}提供服务'
+  },
+  'ko': {
+    'quick.btn.translate': '번역',
+    'quick.panel.title': '빠른 번역',
+    'quick.panel.original': '원문',
+    'quick.panel.translated': '번역',
+    'quick.btn.copy': '복사',
+    'quick.btn.save': '저장',
+    'quick.msg.copied': '복사됨',
+    'quick.msg.saved': '저장됨',
+    'quick.msg.translating': '번역 중...',
+    'quick.hint.hover': '호버 번역',
+    'quick.hint.clickToCopy': '클릭하여 각 엔진 결과 복사',
+    'quick.hint.multiSuccess': '{success}개 성공, {error}개 실패',
+    'quick.hint.allFailed': '모든 엔진 실패',
+    'quick.error.noText': '텍스트가 인식되지 않았습니다',
+    'quick.error.screenshotFailed': '스크린샷 실패',
+    'quick.error.processFailed': '처리 실패',
+    'quick.error.ocrNoText': '이미지에서 인식 가능한 텍스트를 찾을 수 없습니다. 선명한 텍스트가 포함된 영역을 선택하세요.',
+    'quick.result.title': '번역 결과 (드래그 가능)',
+    'quick.result.recognized': '인식된 텍스트',
+    'quick.result.translated': '번역 결과',
+    'engine.google': 'Google 번역',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '사용자 정의 LLM',
+    'engine.glm': 'GLM',
+    'engine.backup': '{service}提供服务'
+  }
+};
+
 // 防止重複聲明
 if (typeof window.ScreenshotCapture === 'undefined') {
 
@@ -12,7 +151,47 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       this.startX = 0;
       this.startY = 0;
       this.isSelecting = false;
+      this.lang = 'en';  // UI语言
       this.setupMessageListeners();
+      this.loadUserLanguage();
+    }
+
+    // 从 background 获取用户界面语言
+    async loadUserLanguage() {
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: 'getSettings' }, (response) => {
+          if (response && response.success && response.settings && response.settings.uiLanguage) {
+            this.lang = response.settings.uiLanguage;
+          } else {
+            this.detectBrowserLanguage();
+          }
+          resolve();
+        });
+      });
+    }
+
+    // 检测浏览器语言
+    detectBrowserLanguage() {
+      const browserLang = navigator.language || navigator.userLanguage || 'en';
+      const langMap = {
+        'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', 'zh-HK': 'zh-TW',
+        'en': 'en', 'en-US': 'en', 'en-GB': 'en',
+        'ja': 'ja', 'ja-JP': 'ja',
+        'ko': 'ko', 'ko-KR': 'ko'
+      };
+      const prefix = browserLang.split('-')[0].toLowerCase();
+      this.lang = langMap[browserLang] || langMap[prefix] || 'en';
+    }
+
+    // 获取翻译
+    t(key) {
+      if (contentTranslations[this.lang] && contentTranslations[this.lang][key]) {
+        return contentTranslations[this.lang][key];
+      }
+      if (contentTranslations['en'][key]) {
+        return contentTranslations['en'][key];
+      }
+      return key;
     }
 
     setupMessageListeners() {
@@ -1601,12 +1780,6 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
         // 翻譯請求將通過 background script 根據用戶設置的 apiProvider 路由到相應的翻譯服務
         console.log(`Content: Translation request - source: ${sourceLang}, target: ${targetLang}`);
-
-        // 如果检测到英文但目标语言不是中文，强制设置为中文
-        if (sourceLang === 'en' && !targetLang.startsWith('zh')) {
-          console.log('Content: English detected but target is not Chinese, forcing Chinese target');
-          targetLang = 'zh';
-        }
 
         // 通過 background script 調用翻譯服務
         console.log(`Content: Calling translation service with: "${text}" (${sourceLang} -> ${targetLang})`);
@@ -5139,19 +5312,19 @@ if (result && result !== text) {
           } else {
             console.log('Content: No text found in image');
             this.showTranslationResult({
-              originalText: '未識別到文字',
-              translatedText: '圖片中沒有找到可識別的文字，請嘗試選擇包含清晰文字的區域',
+              originalText: this.t('quick.error.noText'),
+              translatedText: this.t('quick.error.ocrNoText'),
               confidence: 0.0
             });
           }
         } else {
-          throw new Error('截圖失敗');
+          throw new Error(this.t('quick.error.screenshotFailed'));
         }
       } catch (error) {
         console.error('Content: Screenshot capture failed:', error);
         this.showTranslationResult({
-          originalText: '處理失敗',
-          translatedText: `處理失敗: ${error.message}`,
+          originalText: this.t('quick.error.processFailed'),
+          translatedText: `${this.t('quick.error.processFailed')}: ${error.message}`,
           confidence: 0.0
         });
       }
@@ -5319,7 +5492,7 @@ if (result && result !== text) {
       } catch (error) {
         console.error('Simple OCR setup error:', error);
         return {
-          text: '處理失敗',
+          text: this.t('quick.error.processFailed'),
           confidence: 0.0
         };
       }
@@ -5755,7 +5928,7 @@ if (result && result !== text) {
       `;
 
       const title = document.createElement('h3');
-      title.textContent = '🔤 翻譯結果 (可拖動)';
+      title.textContent = `🔤 ${this.t('quick.result.title')}`;
       title.style.cssText = `
         margin: 0 !important;
         font-size: 18px !important;
@@ -5823,7 +5996,7 @@ if (result && result !== text) {
       `;
 
       const originalLabel = document.createElement('label');
-      originalLabel.textContent = '📝 識別文字：';
+      originalLabel.textContent = `📝 ${this.t('quick.result.recognized')}：`;
       originalLabel.style.cssText = `
         display: block !important;
         font-weight: 600 !important;
@@ -5857,7 +6030,7 @@ if (result && result !== text) {
       `;
 
       const translatedLabel = document.createElement('label');
-      translatedLabel.textContent = '🌐 翻譯結果：';
+      translatedLabel.textContent = `🌐 ${this.t('quick.result.translated')}：`;
       translatedLabel.style.cssText = `
         display: block !important;
         font-weight: 600 !important;
@@ -5906,7 +6079,7 @@ if (result && result !== text) {
       `;
 
       const saveBtn = document.createElement('button');
-      saveBtn.textContent = '⭐ 收藏';
+      saveBtn.textContent = `⭐ ${this.t('quick.btn.save')}`;
       saveBtn.style.cssText = `
         padding: 8px 16px !important;
         background-color: #f8f9fa !important;
@@ -5929,7 +6102,7 @@ if (result && result !== text) {
           }
         }, (response) => {
           if (response && response.success) {
-            saveBtn.textContent = '✅ 已收藏';
+            saveBtn.textContent = `✅ ${this.t('quick.msg.saved')}`;
             saveBtn.disabled = true;
             saveBtn.style.backgroundColor = '#e8f5e9';
             saveBtn.style.borderColor = '#4caf50';
@@ -6063,7 +6236,7 @@ if (result && result !== text) {
 
     showError(errorMessage) {
       this.cleanupOverlay();
-      this.showMessage('處理失敗: ' + errorMessage, 'error');
+      this.showMessage(`${this.t('quick.error.processFailed')}: ${errorMessage}`, 'error');
     }
 
     showMessage(message, type = 'info') {

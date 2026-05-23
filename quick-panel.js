@@ -4,6 +4,150 @@
  * 快捷翻译面板 - 选中文字即可快速翻译
  */
 
+// 内置翻译表（content script 无法访问 popup 的 i18n.js）
+const quickTranslations = {
+  'zh-CN': {
+    'quick.btn.translate': '翻译',
+    'quick.panel.title': '快速翻译',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '译文',
+    'quick.btn.copy': '复制',
+    'quick.btn.save': '收藏',
+    'quick.msg.copied': '已复制',
+    'quick.msg.saved': '已收藏',
+    'quick.msg.translating': '翻译中...',
+    'quick.hint.hover': '悬停翻译',
+    'quick.hint.clickToCopy': '点击复制各引擎结果',
+    'quick.hint.multiSuccess': '{success}个成功，{error}个失败',
+    'quick.hint.allFailed': '所有引擎均失败',
+    'quick.error.failed': '失败',
+    'quick.error.noText': '未识别到文字',
+    'quick.error.screenshotFailed': '截图失败',
+    'quick.error.processFailed': '处理失败',
+    'quick.error.ocrNoText': '图片中没有找到可识别的文字，请尝试选择包含清晰文字的区域',
+    'quick.result.title': '翻译结果（可拖动）',
+    'quick.result.recognized': '识别文字',
+    'quick.result.translated': '翻译结果',
+    'engine.google': 'Google 翻译',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '自定义 LLM',
+    'engine.glm': 'GLM 大模型',
+    'engine.backup': '由 {service} 提供'
+  },
+  'zh-TW': {
+    'quick.btn.translate': '翻譯',
+    'quick.panel.title': '快速翻譯',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '譯文',
+    'quick.btn.copy': '複製',
+    'quick.btn.save': '收藏',
+    'quick.msg.copied': '已複製',
+    'quick.msg.saved': '已收藏',
+    'quick.msg.translating': '翻譯中...',
+    'quick.hint.hover': '懸停翻譯',
+    'quick.hint.clickToCopy': '點擊複製各引擎結果',
+    'quick.hint.multiSuccess': '{success}個成功，{error}個失敗',
+    'quick.hint.allFailed': '所有引擎均失敗',
+    'quick.error.failed': '失敗',
+    'quick.error.noText': '未識別到文字',
+    'quick.error.screenshotFailed': '截圖失敗',
+    'quick.error.processFailed': '處理失敗',
+    'quick.error.ocrNoText': '圖片中沒有找到可識別的文字，請嘗試選擇包含清晰文字的區域',
+    'quick.result.title': '翻譯結果（可拖動）',
+    'quick.result.recognized': '識別文字',
+    'quick.result.translated': '翻譯結果',
+    'engine.google': 'Google 翻譯',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '自訂 LLM',
+    'engine.glm': 'GLM 大模型',
+    'engine.backup': '由 {service} 提供'
+  },
+  'en': {
+    'quick.btn.translate': 'Translate',
+    'quick.panel.title': 'Quick Translate',
+    'quick.panel.original': 'Original',
+    'quick.panel.translated': 'Translation',
+    'quick.btn.copy': 'Copy',
+    'quick.btn.save': 'Save',
+    'quick.msg.copied': 'Copied',
+    'quick.msg.saved': 'Saved',
+    'quick.msg.translating': 'Translating...',
+    'quick.hint.hover': 'Hover Translate',
+    'quick.hint.clickToCopy': 'Click to copy engine results',
+    'quick.hint.multiSuccess': '{success} succeeded, {error} failed',
+    'quick.hint.allFailed': 'All engines failed',
+    'quick.error.failed': 'Failed',
+    'quick.error.noText': 'No text recognized',
+    'quick.error.screenshotFailed': 'Screenshot failed',
+    'quick.error.processFailed': 'Processing failed',
+    'quick.error.ocrNoText': 'No recognizable text found in image. Try selecting an area with clear text.',
+    'quick.result.title': 'Translation Result (Draggable)',
+    'quick.result.recognized': 'Recognized Text',
+    'quick.result.translated': 'Translation',
+    'engine.google': 'Google Translate',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': 'Custom LLM',
+    'engine.glm': 'GLM',
+    'engine.backup': 'Provided by {service}'
+  },
+  'ja': {
+    'quick.btn.translate': '翻訳',
+    'quick.panel.title': 'クイック翻訳',
+    'quick.panel.original': '原文',
+    'quick.panel.translated': '訳文',
+    'quick.btn.copy': 'コピー',
+    'quick.btn.save': '保存',
+    'quick.msg.copied': 'コピーしました',
+    'quick.msg.saved': '保存しました',
+    'quick.msg.translating': '翻訳中...',
+    'quick.hint.hover': 'ホバー翻訳',
+    'quick.hint.clickToCopy': 'クリックして各エンジンの結果をコピー',
+    'quick.hint.multiSuccess': '{success}個成功、{error}個失敗',
+    'quick.hint.allFailed': 'すべてのエンジンが失敗',
+    'quick.error.failed': '失敗',
+    'quick.error.noText': 'テキストが認識されませんでした',
+    'quick.error.screenshotFailed': 'スクリーンショットの取得に失敗',
+    'quick.error.processFailed': '処理に失敗',
+    'quick.error.ocrNoText': '画像内に認識可能なテキストが見つかりませんでした。鮮明なテキストが含まれる領域を選択してください。',
+    'quick.result.title': '翻訳結果（ドラッグ可能）',
+    'quick.result.recognized': '認識されたテキスト',
+    'quick.result.translated': '翻訳結果',
+    'engine.google': 'Google翻訳',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': 'カスタムLLM',
+    'engine.glm': 'GLM',
+    'engine.backup': '{service}が提供'
+  },
+  'ko': {
+    'quick.btn.translate': '번역',
+    'quick.panel.title': '빠른 번역',
+    'quick.panel.original': '원문',
+    'quick.panel.translated': '번역',
+    'quick.btn.copy': '복사',
+    'quick.btn.save': '저장',
+    'quick.msg.copied': '복사됨',
+    'quick.msg.saved': '저장됨',
+    'quick.msg.translating': '번역 중...',
+    'quick.hint.hover': '호버 번역',
+    'quick.hint.clickToCopy': '클릭하여 각 엔진 결과 복사',
+    'quick.hint.multiSuccess': '{success}개 성공, {error}개 실패',
+    'quick.hint.allFailed': '모든 엔진 실패',
+    'quick.error.failed': '실패',
+    'quick.error.noText': '텍스트가 인식되지 않았습니다',
+    'quick.error.screenshotFailed': '스크린샷 실패',
+    'quick.error.processFailed': '처리 실패',
+    'quick.error.ocrNoText': '이미지에서 인식 가능한 텍스트를 찾을 수 없습니다. 선명한 텍스트가 포함된 영역을 선택하세요.',
+    'quick.result.title': '번역 결과 (드래그 가능)',
+    'quick.result.recognized': '인식된 텍스트',
+    'quick.result.translated': '번역 결과',
+    'engine.google': 'Google 번역',
+    'engine.microsoft': 'Microsoft',
+    'engine.llm': '사용자 정의 LLM',
+    'engine.glm': 'GLM',
+    'engine.backup': '{service}提供服务'
+  }
+};
+
 class QuickTranslationPanel {
   constructor() {
     this.panel = null;
@@ -12,6 +156,7 @@ class QuickTranslationPanel {
     this.minSelectionLength = 2;
     this.translating = false;
     this.currentSelection = null;
+    this.lang = 'en';  // UI语言
 
     // 悬浮翻译相关
     this.hoverEnabled = false;
@@ -33,6 +178,8 @@ class QuickTranslationPanel {
   }
 
   async init() {
+    // 加载用户界面语言
+    await this.loadUserLanguage();
     // 加载用户设置
     await this.loadSettings();
 
@@ -95,6 +242,44 @@ class QuickTranslationPanel {
     this.multiEngineEnabled = settings.multiEngineEnabled || false; // 默认关闭
     this.targetLanguage = settings.targetLanguage || 'zh-CN';
     this.apiProvider = settings.apiProvider || 'google';
+  }
+
+  // 从 background 获取用户界面语言
+  async loadUserLanguage() {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage({ action: 'getSettings' }, (response) => {
+        if (response && response.success && response.settings && response.settings.uiLanguage) {
+          this.lang = response.settings.uiLanguage;
+        } else {
+          this.detectBrowserLanguage();
+        }
+        resolve();
+      });
+    });
+  }
+
+  // 检测浏览器语言
+  detectBrowserLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage || 'en';
+    const langMap = {
+      'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', 'zh-HK': 'zh-TW',
+      'en': 'en', 'en-US': 'en', 'en-GB': 'en',
+      'ja': 'ja', 'ja-JP': 'ja',
+      'ko': 'ko', 'ko-KR': 'ko'
+    };
+    const prefix = browserLang.split('-')[0].toLowerCase();
+    this.lang = langMap[browserLang] || langMap[prefix] || 'en';
+  }
+
+  // 获取翻译
+  t(key) {
+    if (quickTranslations[this.lang] && quickTranslations[this.lang][key]) {
+      return quickTranslations[this.lang][key];
+    }
+    if (quickTranslations['en'][key]) {
+      return quickTranslations['en'][key];
+    }
+    return key;
   }
 
   // 初始化悬浮翻译
@@ -202,7 +387,7 @@ class QuickTranslationPanel {
     }
 
     this.currentText = text;
-    resultEl.innerHTML = '<span class="hover-loading">翻译中...</span>';
+    resultEl.innerHTML = `<span class="hover-loading">${this.t('quick.msg.translating')}</span>`;
     this.hoverBubble.style.display = 'block';
 
     this.performHoverTranslate(text);
@@ -242,10 +427,10 @@ class QuickTranslationPanel {
 
     // 引擎名称映射
     const engineNames = {
-      google: 'Google',
-      microsoft: 'Microsoft',
-      llm: 'LLM',
-      glm: 'GLM'
+      google: this.t('engine.google'),
+      microsoft: this.t('engine.microsoft'),
+      llm: this.t('engine.llm'),
+      glm: this.t('engine.glm')
     };
 
     // 构建多引擎结果的 HTML
@@ -443,9 +628,9 @@ class QuickTranslationPanel {
     this.hoverBubble.innerHTML = `
       <div class="hover-original"></div>
       <div class="hover-divider"></div>
-      <div class="hover-result">悬停翻译</div>
+      <div class="hover-result">${this.t('quick.hint.hover')}</div>
       <div class="hover-actions">
-        <button class="hover-save-btn">⭐ 收藏</button>
+        <button class="hover-save-btn">⭐ ${this.t('quick.btn.save')}</button>
       </div>
     `;
     this.hoverBubble.style.display = 'none';
@@ -574,7 +759,7 @@ class QuickTranslationPanel {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
       </svg>
-      <span>翻译</span>
+      <span>${this.t('quick.btn.translate')}</span>
     `;
     
     // 设置位置（在鼠标附近，稍微偏上）
@@ -718,10 +903,10 @@ class QuickTranslationPanel {
 
     // 定义引擎名称映射
     const engineNames = {
-      google: 'Google 翻译',
-      microsoft: 'Microsoft',
-      llm: '自定义 LLM',
-      glm: 'GLM 大模型'
+      google: this.t('engine.google'),
+      microsoft: this.t('engine.microsoft'),
+      llm: this.t('engine.llm'),
+      glm: this.t('engine.glm')
     };
 
     // 引擎颜色映射
@@ -762,7 +947,7 @@ class QuickTranslationPanel {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          已复制
+          ${this.t('quick.msg.copied')}
         `;
         setTimeout(() => {
           copyBtn.innerHTML = `
@@ -770,7 +955,7 @@ class QuickTranslationPanel {
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
             </svg>
-            复制
+            ${this.t('quick.btn.copy')}
           `;
         }, 2000);
       });
@@ -788,7 +973,7 @@ class QuickTranslationPanel {
       errorItem.innerHTML = `
         <div class="multi-result-header">
           <span class="multi-engine-name" style="color: ${engineColor}">${engineName}</span>
-          <span class="multi-error-badge">失败</span>
+          <span class="multi-error-badge">${this.t('quick.error.failed')}</span>
         </div>
         <div class="multi-result-text multi-error-text">${this.escapeHtml(errorMsg)}</div>
       `;
@@ -803,11 +988,11 @@ class QuickTranslationPanel {
     const errorCount = Object.keys(errors).length;
     let hintText = '';
     if (successCount > 0 && errorCount > 0) {
-      hintText = `${successCount}个成功，${errorCount}个失败`;
+      hintText = this.t('quick.hint.multiSuccess').replace('{success}', successCount).replace('{error}', errorCount);
     } else if (successCount > 0) {
-      hintText = '点击复制各引擎结果';
+      hintText = this.t('quick.hint.clickToCopy');
     } else {
-      hintText = '所有引擎均失败';
+      hintText = this.t('quick.hint.allFailed');
     }
 
     // 保存原文和译文用于收藏
@@ -820,7 +1005,7 @@ class QuickTranslationPanel {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
         </svg>
-        收藏
+        ${this.t('quick.btn.save')}
       </button>
       <span class="multi-engine-hint">${hintText}</span>
     `;
@@ -861,7 +1046,7 @@ class QuickTranslationPanel {
     const sourceEl = this.panel.querySelector('.translation-source');
     if (sourceEl) {
       if (backupService) {
-        sourceEl.textContent = `由 ${backupService} 提供`;
+        sourceEl.textContent = this.t('engine.backup').replace('{service}', backupService);
         sourceEl.title = 'Google 翻译不可用，已自动切换至备用服务';
       } else {
         sourceEl.textContent = '';
@@ -880,7 +1065,7 @@ class QuickTranslationPanel {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          已复制
+          ${this.t('quick.msg.copied')}
         `;
         setTimeout(() => {
           copyBtn.innerHTML = `
@@ -888,7 +1073,7 @@ class QuickTranslationPanel {
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
             </svg>
-            复制
+            ${this.t('quick.btn.copy')}
           `;
         }, 2000);
       });
@@ -964,19 +1149,19 @@ class QuickTranslationPanel {
     this.panel.className = 'quick-translate-panel';
     this.panel.innerHTML = `
       <div class="panel-header">
-        <span class="panel-title">🌐 快速翻译</span>
+        <span class="panel-title">🌐 ${this.t('quick.panel.title')}</span>
         <button class="panel-close">×</button>
       </div>
       <div class="panel-body">
         <div class="original-text">
-          <div class="text-label">原文</div>
+          <div class="text-label">${this.t('quick.panel.original')}</div>
           <div class="text-content">${this.escapeHtml(originalText)}</div>
         </div>
         <div class="translation-result">
-          <div class="text-label">译文</div>
+          <div class="text-label">${this.t('quick.panel.translated')}</div>
           <div class="text-content loading">
             <div class="loading-spinner"></div>
-            <span>翻译中...</span>
+            <span>${this.t('quick.msg.translating')}</span>
           </div>
         </div>
       </div>
@@ -986,14 +1171,14 @@ class QuickTranslationPanel {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
           </svg>
-          收藏
+          ${this.t('quick.btn.save')}
         </button>
         <button class="panel-btn copy-btn" disabled>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
           </svg>
-          复制
+          ${this.t('quick.btn.copy')}
         </button>
       </div>
     `;
@@ -1094,7 +1279,7 @@ class QuickTranslationPanel {
     const sourceEl = this.panel.querySelector('.translation-source');
     if (sourceEl) {
       if (backupService) {
-        sourceEl.textContent = `由 ${backupService} 提供`;
+        sourceEl.textContent = this.t('engine.backup').replace('{service}', backupService);
         sourceEl.title = 'Google 翻译不可用，已自动切换至备用服务';
       } else {
         sourceEl.textContent = '';
@@ -1114,7 +1299,7 @@ class QuickTranslationPanel {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          已复制
+          ${this.t('quick.msg.copied')}
         `;
         setTimeout(() => {
           copyBtn.innerHTML = `
@@ -1122,7 +1307,7 @@ class QuickTranslationPanel {
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
             </svg>
-            复制
+            ${this.t('quick.btn.copy')}
           `;
         }, 2000);
       });
