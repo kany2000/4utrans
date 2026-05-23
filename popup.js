@@ -1,36 +1,89 @@
 // Popup 界面控制器
 class PopupController {
-   constructor() {
-     this.elements = {};
-     this.settings = {};
-     this.init();
-   }
+  constructor() {
+    this.elements = {};
+    this.settings = {};
+    this.init();
+  }
 
   init() {
     this.bindElements();
     this.bindEvents();
     this.loadSettings();
+    // 初始化 i18n 并更新 UI
+    this.initI18n();
     // 显示欢迎 toast 5 秒
     this.showWelcomeToast();
   }
 
-  showWelcomeToast() {
-    const welcomeToast = document.getElementById('welcome-toast');
-    if (welcomeToast) {
-      welcomeToast.classList.remove('hidden');
-      // 5 秒后隐藏
-      setTimeout(() => {
-        welcomeToast.classList.add('hidden');
-      }, 5000);
-      
-      // 点击关闭按钮手动关闭
-      const closeBtn = welcomeToast.querySelector('.toast-close');
-      if (closeBtn) {
-        closeBtn.onclick = () => {
-          welcomeToast.classList.add('hidden');
-        };
-      }
+  initI18n() {
+    // i18n 已在 i18n.js 中初始化
+    // 如果有保存的 UI 语言设置，使用它
+    if (this.settings.uiLanguage && supportedLanguages.includes(this.settings.uiLanguage)) {
+      i18n.setLanguage(this.settings.uiLanguage);
     }
+    // 更新 UI 文字
+    i18n.updateUI();
+    // 设置语言选择器的值
+    if (this.elements.uiLanguage) {
+      this.elements.uiLanguage.value = i18n.getCurrentLanguage();
+    }
+
+    // 监听语言变更事件
+    window.addEventListener('qtLanguageChanged', (e) => {
+      console.log('Language changed to:', e.detail.language);
+    });
+  }
+
+  async changeUILanguage() {
+    const newLang = this.elements.uiLanguage.value;
+    console.log('Changing UI language to:', newLang);
+
+    // 更新 i18n 语言
+    i18n.setLanguage(newLang);
+
+    // 保存到 storage
+    try {
+      await chrome.storage.local.set({ uiLanguage: newLang });
+      this.showStatus(i18n.t('status.saved'), 'success');
+    } catch (error) {
+      console.error('Failed to save UI language:', error);
+    }
+  }
+
+  showWelcomeToast() {
+    // 检查是否是首次安装或需要显示欢迎提示
+    // 注意：在开发者模式下 onInstalled 不会触发，所以我们也检查是否有任何已保存的设置
+    chrome.storage.local.get(['shouldShowWelcome', 'targetLanguage'], (result) => {
+      // 如果 shouldShowWelcome 为 true，或者没有任何已保存的设置（首次安装）
+      const isFirstInstall = !result.shouldShowWelcome && !result.targetLanguage;
+
+      if (result.shouldShowWelcome === false && !isFirstInstall) {
+        return; // 不是首次安装，且不需要显示
+      }
+
+      const welcomeToast = document.getElementById('welcome-toast');
+      if (welcomeToast) {
+        // 移除 hidden 类，显示 toast
+        welcomeToast.classList.remove('hidden');
+
+        // 5 秒后隐藏
+        setTimeout(() => {
+          welcomeToast.classList.add('hidden');
+        }, 5000);
+
+        // 点击关闭按钮手动关闭
+        const closeBtn = welcomeToast.querySelector('.toast-close');
+        if (closeBtn) {
+          closeBtn.onclick = () => {
+            welcomeToast.classList.add('hidden');
+          };
+        }
+      }
+
+      // 显示后清除标记，避免下次打开 popup 时重复显示
+      chrome.storage.local.set({ shouldShowWelcome: false });
+    });
   }
 
   bindElements() {
@@ -38,6 +91,7 @@ class PopupController {
       startCapture: document.getElementById('start-capture'),
       targetLanguage: document.getElementById('target-language'),
       ocrLanguage: document.getElementById('ocr-language'),
+      uiLanguage: document.getElementById('ui-language'),
       quickSave: document.getElementById('quick-save'),
       settingsBtn: document.getElementById('settings-btn'),
       settingsModal: document.getElementById('settings-modal'),
@@ -118,6 +172,11 @@ class PopupController {
 
     this.elements.ocrLanguage.addEventListener('change', () => {
       this.showUnsavedChanges();
+    });
+
+    // UI 語言設置變更時即時切換
+    this.elements.uiLanguage.addEventListener('change', () => {
+      this.changeUILanguage();
     });
 
     // ESC 鍵關閉模態框
@@ -400,7 +459,8 @@ class PopupController {
       llmConfig: {
         baseUrl: '',
         model: ''
-      }
+      },
+      uiLanguage: 'en'
     };
     this.updateUI();
   }
@@ -416,6 +476,14 @@ class PopupController {
     // 更新基本設置
     this.elements.targetLanguage.value = this.settings.targetLanguage || 'zh-TW';
     this.elements.ocrLanguage.value = this.settings.ocrLanguage || 'eng';
+
+    // 更新 UI 語言設置
+    if (this.elements.uiLanguage) {
+      const savedLang = this.settings.uiLanguage || 'en';
+      if (supportedLanguages.includes(savedLang)) {
+        this.elements.uiLanguage.value = savedLang;
+      }
+    }
 
     // 更新高級設置
     this.elements.apiProvider.value = this.settings.apiProvider || 'google';
@@ -689,7 +757,7 @@ class PopupController {
   }
 
   resetSettings() {
-    if (confirm('確定要重置所有設置嗎？')) {
+    if (confirm(i18n.t('status.resetConfirm'))) {
       const defaultSettings = {
         targetLanguage: 'zh-TW',
         ocrLanguage: 'eng',
@@ -713,7 +781,7 @@ class PopupController {
         if (response && response.success) {
           this.settings = defaultSettings;
           this.updateUI();
-          this.showStatus('設置已重置', 'success');
+          this.showStatus(i18n.t('status.reset'), 'success');
         } else {
           this.showStatus('重置失敗', 'error');
         }

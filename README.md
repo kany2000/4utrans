@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.2.0-667EEA?style=flat-square&logo=google-chrome"/>
+  <img alt="Version" src="https://img.shields.io/badge/version-2.3.0-667EEA?style=flat-square&logo=google-chrome"/>
   <img alt="Chrome" src="https://img.shields.io/badge/Chrome-Extension-blue?style=flat-square&logo=google-chrome"/>
   <img alt="License" src="https://img.shields.io/badge/license-MIT-764BA2?style=flat-square"/>
 </p>
@@ -62,22 +62,25 @@
 
 ## 🤩 **各版本亮点说明**
 
-## 版本亮点更新为 v2.2.0（当前版本）
-- 添加了多引擎结果对比功能
-- 同时展示 Google / Microsoft / LLM 翻译结果
-- 历史版本 v2.1.0 - v2.1.2 已移入历史记录
+## 版本亮点更新为 v2.3.0（当前版本）
+- 新增多语言界面切换功能
+- 支持简体中文、繁体中文、英文、日文、韩文5种界面语言
+- 插件界面自动根据浏览器默认语言切换
+- 优化了高级设置按钮在不同语言下的显示效果
+- 历史版本 v2.2.0 已移入历史记录
 
 <details>
 
  <summary>✨ <strong>版本亮点详情</strong></summary>
 
-## 🆕 版本亮点 (v2.2.0)（当前版本）
+## 🆕 版本亮点 (v2.3.0)（当前版本）
 
-### 🌟 **多引擎结果对比（全新！）**
-- 同时展示 **Google / Microsoft / LLM** 等多个翻译引擎的结果
-- 每个引擎结果独立展示，可对比选择更好的翻译
-- 独立的复制按钮，点击即可复制对应结果
-- 可在高级设置中启用/关闭此功能
+### 🌍 **多语言界面切换（全新！）**
+- 支持 **5种界面语言**：简体中文、繁体中文、英文、日文、韩文
+- 插件自动检测浏览器默认语言并切换对应界面
+- 可随时通过标题栏语言选择器手动切换界面语言
+- 语言设置自动保存，下次打开自动应用
+- 安装通知和欢迎提示也支持多语言显示
 
 ### 🎨 **界面优化**
 - Google 翻译（蓝色标签）、Microsoft（青色）
