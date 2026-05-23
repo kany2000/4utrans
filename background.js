@@ -7,7 +7,85 @@ class ScreenshotTranslator {
     this.isProcessing = false;
     this.setupMessageListeners();
     this.setupInstallListener();
+    // 检查是否是首次启动（开发者模式下 onInstalled 不会触发）
+    this.checkFirstRun();
     console.log('ScreenshotTranslator initialized');
+  }
+
+  // 获取通知文本（根据浏览器语言）
+  getNotificationText() {
+    const lang = navigator.language || 'en';
+    const langMap = {
+      'zh': { title: 'QuickTranslate 安装完成', msg: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。' },
+      'zh-CN': { title: 'QuickTranslate 安装完成', msg: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。' },
+      'zh-TW': { title: 'QuickTranslate 安裝完成', msg: 'QuickTranslate已安裝！請點擊插件圖標開始使用。溫馨提示：請把插件固定在快捷工具欄方便使用。' },
+      'zh-HK': { title: 'QuickTranslate 安裝完成', msg: 'QuickTranslate已安裝！請點擊插件圖標開始使用。溫馨提示：請把插件固定在快捷工具欄方便使用。' },
+      'ja': { title: 'QuickTranslate インストール完了', msg: 'QuickTranslateがインストールされました！アイコンをクリックして開始してください。ヒント：ツールバーに固定すると便利です。' },
+      'ko': { title: 'QuickTranslate 설치 완료', msg: 'QuickTranslate이 설치되었습니다! 아이콘을 클릭하여 시작하세요. 팁：도구 모음에 고정하면 편리합니다.' },
+      'en':
+      { title: 'QuickTranslate Installed', msg: 'QuickTranslate installed! Click the icon to start. Tip: Pin to toolbar for easy access.' }
+    };
+
+    // 尝试精确匹配
+    if (langMap[lang]) return langMap[lang];
+
+    // 尝试语言前缀匹配
+    const prefix = lang.split('-')[0];
+    for (const key in langMap) {
+      if (key.startsWith(prefix)) return langMap[key];
+    }
+
+    // 默认英文
+    return langMap['en'];
+  }
+
+  // 检查是否是首次运行
+  checkFirstRun() {
+    chrome.storage.local.get(['hasRunBefore'], (result) => {
+      console.log('Storage check - hasRunBefore:', result.hasRunBefore);
+      if (!result.hasRunBefore) {
+        console.log('First run! Setting up...');
+        // 首次运行，设置标记
+        chrome.storage.local.set({
+          shouldShowWelcome: true,
+          hasRunBefore: true
+        }, () => {
+          console.log('Storage set, now showing notification...');
+          // 设置默认 UI 语言
+          this.setDefaultUILanguage();
+
+          // 获取对应语言的通知文本
+          const notifText = this.getNotificationText();
+
+          // 显示安装通知
+          chrome.notifications.create({
+            type: 'basic',
+            iconUrl: 'icons/icon16.png',
+            title: notifText.title,
+            message: notifText.msg,
+            requireInteraction: false,
+            silent: false
+          }, (notificationId) => {
+            console.log('Notification created, ID:', notificationId);
+            if (chrome.runtime.lastError) {
+              console.error('Notification error:', chrome.runtime.lastError);
+            }
+          });
+
+          // 5秒后关闭通知
+          setTimeout(() => {
+            chrome.notifications.getAll((notifications) => {
+              console.log('Current notifications:', notifications);
+              Object.keys(notifications).forEach(id => {
+                chrome.notifications.clear(id);
+              });
+            });
+          }, 5000);
+        });
+      } else {
+        console.log('Not first run, skipping notification');
+      }
+    });
   }
 
   setupInstallListener() {
@@ -17,12 +95,18 @@ class ScreenshotTranslator {
         // 使用 storage 存储安装标记，popup 打开时会检查
         chrome.storage.local.set({ shouldShowWelcome: true });
 
+        // 根据浏览器语言设置默认的 UI 语言
+        this.setDefaultUILanguage();
+
+        // 获取对应语言的通知文本
+        const notifText = this.getNotificationText();
+
         // 安装完成后立即显示欢迎通知，持续5秒
         chrome.notifications.create({
           type: 'basic',
           iconUrl: 'icons/icon16.png',
-          title: 'QuickTranslate 安装完成',
-          message: 'QuickTranslate已安装！请点击插件图标开始使用。温馨提示：请把插件固定在快捷工具栏方便使用。',
+          title: notifText.title,
+          message: notifText.msg,
           requireInteraction: false,
           silent: false
         });
@@ -37,6 +121,49 @@ class ScreenshotTranslator {
         }, 5000);
       }
     });
+  }
+
+  // 根据浏览器语言设置默认 UI 语言
+  async setDefaultUILanguage() {
+    // 支持的语言
+    const supportedLangs = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'];
+    const langMap = {
+      'zh': 'zh-CN',
+      'zh-CN': 'zh-CN',
+      'zh-TW': 'zh-TW',
+      'zh-HK': 'zh-TW',
+      'zh-SG': 'zh-CN',
+      'en': 'en',
+      'en-US': 'en',
+      'en-GB': 'en',
+      'en-AU': 'en',
+      'en-CA': 'en',
+      'ja': 'ja',
+      'ja-JP': 'ja',
+      'ko': 'ko',
+      'ko-KR': 'ko'
+    };
+
+    // 获取浏览器语言
+    const browserLang = chrome.runtime.getManifest().default_locale || 'en';
+    console.log('Background: Browser default locale:', browserLang);
+
+    // 尝试匹配
+    let uiLang = langMap[browserLang];
+    if (!uiLang) {
+      const langPrefix = browserLang.split('-')[0].toLowerCase();
+      uiLang = langMap[langPrefix];
+    }
+
+    // 如果不匹配支持的语言，默认英文
+    if (!uiLang || !supportedLangs.includes(uiLang)) {
+      uiLang = 'en';
+    }
+
+    console.log('Background: Setting default UI language to:', uiLang);
+
+    // 保存到 storage
+    await chrome.storage.local.set({ uiLanguage: uiLang });
   }
 
   setupMessageListeners() {
@@ -275,7 +402,8 @@ class ScreenshotTranslator {
         'multiEngineEnabled',
         'minSelectionLength',
         'apiKeys',
-        'llmConfig'
+        'llmConfig',
+        'uiLanguage'
       ]);
 
       const settings = {
@@ -288,7 +416,8 @@ class ScreenshotTranslator {
         multiEngineEnabled: result.multiEngineEnabled || false,
         minSelectionLength: result.minSelectionLength || 2,
         apiKeys: result.apiKeys || {},
-        llmConfig: result.llmConfig || { baseUrl: '', model: '' }
+        llmConfig: result.llmConfig || { baseUrl: '', model: '' },
+        uiLanguage: result.uiLanguage || 'en'
       };
 
       sendResponse({ success: true, settings });
