@@ -64,12 +64,12 @@ class PopupController {
 
       const welcomeToast = document.getElementById('welcome-toast');
       if (welcomeToast) {
-        // 移除 hidden 和 hiding 类，显示 toast
-        welcomeToast.classList.remove('hidden', 'hiding');
+        // 添加 visible 类，显示 toast
+        welcomeToast.classList.add('visible');
 
         // 5 秒后隐藏
         setTimeout(() => {
-          welcomeToast.classList.add('hiding');
+          welcomeToast.classList.remove('visible');
           welcomeToast.classList.add('hidden');
         }, 5000);
 
@@ -77,7 +77,7 @@ class PopupController {
         const closeBtn = welcomeToast.querySelector('.toast-close');
         if (closeBtn) {
           closeBtn.onclick = () => {
-            welcomeToast.classList.add('hiding');
+            welcomeToast.classList.remove('visible');
             welcomeToast.classList.add('hidden');
           };
         }
