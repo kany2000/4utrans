@@ -1,11 +1,13 @@
 # 🚀 QuickTranslate - 快译
+  
+<br>
 
 <p align="center">
   <img src="icons/icon128.png" alt="QuickTranslate" width="128"/>
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.2.0-667EEA?style=flat-square&logo=google-chrome"/>
+  <img alt="Version" src="https://img.shields.io/badge/version-2.3.0-667EEA?style=flat-square&logo=google-chrome"/>
   <img alt="Chrome" src="https://img.shields.io/badge/Chrome-Extension-blue?style=flat-square&logo=google-chrome"/>
   <img alt="License" src="https://img.shields.io/badge/license-MIT-764BA2?style=flat-square"/>
 </p>
@@ -21,7 +23,7 @@
 <details>
 <summary>✨ <strong>展开</strong></summary>
 
-### 🌟 **快捷翻译面板 (v2.0.0 新功能！)**
+### 🌟 **快捷翻译面板 (新功能！)**
 - **选中即翻译** - 在网页上选中文字后自动显示翻译按钮，无需打开扩展
 - **一键翻译** - 点击按钮即可快速翻译，操作步骤从5步减少到2步
 - **极速响应** - 翻译速度提升75%，从约2秒缩短到0.5秒内
@@ -62,22 +64,25 @@
 
 ## 🤩 **各版本亮点说明**
 
-## 版本亮点更新为 v2.2.0（当前版本）
-- 添加了多引擎结果对比功能
-- 同时展示 Google / Microsoft / LLM 翻译结果
-- 历史版本 v2.1.0 - v2.1.2 已移入历史记录
+## 版本亮点更新为 v2.3.0（当前版本）
+- 新增多语言界面切换功能
+- 支持简体中文、繁体中文、英文、日文、韩文5种界面语言
+- 插件界面自动根据浏览器默认语言切换
+- 优化了高级设置按钮在不同语言下的显示效果
+- 历史版本 v2.2.0 已移入历史记录
 
 <details>
 
  <summary>✨ <strong>版本亮点详情</strong></summary>
 
-## 🆕 版本亮点 (v2.2.0)（当前版本）
+## 🆕 版本亮点 (v2.3.0)（当前版本）
 
-### 🌟 **多引擎结果对比（全新！）**
-- 同时展示 **Google / Microsoft / LLM** 等多个翻译引擎的结果
-- 每个引擎结果独立展示，可对比选择更好的翻译
-- 独立的复制按钮，点击即可复制对应结果
-- 可在高级设置中启用/关闭此功能
+### 🌍 **多语言界面切换（全新！）**
+- 支持 **5种界面语言**：简体中文、繁体中文、英文、日文、韩文
+- 插件自动检测浏览器默认语言并切换对应界面
+- 可随时通过标题栏语言选择器手动切换界面语言
+- 语言设置自动保存，下次打开自动应用
+- 安装通知和欢迎提示也支持多语言显示
 
 ### 🎨 **界面优化**
 - Google 翻译（蓝色标签）、Microsoft（青色）
@@ -307,7 +312,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 ## 🎨 界面展示
 
 <details>
-<summary>📋 <strong>界面布局详解 (v2.2.0)</strong></summary>
+<summary>📋 <strong>界面布局详解 (v2.3.0)</strong></summary>
 
 <br>
 
@@ -315,7 +320,8 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 ```
 ┌─────────────────────────────────┐
-│   QuickTranslate 快译 v2.2.0    │  ← 🎨 紫色渐变标题
+│   QuickTranslate 快译 v2.3.0    │  ← 🎨 紫色渐变标题
+│  [简体中文 ▼]              v2.3.0 │  ← 🌍 语言选择器
 ├─────────────────────────────────┤
 │      📷 开始翻译                 │  ← 🎯 主操作按钮
 │  拖拽选择区域，自动识别并翻译文字  │  ← 💡 操作提示
@@ -331,7 +337,9 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 └─────────────────────────────────┘
 ```
 
-### 高级设置结构 (v2.2.0)
+> 🆕 **v2.3.0 新增**：标题栏右侧新增语言选择器，支持简体中文、繁体中文、英文、日文、韩文5种界面语言
+
+### 高级设置结构 (v2.3.0)
 
 ```
 ┌─────────────────────────────────────────┐
