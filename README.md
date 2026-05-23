@@ -310,7 +310,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 ## 🎨 界面展示
 
 <details>
-<summary>📋 <strong>界面布局详解 (v2.2.0)</strong></summary>
+<summary>📋 <strong>界面布局详解 (v2.3.0)</strong></summary>
 
 <br>
 
@@ -318,7 +318,7 @@ git clone https://github.com/kany2000/QuickTranslate.git && open -a "Google Chro
 
 ```
 ┌─────────────────────────────────┐
-│   QuickTranslate 快译 v2.2.0    │  ← 🎨 紫色渐变标题
+│   QuickTranslate 快译 v2.3.0    │  ← 🎨 紫色渐变标题
 ├─────────────────────────────────┤
 │      📷 开始翻译                 │  ← 🎯 主操作按钮
 │  拖拽选择区域，自动识别并翻译文字  │  ← 💡 操作提示
