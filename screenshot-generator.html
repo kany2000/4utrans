@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickTranslate - Screenshot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #1a1a25 100%);
+      min-height: 100vh;
+      color: white;
+      padding: 60px;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 20px 40px rgba(102,126,234,0.4);
+    }
+    .title-group h1 {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .title-group p {
+      font-size: 20px;
+      color: #a0a0b0;
+      margin-top: 4px;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+    .feature {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 32px;
+    }
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .feature h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature p {
+      color: #a0a0b0;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 40px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 56px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      color: #a0a0b0;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      color: #a0a0b0;
+      font-size: 16px;
+    }
+    .footer span {
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🌐</div>
+      <div class="title-group">
+        <h1>QuickTranslate</h1>
+        <p>选中文本，即刻翻译 | 0.5秒极速响应</p>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>闪电翻译</h3>
+        <p>0.5秒内显示结果，操作步骤从5步减少到2步，翻译速度提升75%</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <h3>精准识别</h3>
+        <p>DOM直接提取技术，跳过OCR，准确率高达98%+</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🧠</div>
+        <h3>AI语言检测</h3>
+        <p>深度字符特征分析，自动识别10+种语言，检测准确率99%+</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>多引擎翻译</h3>
+        <p>Google + Microsoft + GLM + LLM，多引擎对比，成功率95%+</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        <h3>悬停翻译</h3>
+        <p>按住Alt键并悬停，无需选中文本，沉浸式阅读体验</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📚</div>
+        <h3>历史 + 生词本</h3>
+        <p>自动保存500条翻译记录，收藏常用词汇，方便复习</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">98%</div>
+        <div class="stat-label">文字识别准确率</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">99%</div>
+        <div class="stat-label">语言检测准确率</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">95%</div>
+        <div class="stat-label">翻译成功率</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number"><500ms</div>
+        <div class="stat-label">响应时间</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      支持 <span>Chrome</span> 浏览器 | 立即获取 QuickTranslate
+    </div>
+  </div>
+</body>
+</html>

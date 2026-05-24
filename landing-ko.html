@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickTranslate - 빠른 번역 | Chrome 확장</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gradient-start: #667eea;
+      --gradient-end: #764ba2;
+      --bg-dark: #0a0a0f;
+      --bg-dark-secondary: #12121a;
+      --bg-dark-tertiary: #1a1a25;
+      --text-dark: #ffffff;
+      --text-dark-secondary: #a0a0b0;
+      --card-bg-dark: rgba(255,255,255,0.03);
+      --card-border-dark: rgba(255,255,255,0.08);
+      --glow-dark: rgba(102,126,234,0.3);
+
+      --bg-light: #f8f9fc;
+      --bg-light-secondary: #ffffff;
+      --bg-light-tertiary: #f0f1f5;
+      --text-light: #1a1a2e;
+      --text-light-secondary: #6b6b80;
+      --card-bg-light: rgba(255,255,255,0.8);
+      --card-border-light: rgba(0,0,0,0.08);
+      --glow-light: rgba(102,126,234,0.2);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --bg-secondary: var(--bg-dark-secondary);
+      --bg-tertiary: var(--bg-dark-tertiary);
+      --text: var(--text-dark);
+      --text-secondary: var(--text-dark-secondary);
+      --card-bg: var(--card-bg-dark);
+      --card-border: var(--card-border-dark);
+      --glow: var(--glow-dark);
+    }
+
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --bg-secondary: var(--bg-light-secondary);
+      --bg-tertiary: var(--bg-light-tertiary);
+      --text: var(--text-light);
+      --text-secondary: var(--text-light-secondary);
+      --card-bg: var(--card-bg-light);
+      --card-border: var(--card-border-light);
+      --glow: var(--glow-light);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 1000;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      border-color: var(--gradient-start);
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    /* Language Switcher Top Right */
+    .lang-switcher-top {
+      position: fixed;
+      top: 24px;
+      right: 80px;
+      z-index: 1000;
+    }
+    .lang-dropdown {
+      position: relative;
+    }
+    .lang-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .lang-dropdown-btn:hover {
+      border-color: var(--gradient-start);
+      box-shadow: 0 0 20px var(--glow);
+    }
+    .lang-arrow {
+      font-size: 10px;
+      transition: transform 0.3s ease;
+    }
+    .lang-dropdown.open .lang-arrow {
+      transform: rotate(180deg);
+    }
+    .lang-dropdown-content {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 160px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .lang-dropdown.open .lang-dropdown-content {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    .lang-option:hover {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+    }
+    .lang-option.active {
+      background: var(--bg-tertiary);
+    }
+
+    /* Old Language Switcher (Bottom) */
+    .lang-switcher {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .lang-btn:hover, .lang-btn.active {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Particles Background */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--gradient-start);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 15s infinite ease-in-out;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      25% { transform: translateY(-100px) translateX(50px); opacity: 0.6; }
+      50% { transform: translateY(-200px) translateX(-30px); opacity: 0.3; }
+      75% { transform: translateY(-100px) translateX(-50px); opacity: 0.5; }
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .logo-container {
+      margin-bottom: 32px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(102,126,234,0.3);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(102,126,234,0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 30px 80px rgba(102,126,234,0.5); }
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end), #a855f7, var(--gradient-start));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .tagline {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .typewriter {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      height: 32px;
+      animation: fadeInUp 0.8s ease 0.5s both;
+    }
+    .typewriter span {
+      border-right: 2px solid var(--gradient-start);
+      padding-right: 4px;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.8s ease 0.6s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+      box-shadow: 0 8px 30px rgba(102,126,234,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(102,126,234,0.6);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gradient-start);
+      transform: translateY(-3px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--bg-tertiary);
+      font-size: 14px;
+      margin-top: 32px;
+      animation: fadeInUp 0.8s ease 0.7s both;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34a853;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Section Styles */
+    section {
+      padding: 100px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 18px;
+      margin-bottom: 64px;
+    }
+
+    /* Features */
+    .features {
+      background: var(--bg-secondary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px var(--glow);
+      border-color: transparent;
+    }
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Demo Section */
+    .demo {
+      position: relative;
+    }
+
+    .demo-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.3);
+    }
+
+    .demo-window {
+      background: var(--bg-tertiary);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .demo-dot.red { background: #ff5f56; }
+    .demo-dot.yellow { background: #ffbd2e; }
+    .demo-dot.green { background: #27c93f; }
+
+    .demo-title {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .demo-content {
+      padding: 40px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Animated Demo UI */
+    .demo-ui {
+      width: 100%;
+      max-width: 600px;
+      background: var(--bg);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .demo-header {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .demo-header-title {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .demo-header-select {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .demo-body {
+      padding: 24px;
+    }
+
+    .demo-section {
+      margin-bottom: 20px;
+    }
+
+    .demo-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .demo-select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .demo-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .demo-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 30px rgba(102,126,234,0.4);
+    }
+
+    /* Demo Animation - Show panel appearing */
+    .demo-panel {
+      position: absolute;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      width: 320px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .demo-panel.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .demo-panel-header {
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .demo-panel-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    .demo-panel-result {
+      font-size: 15px;
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+      border-radius: 8px;
+      border-left: 3px solid var(--gradient-start);
+    }
+
+    /* Stats */
+    .stats {
+      background: var(--bg-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    /* Install */
+    .install-steps {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .install-step {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .install-step:hover {
+      border-color: var(--gradient-start);
+      transform: translateX(8px);
+    }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-content h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .step-content p {
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .code-block {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+
+    /* FAQ */
+    .faq {
+      background: var(--bg-secondary);
+    }
+
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .faq-item:hover {
+      border-color: var(--gradient-start);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 20px 24px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: inherit;
+    }
+
+    .faq-icon {
+      font-size: 24px;
+      transition: transform 0.3s ease;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Footer */
+    footer {
+      padding: 60px 24px;
+      text-align: center;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .footer-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .footer-link:hover {
+      color: var(--gradient-start);
+    }
+
+    .footer-copyright {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .lang-switcher-top {
+        top: 12px;
+        right: 12px;
+      }
+      .theme-toggle {
+        top: 12px;
+        right: 12px;
+      }
+      .hero { padding: 100px 16px 60px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .install-step { flex-direction: column; }
+    }
+
+    /* Scroll Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <!-- Particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+  <!-- Language Dropdown (Top Right) -->
+  <div class="lang-switcher-top">
+    <div class="lang-dropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn">
+        <span>🌐</span>
+        <span class="lang-arrow">▼</span>
+      </button>
+      <div class="lang-dropdown-content" id="langDropdownContent">
+        <a href="landing.html" class="lang-option">🇨🇳 中文</a>
+        <a href="landing-en.html" class="lang-option">🇺🇸 English</a>
+        <a href="landing-ja.html" class="lang-option">🇯🇵 日本語</a>
+        <a href="landing-ko.html" class="lang-option">🇰🇷 한국어</a>
+        <a href="landing-zh-TW.html" class="lang-option">🇹🇼 繁體中文</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="logo-container">
+      <img src="icons/icon128.png" alt="QuickTranslate" class="logo">
+    </div>
+
+    <h1>
+      <span class="gradient-text">QuickTranslate</span>
+    </h1>
+
+    <p class="tagline">텍스트를 선택하면 즉시 번역</p>
+
+    <div class="typewriter">
+      <span id="typed-text"></span>
+    </div>
+
+    <div class="hero-buttons">
+      <a href="https://chrome.google.com/webstore" class="btn btn-primary" target="_blank">
+        <span>🧩</span> Chrome 확장 설치
+      </a>
+      <a href="https://github.com/kany2000/QuickTranslate" class="btn btn-secondary" target="_blank">
+        <span>⭐</span> GitHub
+      </a>
+    </div>
+
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span>v2.5.0 · 100,000+ 사용자</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title reveal">왜 QuickTranslate를 선택하는가?</h2>
+      <p class="section-subtitle reveal">강력한 기능, 깔끔한 디자인</p>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">⚡</div>
+          <h3>번개 같은 번역</h3>
+          <p>작업 단계가 5단계에서 2단계로 줄었고, 번역 속도가 75% 향상되었으며, 0.5초 이내에 결과가 나타납니다. 텍스트 선택, 버튼 클릭, 번역 완료.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🎯</div>
+          <h3>정밀 인식</h3>
+          <p>DOM 직접 추출 기술로 OCR 단계를 건너뛰고 정확도가 98%+입니다. 지능형 다중 포인트 샘플링으로 선택 영역의 텍스트가 완벽하게 추출됩니다.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🧠</div>
+          <h3>AI 언어 감지</h3>
+          <p>심층 문자 특성 분석을 기반으로 일본어, 한국어, 영어, 중국어 등 10개 이상의 언어를 자동으로 감지하며, 수동으로 원본 언어를 선택할 필요가 없습니다.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🌐</div>
+          <h3>다중 번역 엔진</h3>
+          <p>Google, Microsoft, GLM, LLM 등 다양한 번역 엔진과 다중 엔진 결과 비교를 지원하며, 번역 성공률이 95%+입니다.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">✨</div>
+          <h3>호버 번역</h3>
+          <p>Alt 키를 누르고 마우스를 호버하면 선택 없이도 번역할 수 있습니다. 몰입형 읽기 경험을 통해 번역이 자연스러운 읽기 과정이 됩니다.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">📚</div>
+          <h3>단어장</h3>
+          <p>자주 사용하는 번역을 저장하고 자동으로 기록합니다. 500개 용량으로 복습과 조회가 편리합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <div class="container">
+      <h2 class="section-title reveal">번역의 마법을 직접 확인하세요</h2>
+      <p class="section-subtitle reveal">간단한 操作으로前所未有的 번역 경험을感受하세요</p>
+
+      <div class="demo-container reveal">
+        <div class="demo-window">
+          <span class="demo-dot red"></span>
+          <span class="demo-dot yellow"></span>
+          <span class="demo-dot green"></span>
+          <span class="demo-title">QuickTranslate Demo</span>
+        </div>
+
+        <div class="demo-content">
+          <div class="demo-ui">
+            <div class="demo-header">
+              <span class="demo-header-title">🌐 QuickTranslate</span>
+              <select class="demo-header-select">
+                <option>한국어</option>
+                <option>English</option>
+                <option>日本語</option>
+              </select>
+            </div>
+            <div class="demo-body">
+              <div class="demo-section">
+                <div class="demo-label">대상 언어</div>
+                <select class="demo-select">
+                  <option>한국어 → English</option>
+                  <option>English → 한국어</option>
+                  <option>日本語 → 한국어</option>
+                </select>
+              </div>
+              <button class="demo-btn" id="demoBtn">
+                <span>📷</span> 번역 시작
+              </button>
+            </div>
+          </div>
+
+          <div class="demo-panel" id="demoPanel">
+            <div class="demo-panel-header">
+              <span>🌐 빠른 번역</span>
+              <span style="cursor:pointer">×</span>
+            </div>
+            <div class="demo-panel-text">Hello World</div>
+            <div class="demo-panel-result">안녕하세요, 세계!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="98">0</div>
+          <div class="stat-label">문자 인식 정확도 %</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="99">0</div>
+          <div class="stat-label">언어 감지 정확도 %</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="95">0</div>
+          <div class="stat-label">번역 성공률 %</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="500" data-suffix="ms"><500</div>
+          <div class="stat-label">응답 시간</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section class="install">
+    <div class="container">
+      <h2 class="section-title reveal">지금 바로 시작하기</h2>
+      <p class="section-subtitle reveal">세 단계만 설치하면 스마트 번역을 바로体验하세요</p>
+
+      <div class="install-steps">
+        <div class="install-step reveal">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>프로젝트 클론 또는 다운로드</h3>
+            <p>QuickTranslate 최신 코드 가져오기</p>
+            <div class="code-block">git clone https://github.com/kany2000/QuickTranslate.git</div>
+          </div>
+        </div>
+
+        <div class="install-step reveal">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Chrome 확장 프로그램 페이지 열기</h3>
+            <p>주소창에 다음 주소 입력</p>
+            <div class="code-block">chrome://extensions/</div>
+          </div>
+        </div>
+
+        <div class="install-step reveal">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>확장 프로그램 로드</h3>
+            <p>개발자 모드를 활성화하고 "압축해제된 확장 프로그램 로드"를 클릭한 다음 프로젝트 폴더를 선택하세요</p>
+            <div class="code-block">✓ 개발자 모드 → 압축해제된 확장 프로그램 로드 → QuickTranslate 선택</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="container">
+      <h2 class="section-title reveal">자주 묻는 질문</h2>
+      <p class="section-subtitle reveal">문제가 있으신가요? 여기서 답을 찾으세요</p>
+
+      <div class="faq-list">
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            <span>단축키가 작동하지 않으면 어떻게 하나요?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              chrome://extensions/shortcuts로 이동하여 단축키 설정을 확인하고 다른 확장 프로그램과 충돌하지 않는지 확인하세요. 새 단축키 조합을 수동으로 설정할 수도 있습니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            <span>일부 텍스트가 인식되지 않는 이유는 무엇인가요?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              선택한 영역에 선명한 텍스트가 포함되어 있는지 확인하세요. 이미지, 특수 폰트 또는 복잡한 배경의 텍스트는 정확하게 인식되지 않을 수 있습니다. 대비가 높은 텍스트 영역을 선택하세요.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            <span>어떤 언어 번역을 지원하나요?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              현재 일본어, 한국어, 영어, 독일어, 프랑스어, 스페인어 등 10개 이상의 언어를 중국어(간체/번체)로 번역할 수 있습니다. 시스템이 원본 언어를 자동으로 감지하므로 수동으로 선택할 필요가 없습니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            <span>인터페이스 언어를切换하는 방법은?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              확장 프로그램 아이콘을 클릭하여 메인 인터페이스를 열면 제목 표시 줄 오른쪽에 언어 선택기가 있습니다. 간체 중국어, 번체 중국어, 영어, 일본어, 한국어 등 5가지 인터페이스 언어를 지원합니다. 설정은 자동으로 저장됩니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            <span>번역 결과가 부정확하면 어떻게 하나요?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              더 정확한 텍스트 영역을 선택하거나 고급 설정에서 다른 번역 엔진을切换해 보세요. Google 번역은 일상 사용에 적합하고, GLM 대형 모델 번역 품질이 더 높지만 API Key가 필요합니다.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/kany2000/QuickTranslate" class="footer-link">GitHub</a>
+      <a href="https://chrome.google.com/webstore" class="footer-link">Chrome Web Store</a>
+      <a href="LICENSE" class="footer-link">License (MIT)</a>
+    </div>
+    <p class="footer-copyright">
+      Made with ❤️ by QuickTranslate Team · v2.5.0
+    </p>
+  </footer>
+
+  <script>
+    // Language Dropdown
+    const langDropdownBtn = document.getElementById('langDropdownBtn');
+    const langDropdown = langDropdownBtn.parentElement;
+    const langDropdownContent = document.getElementById('langDropdownContent');
+
+    langDropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      langDropdown.classList.remove('open');
+    });
+
+    // Language dropdown is optional - main switcher is in hero section
+    // This just provides quick access from top right
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    // Check saved theme or system preference
+    const savedTheme = localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    html.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon(next);
+    });
+
+    function updateThemeIcon(theme) {
+      themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    // Typewriter Effect
+    const phrases = [
+      'Google, Microsoft, GLM, LLM 등 다양한 번역 엔진 지원',
+      'Alt+1 스마트 번역, 자동 언어 감지',
+      '호버 번역, 몰입형 읽기 경험',
+      '기록 + 단어장, 학습 도우미'
+    ];
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    const typedElement = document.getElementById('typed-text');
+
+    function type() {
+      const currentPhrase = phrases[phraseIndex];
+
+      if (isDeleting) {
+        typedElement.textContent = currentPhrase.substring(0, charIndex - 1);
+        charIndex--;
+      } else {
+        typedElement.textContent = currentPhrase.substring(0, charIndex + 1);
+        charIndex++;
+      }
+
+      let typeSpeed = isDeleting ? 50 : 100;
+
+      if (!isDeleting && charIndex === currentPhrase.length) {
+        typeSpeed = 2000;
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        typeSpeed = 500;
+      }
+
+      setTimeout(type, typeSpeed);
+    }
+    type();
+
+    // Particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 15 + 's';
+      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+      particlesContainer.appendChild(particle);
+    }
+
+    // Demo Panel Animation
+    const demoBtn = document.getElementById('demoBtn');
+    const demoPanel = document.getElementById('demoPanel');
+    demoBtn.addEventListener('click', () => {
+      demoPanel.classList.add('show');
+      setTimeout(() => {
+        demoPanel.classList.remove('show');
+      }, 3000);
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+
+    // Scroll Reveal
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealOnScroll = () => {
+      revealElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+          el.classList.add('active');
+        }
+      });
+    };
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
+
+    // Stats Counter Animation
+    const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+    let statsAnimated = false;
+
+    const animateStats = () => {
+      if (statsAnimated) return;
+
+      const statsSection = document.querySelector('.stats');
+      const rect = statsSection.getBoundingClientRect();
+
+      if (rect.top < window.innerHeight - 100) {
+        statsAnimated = true;
+        statNumbers.forEach(stat => {
+          const target = parseInt(stat.dataset.target);
+          const suffix = stat.dataset.suffix || '%';
+          let current = 0;
+          const increment = target / 50;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              current = target;
+              clearInterval(timer);
+            }
+            stat.textContent = Math.floor(current) + suffix;
+          }, 30);
+        });
+      }
+    };
+
+    window.addEventListener('scroll', animateStats);
+    animateStats();
+  </script>
+</body>
+</html>

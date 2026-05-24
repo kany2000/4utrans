@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "QuickTranslate - 快译",
   "version": "2.5.0",
-  "description": "QuickTranslate 快译 - 選中文字即可快速翻譯，支持多種翻譯引擎和大模型",
+  "description": "QuickTranslate 快译 - 選中文字即時翻譯，支持 Google、Microsoft、GLM、LLM。快捷面板、截圖、懸浮翻譯，識別準確率 98%+。",
   "author": "QuickTranslate Team",
   "permissions": [
     "activeTab",
@@ -23,7 +23,8 @@
     "default_title": "QuickTranslate 快译 - 點擊開始",
     "default_icon": {
       "16": "icons/icon16.png",
-      "32": "icons/icon32.png"
+      "32": "icons/icon32.png",
+      "128": "icons/icon128.png"
     }
   },
   "icons": {
