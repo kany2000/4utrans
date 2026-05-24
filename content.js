@@ -2,7 +2,8 @@
 console.log('Content script loading...');
 
 // 內置翻譯表（content script 無法訪問 popup 的 i18n.js）
-const contentTranslations = {
+// 使用 window 避免與頁面腳本衝突
+window.qt_contentTranslations = {
   'zh-CN': {
     'quick.btn.translate': '翻译',
     'quick.panel.title': '快速翻译',
@@ -210,11 +211,12 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
     // 获取翻译
     t(key) {
-      if (contentTranslations[this.lang] && contentTranslations[this.lang][key]) {
-        return contentTranslations[this.lang][key];
+      const trans = window.qt_contentTranslations;
+      if (trans[this.lang] && trans[this.lang][key]) {
+        return trans[this.lang][key];
       }
-      if (contentTranslations['en'][key]) {
-        return contentTranslations['en'][key];
+      if (trans['en'][key]) {
+        return trans['en'][key];
       }
       return key;
     }
