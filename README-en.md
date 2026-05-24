@@ -12,6 +12,15 @@
   <img alt="License" src="https://img.shields.io/badge/license-MIT-764BA2?style=flat-square"/>
 </p>
 
+<p align="center">
+  <strong>🌐 Language / 语言 / 言語 / 언어:</strong>
+  <a href="README.md">中文</a> ·
+  <a href="README-en.md">English</a> ·
+  <a href="README-ja.md">日本語</a> ·
+  <a href="README-ko.md">한국어</a> ·
+  <a href="README-zh-TW.md">繁體中文</a>
+</p>
+
 ---
 
 > 🎉 **Select text to translate instantly**, supporting Google, Microsoft, GLM, LLM and other translation engines
@@ -307,7 +316,3 @@ MIT License - See [LICENSE](LICENSE) for details.
 **⭐ If this project helps you, please give us a star!**
 
 **🚀 Press Alt+1 to start your smart translation journey!**
-
----
-
-[中文版](README.md) | [English](README-en.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [繁體中文](README-zh-TW.md)
