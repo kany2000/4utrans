@@ -13,6 +13,9 @@ const contentTranslations = {
     'quick.msg.copied': '已复制',
     'quick.msg.saved': '已收藏',
     'quick.msg.translating': '翻译中...',
+    'quick.msg.capturing': '正在截取区域...',
+    'quick.msg.translatingInProgress': '正在翻译...',
+    'quick.msg.ocr': '正在截图识别...',
     'quick.hint.hover': '悬停翻译',
     'quick.hint.dragToSelect': '拖拽选择要翻译的区域，或点击使用默认区域，按 ESC 取消',
     'quick.hint.smartMode': '智能翻译模式\n自动检测语言 → 中文\n拖拽选择要翻译的区域，按 ESC 取消',
@@ -42,6 +45,9 @@ const contentTranslations = {
     'quick.msg.copied': '已複製',
     'quick.msg.saved': '已收藏',
     'quick.msg.translating': '翻譯中...',
+    'quick.msg.capturing': '正在截取區域...',
+    'quick.msg.translatingInProgress': '正在翻譯...',
+    'quick.msg.ocr': '正在截圖識別...',
     'quick.hint.hover': '懸停翻譯',
     'quick.hint.dragToSelect': '拖拽選擇要翻譯的區域，或點擊使用預設區域，按 ESC 取消',
     'quick.hint.smartMode': '智慧翻譯模式\n自動偵測語言 → 中文\n拖拽選擇要翻譯的區域，按 ESC 取消',
@@ -71,6 +77,9 @@ const contentTranslations = {
     'quick.msg.copied': 'Copied',
     'quick.msg.saved': 'Saved',
     'quick.msg.translating': 'Translating...',
+    'quick.msg.capturing': 'Capturing area...',
+    'quick.msg.translatingInProgress': 'Translating...',
+    'quick.msg.ocr': 'Recognizing text...',
     'quick.hint.hover': 'Hover Translate',
     'quick.hint.dragToSelect': 'Drag to select translation area, or click to use default area. Press ESC to cancel.',
     'quick.hint.smartMode': 'Smart Translation Mode\nAuto-detect language → Chinese\nDrag to select area, press ESC to cancel',
@@ -100,6 +109,9 @@ const contentTranslations = {
     'quick.msg.copied': 'コピーしました',
     'quick.msg.saved': '保存しました',
     'quick.msg.translating': '翻訳中...',
+    'quick.msg.capturing': '領域をキャプチャ中...',
+    'quick.msg.translatingInProgress': '翻訳中...',
+    'quick.msg.ocr': 'テキストを認識中...',
     'quick.hint.hover': 'ホバー翻訳',
     'quick.hint.dragToSelect': 'ドラッグして翻訳領域を選択、またはクリックしてデフォルト領域を使用。ESCでキャンセル。',
     'quick.hint.smartMode': 'スマート翻訳モード\n言語自動検出 → 中国語\nドラッグして領域を選択、ESCでキャンセル',
@@ -129,6 +141,9 @@ const contentTranslations = {
     'quick.msg.copied': '복사됨',
     'quick.msg.saved': '저장됨',
     'quick.msg.translating': '번역 중...',
+    'quick.msg.capturing': '영역 캡처 중...',
+    'quick.msg.translatingInProgress': '번역 중...',
+    'quick.msg.ocr': '텍스트 인식 중...',
     'quick.hint.hover': '호버 번역',
     'quick.hint.dragToSelect': '드래그하여 번역 영역 선택 또는 클릭하여 기본 영역 사용. ESC로 취소.',
     'quick.hint.smartMode': '스마트 번역 모드\n언어 자동 감지 → 중국어\n드래그하여 영역 선택, ESC로 취소',
@@ -476,7 +491,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
 
       // 顯示處理狀態
       if (this.instructionText) {
-        this.instructionText.textContent = '正在截取區域...';
+        this.instructionText.textContent = this.t('quick.msg.capturing');
         this.instructionText.style.backgroundColor = 'rgba(66, 133, 244, 0.9)';
         this.instructionText.style.display = 'block';
       }
@@ -488,7 +503,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         console.log('Content: Extracted text:', selectedText);
 
         if (this.instructionText) {
-          this.instructionText.textContent = '正在翻譯...';
+          this.instructionText.textContent = this.t('quick.msg.translatingInProgress');
         }
 
         // 進行真實翻譯處理
@@ -515,7 +530,7 @@ if (typeof window.ScreenshotCapture === 'undefined') {
         console.log('Content: No text found, using screenshot method');
 
         if (this.instructionText) {
-          this.instructionText.textContent = '正在截圖識別...';
+          this.instructionText.textContent = this.t('quick.msg.ocr');
         }
 
         // 使用截圖方法
