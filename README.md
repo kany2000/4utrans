@@ -27,8 +27,6 @@
 
 **QuickTranslate** 是一款强大的 Chrome 浏览器扩展，采用创新的 DOM 文字提取技术，实现精确的网页文字识别和即时翻译。
 
-QuickTranslate – Fast Intelligent Screenshot Translation. A powerful, fully optimized Chrome browser extension that employs innovative DOM text extraction technology and a modular architecture to achieve precise web page text recognition and instant translation. Featuring support for multiple languages, various translation methods, a vocabulary notebook, a quick translation panel, and other multifunctional modules, it provides fast, accurate, stable, and efficient translation services.
-
 
 ## ✨ 核心特色
 
