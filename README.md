@@ -1,5 +1,5 @@
 # 🚀 QuickTranslate - 快译
-  
+ [![Stars](https://img.shields.io/github/stars/kany2000/QuickTranslate?style=social)](https://github.com/kany2000/QuickTranslate)  
 <br>
 
 <p align="center">
