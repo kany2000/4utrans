@@ -14,6 +14,8 @@ const contentTranslations = {
     'quick.msg.saved': '已收藏',
     'quick.msg.translating': '翻译中...',
     'quick.hint.hover': '悬停翻译',
+    'quick.hint.dragToSelect': '拖拽选择要翻译的区域，或点击使用默认区域，按 ESC 取消',
+    'quick.hint.smartMode': '智能翻译模式\n自动检测语言 → 中文\n拖拽选择要翻译的区域，按 ESC 取消',
     'quick.hint.clickToCopy': '点击复制各引擎结果',
     'quick.hint.multiSuccess': '{success}个成功，{error}个失败',
     'quick.hint.allFailed': '所有引擎均失败',
@@ -41,6 +43,8 @@ const contentTranslations = {
     'quick.msg.saved': '已收藏',
     'quick.msg.translating': '翻譯中...',
     'quick.hint.hover': '懸停翻譯',
+    'quick.hint.dragToSelect': '拖拽選擇要翻譯的區域，或點擊使用預設區域，按 ESC 取消',
+    'quick.hint.smartMode': '智慧翻譯模式\n自動偵測語言 → 中文\n拖拽選擇要翻譯的區域，按 ESC 取消',
     'quick.hint.clickToCopy': '點擊複製各引擎結果',
     'quick.hint.multiSuccess': '{success}個成功，{error}個失敗',
     'quick.hint.allFailed': '所有引擎均失敗',
@@ -68,6 +72,8 @@ const contentTranslations = {
     'quick.msg.saved': 'Saved',
     'quick.msg.translating': 'Translating...',
     'quick.hint.hover': 'Hover Translate',
+    'quick.hint.dragToSelect': 'Drag to select translation area, or click to use default area. Press ESC to cancel.',
+    'quick.hint.smartMode': 'Smart Translation Mode\nAuto-detect language → Chinese\nDrag to select area, press ESC to cancel',
     'quick.hint.clickToCopy': 'Click to copy engine results',
     'quick.hint.multiSuccess': '{success} succeeded, {error} failed',
     'quick.hint.allFailed': 'All engines failed',
@@ -95,6 +101,8 @@ const contentTranslations = {
     'quick.msg.saved': '保存しました',
     'quick.msg.translating': '翻訳中...',
     'quick.hint.hover': 'ホバー翻訳',
+    'quick.hint.dragToSelect': 'ドラッグして翻訳領域を選択、またはクリックしてデフォルト領域を使用。ESCでキャンセル。',
+    'quick.hint.smartMode': 'スマート翻訳モード\n言語自動検出 → 中国語\nドラッグして領域を選択、ESCでキャンセル',
     'quick.hint.clickToCopy': 'クリックして各エンジンの結果をコピー',
     'quick.hint.multiSuccess': '{success}個成功、{error}個失敗',
     'quick.hint.allFailed': 'すべてのエンジンが失敗',
@@ -122,6 +130,8 @@ const contentTranslations = {
     'quick.msg.saved': '저장됨',
     'quick.msg.translating': '번역 중...',
     'quick.hint.hover': '호버 번역',
+    'quick.hint.dragToSelect': '드래그하여 번역 영역 선택 또는 클릭하여 기본 영역 사용. ESC로 취소.',
+    'quick.hint.smartMode': '스마트 번역 모드\n언어 자동 감지 → 중국어\n드래그하여 영역 선택, ESC로 취소',
     'quick.hint.clickToCopy': '클릭하여 각 엔진 결과 복사',
     'quick.hint.multiSuccess': '{success}개 성공, {error}개 실패',
     'quick.hint.allFailed': '모든 엔진 실패',
@@ -292,11 +302,11 @@ if (typeof window.ScreenshotCapture === 'undefined') {
       this.instructionText = document.createElement('div');
 
       // 根据智能模式设置不同的提示文字
-      let instructionText = '拖拽選擇要翻譯的區域，或點擊使用默認區域，按 ESC 取消';
+      let instructionText = this.t('quick.hint.dragToSelect');
       let backgroundColor = 'rgba(0, 0, 0, 0.8)';
 
       if (this.isSmartMode && this.smartUserSettings) {
-        instructionText = `智能翻譯模式\n自動檢測語言 → 中文\n拖拽選擇要翻譯的區域，按 ESC 取消`;
+        instructionText = this.t('quick.hint.smartMode');
         backgroundColor = 'rgba(52, 168, 83, 0.9)';
       }
 
