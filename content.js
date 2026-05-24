@@ -255,6 +255,11 @@ if (typeof window.ScreenshotCapture === 'undefined') {
             }
             sendResponse({ success: true });
             break;
+          case 'languageChanged':
+            console.log('Content: language changed to', request.language);
+            this.lang = request.language;
+            sendResponse({ success: true });
+            break;
           default:
             console.warn('Content: Unknown action:', request.action);
             sendResponse({ error: 'Unknown action' });

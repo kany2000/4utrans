@@ -45,10 +45,33 @@ class PopupController {
     // 保存到 storage
     try {
       await chrome.storage.local.set({ uiLanguage: newLang });
+
+      // 通知所有 content script 语言已变更
+      this.notifyContentScriptsLanguageChange(newLang);
+
       this.showStatus(i18n.t('status.saved'), 'success');
     } catch (error) {
       console.error('Failed to save UI language:', error);
     }
+  }
+
+  // 通知所有 content script 语言已变更
+  notifyContentScriptsLanguageChange(lang) {
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        if (tab.id && tab.url && !tab.url.startsWith('chrome://')) {
+          chrome.tabs.sendMessage(tab.id, {
+            action: 'languageChanged',
+            language: lang
+          }, (response) => {
+            // 忽略无法发送消息的 tab（可能没有注入 content script）
+            if (chrome.runtime.lastError) {
+              // console.log('Tab', tab.id, 'not responding');
+            }
+          });
+        }
+      });
+    });
   }
 
   showWelcomeToast() {

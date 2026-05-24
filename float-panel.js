@@ -741,6 +741,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'openFloatPanel') {
     floatPanel.init();
   }
+  if (request.action === 'languageChanged') {
+    console.log('Float panel: language changed to', request.language);
+    floatPanel.lang = request.language;
+  }
 });
 
 // 初始化（如果页面已加载）

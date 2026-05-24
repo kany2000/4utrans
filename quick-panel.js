@@ -224,6 +224,15 @@ class QuickTranslationPanel {
         console.log('Quick panel: apiProvider changed to', this.apiProvider);
       }
     });
+
+    // 监听来自 popup 的语言变更消息
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'languageChanged') {
+        console.log('Quick panel: language changed to', request.language);
+        this.lang = request.language;
+      }
+      return true;
+    });
   }
 
   async loadSettings() {
