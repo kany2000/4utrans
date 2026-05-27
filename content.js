@@ -5691,41 +5691,26 @@ if (result && result !== text) {
     }
 
     async loadTesseract() {
+      // Tesseract 现在通过 manifest.json 直接加载，所以应该已经可用
       return new Promise((resolve, reject) => {
         if (typeof Tesseract !== 'undefined') {
-          console.log('Content: Tesseract already loaded');
+          console.log('Content: Tesseract is loaded');
           resolve();
           return;
         }
 
-        console.log('Content: Loading Tesseract.js from CDN...');
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/tesseract.js@4/dist/tesseract.min.js';
-        script.crossOrigin = 'anonymous';
-
-        script.onload = () => {
-          console.log('Tesseract.js loaded successfully');
-          // 等待一下確保完全載入
-          setTimeout(() => {
-            if (typeof Tesseract !== 'undefined') {
-              resolve();
-            } else {
-              reject(new Error('Tesseract載入後仍不可用'));
-            }
-          }, 500);
-        };
-
-        script.onerror = (error) => {
-          console.error('Failed to load Tesseract.js:', error);
-          reject(new Error('無法載入 OCR 庫'));
-        };
-
-        document.head.appendChild(script);
-
-        // 設置超時
-        setTimeout(() => {
-          reject(new Error('載入 OCR 庫超時'));
-        }, 30000); // 30秒超時
+        // 如果不可用，等待一下再检查
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          if (typeof Tesseract !== 'undefined') {
+            clearInterval(checkInterval);
+            resolve();
+          } else if (attempts > 50) { // 5秒超时
+            clearInterval(checkInterval);
+            reject(new Error('Tesseract 加载超时'));
+          }
+        }, 100);
       });
     }
 
