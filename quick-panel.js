@@ -157,12 +157,14 @@ class QuickTranslationPanel {
     this.translating = false;
     this.currentSelection = null;
     this.lang = 'en';  // UI语言
+    this.buttonHideTimer = null;  // 翻译按钮自动隐藏计时器
 
     // 悬浮翻译相关
     this.hoverEnabled = false;
     this.hoverBubble = null;
     this.hoverKeyDown = false;
     this.hoverTimeout = null;
+    this.hoverBubbleHideTimer = null;  // 悬停气泡自动隐藏计时器
     this.currentText = '';
     this.lastMouseX = undefined;
     this.lastMouseY = undefined;
@@ -392,12 +394,27 @@ class QuickTranslationPanel {
 
     if (text === this.currentText && this.hoverBubble.style.display !== 'none') {
       this.hoverBubble.style.display = 'block';
+      // 重置10秒自动隐藏计时器
+      if (this.hoverBubbleHideTimer) {
+        clearTimeout(this.hoverBubbleHideTimer);
+      }
+      this.hoverBubbleHideTimer = setTimeout(() => {
+        this.hideHoverBubble();
+      }, 10000);
       return;
     }
 
     this.currentText = text;
     resultEl.innerHTML = `<span class="hover-loading">${this.t('quick.msg.translating')}</span>`;
     this.hoverBubble.style.display = 'block';
+
+    // 10秒后自动隐藏气泡
+    if (this.hoverBubbleHideTimer) {
+      clearTimeout(this.hoverBubbleHideTimer);
+    }
+    this.hoverBubbleHideTimer = setTimeout(() => {
+      this.hideHoverBubble();
+    }, 10000);
 
     this.performHoverTranslate(text);
   }
@@ -677,6 +694,11 @@ class QuickTranslationPanel {
   }
 
   hideHoverBubble() {
+    // 清除自动隐藏计时器
+    if (this.hoverBubbleHideTimer) {
+      clearTimeout(this.hoverBubbleHideTimer);
+      this.hoverBubbleHideTimer = null;
+    }
     if (this.hoverBubble) {
       this.hoverBubble.style.display = 'none';
     }
@@ -760,7 +782,7 @@ class QuickTranslationPanel {
   showButton(x, y) {
     // 移除旧按钮
     this.hideButton();
-    
+
     // 创建翻译按钮
     this.button = document.createElement('div');
     this.button.className = 'quick-translate-button';
@@ -770,27 +792,38 @@ class QuickTranslationPanel {
       </svg>
       <span>${this.t('quick.btn.translate')}</span>
     `;
-    
+
     // 设置位置（在鼠标附近，稍微偏上）
     this.button.style.left = `${x}px`;
     this.button.style.top = `${y - 50}px`;
-    
+
     // 添加点击事件
     this.button.addEventListener('click', (e) => {
       e.stopPropagation();
+      this.hideButton();  // 清除自动隐藏计时器
       this.translate();
     });
-    
+
     // 添加到页面
     document.body.appendChild(this.button);
-    
+
     // 添加显示动画
     setTimeout(() => {
       this.button.classList.add('show');
     }, 10);
+
+    // 10秒后自动隐藏按钮
+    this.buttonHideTimer = setTimeout(() => {
+      this.hideButton();
+    }, 10000);
   }
 
   hideButton() {
+    // 清除自动隐藏计时器
+    if (this.buttonHideTimer) {
+      clearTimeout(this.buttonHideTimer);
+      this.buttonHideTimer = null;
+    }
     if (this.button) {
       this.button.remove();
       this.button = null;
